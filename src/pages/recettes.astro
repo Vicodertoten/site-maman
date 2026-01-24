@@ -75,14 +75,14 @@ const uniqueTags = Array.from(allTags).sort();
         <!-- Filter Tags -->
         <div class="flex flex-wrap justify-center gap-3" id="filter-buttons">
           <button
-            class="filter-btn px-4 py-2 bg-mv-forest text-mv-cream rounded-full text-sm font-medium hover:bg-mv-leaf transition-colors active"
+            class="filter-btn px-4 py-2 bg-mv-forest text-mv-cream rounded-full text-sm font-medium hover:bg-mv-leaf hover:scale-105 transition-all duration-300 transform active"
             data-filter="all"
           >
             Toutes ({recipes.length})
           </button>
           {uniqueTags.map(tag => (
             <button
-              class="filter-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-colors"
+              class="filter-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream hover:scale-105 transition-all duration-300 transform"
               data-filter={tag}
             >
               {tag.charAt(0).toUpperCase() + tag.slice(1)} ({recipes.filter(r => r.tags?.includes(tag)).length})
@@ -96,18 +96,18 @@ const uniqueTags = Array.from(allTags).sort();
         <div id="recipes-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {recipes.map((recipe) => (
             <article
-              class="recipe-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
+              class="recipe-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 hover:scale-105 transition-all duration-300 transform"
               data-title={recipe.title.toLowerCase()}
               data-description={recipe.description?.toLowerCase() || ''}
               data-tags={recipe.tags?.join(',').toLowerCase() || ''}
               data-category={recipe.category}
             >
               {recipe.featuredImage && (
-                <div class="h-48 bg-gray-200">
+                <div class="h-48 bg-gray-200 overflow-hidden">
                   <img
                     src={`${recipe.featuredImage}?w=400&h=300&fit=crop&auto=format`}
                     alt={recipe.title}
-                    class="w-full h-full object-cover"
+                    class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                     loading="lazy"
                   />
                 </div>

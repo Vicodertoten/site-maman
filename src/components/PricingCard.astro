@@ -13,7 +13,7 @@ interface Props {
 const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = false }: Props = Astro.props;
 ---
 
-<div class={`bg-white rounded-lg shadow-lg p-6 border-2 ${highlight ? 'border-mv-leaf transform scale-105' : 'border-mv-cream'} relative`}>
+<div class={`bg-white rounded-lg shadow-lg hover:shadow-xl p-6 border-2 transition-all duration-300 transform hover:-translate-y-1 ${highlight ? 'border-mv-leaf transform scale-105' : 'border-mv-cream'} relative`}>
 
   <div class="text-center mb-6">
     <h3 class="text-2xl font-serif font-bold text-mv-forest mb-2">{title}</h3>
@@ -36,7 +36,7 @@ const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = 
 
   <a
     href={ctaLink}
-    class={`block w-full text-center py-3 px-4 rounded-lg font-semibold transition-colors ${
+    class={`block w-full text-center py-3 px-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
       highlight
         ? 'bg-mv-leaf text-mv-cream hover:bg-mv-forest'
         : 'bg-mv-forest text-mv-cream hover:bg-mv-leaf'

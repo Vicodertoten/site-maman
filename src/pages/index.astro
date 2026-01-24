@@ -15,7 +15,7 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
 
 <MainLayout title={homeData?.title || "Gastronomade - Manger Vrai | Muriel Cruysmans"}>
   <!-- Hero Section -->
-  <section class="bg-mv-cream py-16">
+  <section class="bg-mv-cream py-16 fade-in-up">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h1 class="text-4xl md:text-6xl font-serif font-bold text-mv-forest mb-6">
         {homeData?.heroTitle || "Gastronomade"}
@@ -30,7 +30,7 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
   </section>
 
   <!-- Gastronomade Section -->
-  <section class="py-16 bg-white">
+  <section class="py-16 bg-white fade-in-up">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-forest mb-4">
@@ -179,7 +179,7 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
                 )}
               </div>
               <div class="mt-4 text-center">
-                <a href="/contact" class="inline-block bg-mv-leaf text-white px-6 py-2 rounded-lg font-medium hover:bg-mv-forest transition-colors">
+                <a href="/contact" class="inline-block bg-mv-leaf text-white px-6 py-2 rounded-lg font-medium hover:bg-mv-forest hover:scale-105 transition-all duration-300 transform shadow-sm hover:shadow-md">
                   Réserver
                 </a>
               </div>
@@ -200,10 +200,10 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
         {homeData?.ctaDescription || "Contactez Muriel pour réserver votre espace ou découvrir ses services"}
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/contact" class="bg-mv-leaf text-white px-8 py-4 rounded-lg font-semibold hover:bg-mv-amber transition-colors">
+        <a href="/contact" class="bg-mv-leaf text-white px-8 py-4 rounded-lg font-semibold hover:bg-mv-amber hover:scale-105 transition-all duration-300 transform shadow-md hover:shadow-lg">
           {homeData?.ctaPrimaryButton || "Me contacter"}
         </a>
-        <a href="/about" class="border-2 border-mv-cream text-mv-cream px-8 py-4 rounded-lg font-semibold hover:bg-mv-cream hover:text-mv-forest transition-colors">
+        <a href="/about" class="border-2 border-mv-cream text-mv-cream px-8 py-4 rounded-lg font-semibold hover:bg-mv-cream hover:text-mv-forest hover:scale-105 transition-all duration-300 transform">
           {homeData?.ctaSecondaryButton || "En savoir plus"}
         </a>
       </div>
