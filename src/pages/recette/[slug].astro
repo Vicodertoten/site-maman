@@ -61,7 +61,7 @@ function getDifficultyColor(difficulty: string): string {
       )}
 
       <div class="flex items-center justify-center gap-4 mb-4">
-        <span class="text-sm font-medium text-vert-foret bg-vert-foret/10 px-3 py-1 rounded-full">
+        <span class="text-sm font-medium text-mv-forest bg-mv-forest/10 px-3 py-1 rounded-full">
           {getCategoryName(recipe.category)}
         </span>
         {recipe.difficulty && (
@@ -71,7 +71,7 @@ function getDifficultyColor(difficulty: string): string {
         )}
       </div>
 
-      <h1 class="text-4xl md:text-5xl font-serif font-bold text-vert-foret mb-4">
+      <h1 class="text-4xl md:text-5xl font-serif font-bold text-mv-forest mb-4">
         {recipe.title}
       </h1>
 
@@ -83,19 +83,19 @@ function getDifficultyColor(difficulty: string): string {
       <div class="flex items-center justify-center gap-8 text-gray-600">
         {recipe.prepTime && (
           <div class="text-center">
-            <div class="text-2xl font-bold text-vert-foret">{recipe.prepTime}min</div>
+            <div class="text-2xl font-bold text-mv-forest">{recipe.prepTime}min</div>
             <div class="text-sm">Préparation</div>
           </div>
         )}
         {recipe.cookTime && recipe.cookTime > 0 && (
           <div class="text-center">
-            <div class="text-2xl font-bold text-vert-foret">{recipe.cookTime}min</div>
+            <div class="text-2xl font-bold text-mv-forest">{recipe.cookTime}min</div>
             <div class="text-sm">Cuisson</div>
           </div>
         )}
         {recipe.servings && (
           <div class="text-center">
-            <div class="text-2xl font-bold text-vert-foret">{recipe.servings}</div>
+            <div class="text-2xl font-bold text-mv-forest">{recipe.servings}</div>
             <div class="text-sm">Personnes</div>
           </div>
         )}
@@ -105,15 +105,15 @@ function getDifficultyColor(difficulty: string): string {
     <div class="grid md:grid-cols-3 gap-8">
       <!-- Ingredients -->
       <div class="md:col-span-1">
-        <div class="bg-beige-creme rounded-lg p-6 sticky top-8">
-          <h2 class="text-2xl font-serif font-bold text-vert-foret mb-6">
+        <div class="bg-mv-cream rounded-lg p-6 sticky top-8">
+          <h2 class="text-2xl font-serif font-bold text-mv-forest mb-6">
             Ingrédients
           </h2>
           {recipe.ingredients && recipe.ingredients.length > 0 ? (
             <ul class="space-y-3">
               {recipe.ingredients.map((ingredient, index) => (
                 <li key={index} class="flex items-start">
-                  <span class="inline-block w-2 h-2 bg-vert-foret rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span class="inline-block w-2 h-2 bg-mv-forest rounded-full mt-2 mr-3 flex-shrink-0"></span>
                   <span class="text-gray-700">
                     <span class="font-medium">{ingredient.name}</span>
                     {ingredient.quantity && (
@@ -134,14 +134,14 @@ function getDifficultyColor(difficulty: string): string {
       <!-- Instructions -->
       <div class="md:col-span-2">
         <div class="bg-white rounded-lg shadow-lg p-8">
-          <h2 class="text-2xl font-serif font-bold text-vert-foret mb-6">
+          <h2 class="text-2xl font-serif font-bold text-mv-forest mb-6">
             Instructions
           </h2>
           {recipe.instructions && recipe.instructions.length > 0 ? (
             <div class="space-y-6">
               {recipe.instructions.map((block, index) => (
                 <div key={index} class="flex">
-                  <span class="flex-shrink-0 w-8 h-8 bg-vert-foret text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                  <span class="flex-shrink-0 w-8 h-8 bg-mv-forest text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">
                     {index + 1}
                   </span>
                   <div class="text-gray-700 leading-relaxed">
@@ -160,7 +160,7 @@ function getDifficultyColor(difficulty: string): string {
         <!-- Tags -->
         {recipe.tags && recipe.tags.length > 0 && (
           <div class="mt-8">
-            <h3 class="text-lg font-semibold text-vert-foret mb-4">Tags</h3>
+            <h3 class="text-lg font-semibold text-mv-forest mb-4">Tags</h3>
             <div class="flex flex-wrap gap-2">
               {recipe.tags.map((tag, index) => (
                 <span key={index} class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
@@ -177,7 +177,7 @@ function getDifficultyColor(difficulty: string): string {
     <nav class="mt-16 text-center">
       <a
         href="/recettes"
-        class="inline-flex items-center px-6 py-3 bg-vert-foret text-white rounded-lg font-medium hover:bg-vert-foret-doux transition-colors"
+        class="inline-flex items-center px-6 py-3 bg-mv-forest text-white rounded-lg font-medium hover:bg-mv-forest-doux transition-colors"
       >
         ← Retour aux recettes
       </a>

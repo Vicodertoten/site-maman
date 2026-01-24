@@ -46,14 +46,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--mv-forest);
 }
 
-/* Classes utilitaires personnalisées avec les nouvelles couleurs */
-.bg-beige-creme { background-color: var(--mv-cream); }
-.text-vert-foret { color: var(--mv-forest); }
-.text-vert-foret-doux { color: var(--mv-leaf); }
-.bg-vert-foret { background-color: var(--mv-forest); }
-.border-vert-foret { border-color: var(--mv-forest); }
-
-/* Nouvelles classes utilitaires */
+/* Classes utilitaires personnalisées avec les nouvelles couleurs MV */
 .bg-mv-leaf { background-color: var(--mv-leaf); }
 .bg-mv-coral { background-color: var(--mv-coral); }
 .bg-mv-amber { background-color: var(--mv-amber); }

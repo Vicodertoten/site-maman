@@ -266,30 +266,12 @@ export const queries = {
   }`}
 
 // Fonctions utilitaires pour récupérer les données
-export async function getRestaurantData(): Promise<RestaurantData | null> {
-  try {
-    return await sanityClient.fetch(queries.restaurant)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données restaurant:', error)
-    return null
-  }
-}
-
 export async function getThermomixData(): Promise<ThermomixData | null> {
   try {
     return await sanityClient.fetch(queries.thermomix)
   } catch (error) {
     console.error('Erreur lors de la récupération des données thermomix:', error)
     return null
-  }
-}
-
-export async function getLocationsData(): Promise<LocationData[]> {
-  try {
-    return await sanityClient.fetch(queries.locations)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données locations:', error)
-    return []
   }
 }
 
