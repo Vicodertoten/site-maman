@@ -2,9 +2,42 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import { sanityClient, queries, type ContactData } from '../lib/sanity';
 
-// Récupérer les données depuis Sanity
-const contactData = await sanityClient.fetch<ContactData>(queries.contact);
+// TEST : Données temporaires pour déboguer
+const contactData = {
+  title: "Contact - Gastronomade",
+  heroTitle: "Contactez Muriel Cruysmans",
+  heroSubtitle: "Pour vos projets gastronomiques",
+  contactInfo: {
+    phone: "+32 478 44 40 65",
+    email: "muriel.cruysmans@gmail.com",
+    address: "190 chemin de Vieusart\n1300 Wavre"
+  },
+  socialLinks: [],
+  bookingInfo: {
+    title: "Réservations",
+    text: "Contactez-moi pour organiser votre événement",
+    depositInfo: "Acompte de 30% requis"
+  }
+};
+
+// COMmentez cette ligne pour le test :
+// const contactData = await sanityClient.fetch<ContactData>(queries.contact);
 ---
+
+<MainLayout title={contactData?.title || "Contact - Gastronomade"}>
+  <!-- Debug Info -->
+  <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-8">
+    <div class="flex">
+      <div class="ml-3">
+        <p class="text-sm text-yellow-700">
+          <strong>DEBUG:</strong> Test avec données statiques
+        </p>
+        <p class="text-sm text-yellow-700 mt-1">
+          Si ce message s'affiche, le problème vient de Sanity
+        </p>
+      </div>
+    </div>
+  </div>
 
 <MainLayout title={contactData?.title || "Contact - Gastronomade"}>
   <!-- Hero Section -->
