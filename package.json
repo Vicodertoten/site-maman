@@ -11,6 +11,7 @@
     "studio:build": "cd studio && npm run build"
   },
   "dependencies": {
+    "@astrojs/vercel": "^9.0.4",
     "@sanity/client": "^6.29.1",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.15",
