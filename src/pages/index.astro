@@ -64,7 +64,8 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
               "Cuisine entièrement équipée",
               "Parking privé",
               "Accès facile via E411",
-              "Espace modulable selon vos besoins"
+              "Espace modulable selon vos besoins",
+              "Calendrier de disponibilité"
             ]}
             ctaText="Réserver pour mon équipe"
             ctaLink="/contact"
@@ -122,13 +123,13 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
   </section>
 
   <!-- Restaurant Section -->
-  <section id="restaurant-section" class="py-16 bg-beige-creme">
+  <section id="restaurant-section" class="py-16 bg-mv-cream">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-serif font-bold text-vert-foret mb-4">
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-forest mb-4">
           {homeData?.restaurantSectionTitle || 'Restaurant Gastronomade'}
         </h2>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p class="text-lg text-mv-plum max-w-2xl mx-auto">
           {homeData?.restaurantSectionDescription || "Découvrez notre carte saisonnière et nos événements culinaires"}
         </p>
       </div>
@@ -138,47 +139,47 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
         <div class="bg-white rounded-lg shadow-lg p-8">
           <div class="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 class="text-xl font-serif font-bold text-vert-foret mb-4">{restaurantData?.menuTitle || "Menu du Chef"}</h3>
-              <p class="text-gray-600 mb-4">
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-4">{restaurantData?.menuTitle || "Menu du Chef"}</h3>
+              <p class="text-mv-forest/80 mb-4">
                 {restaurantData?.menuDescription || "Un menu unique élaboré avec des produits frais et locaux, changeant selon les saisons"}
               </p>
-              <div class="text-2xl font-bold text-vert-foret">
-                {restaurantData?.price ? `${restaurantData.price}€` : "50€"} <span class="text-lg font-normal text-gray-600">par personne</span>
+              <div class="text-2xl font-bold text-mv-forest">
+                {restaurantData?.price ? `${restaurantData.price}€` : "50€"} <span class="text-lg font-normal text-mv-forest/60">par personne</span>
               </div>
             </div>
             <div>
-              <h3 class="text-xl font-serif font-bold text-vert-foret mb-4">{restaurantData?.datesTitle || "Prochaines Dates"}</h3>
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-4">{restaurantData?.datesTitle || "Prochaines Dates"}</h3>
               <div class="space-y-2">
                 {restaurantData?.dates && restaurantData.dates.length > 0 ? (
                   restaurantData.dates.slice(0, 4).map((date, index) => (
-                    <div key={index} class="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span class="text-gray-700">{date}</span>
-                      <span class="text-vert-foret font-medium">2026</span>
+                    <div key={index} class="flex justify-between items-center py-2 border-b border-mv-cream">
+                      <span class="text-mv-forest/80">{date}</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
                   ))
                 ) : (
                   <>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span class="text-gray-700">Jeudi 5 mars</span>
-                      <span class="text-vert-foret font-medium">2026</span>
+                    <div class="flex justify-between items-center py-2 border-b border-mv-cream">
+                      <span class="text-mv-forest/80">Jeudi 5 mars</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span class="text-gray-700">Jeudi 9 avril</span>
-                      <span class="text-vert-foret font-medium">2026</span>
+                    <div class="flex justify-between items-center py-2 border-b border-mv-cream">
+                      <span class="text-mv-forest/80">Jeudi 9 avril</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span class="text-gray-700">Jeudi 21 mai</span>
-                      <span class="text-vert-foret font-medium">2026</span>
+                    <div class="flex justify-between items-center py-2 border-b border-mv-cream">
+                      <span class="text-mv-forest/80">Jeudi 21 mai</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span class="text-gray-700">Jeudi 11 juin</span>
-                      <span class="text-vert-foret font-medium">2026</span>
+                    <div class="flex justify-between items-center py-2 border-b border-mv-cream">
+                      <span class="text-mv-forest/80">Jeudi 11 juin</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
                   </>
                 )}
               </div>
               <div class="mt-4 text-center">
-                <a href="/contact" class="inline-block bg-vert-foret text-white px-6 py-2 rounded-lg font-medium hover:bg-vert-foret-doux transition-colors">
+                <a href="/contact" class="inline-block bg-mv-leaf text-white px-6 py-2 rounded-lg font-medium hover:bg-mv-forest transition-colors">
                   Réserver
                 </a>
               </div>
@@ -190,19 +191,19 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
   </section>
 
   <!-- Call to Action Section -->
-  <section class="py-16 bg-vert-foret-doux">
+  <section class="py-16 bg-mv-forest">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl md:text-4xl font-serif font-bold text-white mb-6">
+      <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-cream mb-6">
         {homeData?.ctaTitle || "Prêt à vivre une expérience gastronomique unique ?"}
       </h2>
-      <p class="text-xl text-white/90 mb-8">
+      <p class="text-xl text-mv-cream/90 mb-8">
         {homeData?.ctaDescription || "Contactez Muriel pour réserver votre espace ou découvrir ses services"}
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/contact" class="bg-white text-vert-foret px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+        <a href="/contact" class="bg-mv-leaf text-white px-8 py-4 rounded-lg font-semibold hover:bg-mv-amber transition-colors">
           {homeData?.ctaPrimaryButton || "Me contacter"}
         </a>
-        <a href="/about" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-vert-foret transition-colors">
+        <a href="/about" class="border-2 border-mv-cream text-mv-cream px-8 py-4 rounded-lg font-semibold hover:bg-mv-cream hover:text-mv-forest transition-colors">
           {homeData?.ctaSecondaryButton || "En savoir plus"}
         </a>
       </div>
