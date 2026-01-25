@@ -1,7 +1,7 @@
 import { createClient } from '@sanity/client'
 
 const sanityClient = createClient({
-  projectId: process.env.SANITY_PROJECT_ID,
+  projectId: process.env.SANITY_PROJECT_ID || 'gjz41m8i',
   dataset: process.env.SANITY_DATASET || 'production',
   useCdn: false,
   token: process.env.SANITY_AUTH_TOKEN,
@@ -18,6 +18,17 @@ export default async (req: Request, context: any) => {
   }
 
   try {
+    // Vérifier que les variables d'environnement sont configurées
+    if (!process.env.SANITY_PROJECT_ID || !process.env.SANITY_AUTH_TOKEN) {
+      console.error('Variables d\'environnement Sanity manquantes')
+      return new Response(JSON.stringify({
+        error: 'Configuration serveur incomplète'
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
     // Récupérer les données du formulaire
     const formData = await req.formData()
     const email = formData.get('email') as string
