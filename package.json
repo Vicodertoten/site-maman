@@ -1,7 +1,8 @@
 {
-  "name": "lunar-limit",
+  "name": "gastronomade-site",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "Site web Gastronomade - Manger Vrai avec Muriel Cruysmans",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -17,9 +18,7 @@
     "astro": "^5.16.15",
     "tailwindcss": "^4.1.18"
   },
-  "description": "```sh npm create astro@latest -- --template minimal ```",
-  "main": "index.js",
-  "keywords": [],
-  "author": "",
+  "keywords": ["gastronomie", "cuisine", "santé", "recettes", "coaching"],
+  "author": "Muriel Cruysmans",
   "license": "ISC"
 }

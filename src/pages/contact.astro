@@ -408,8 +408,6 @@ const contactData = await sanityClient.fetch<ContactData>(queries.contact);
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
-        console.log('Données du formulaire:', data);
-
         // Simulation de succès (90% de succès, 10% d'erreur pour test)
         if (Math.random() > 0.1) {
           // Succès

@@ -2,3 +2,9 @@ node_modules
 
 # Local Netlify folder
 .netlify
+
+# Newsletter subscriptions CSV (contains personal data)
+newsletter_subscriptions.csv
+
+# Test scripts
+test-newsletter.js

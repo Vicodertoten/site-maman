@@ -1,28 +1,7 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import { sanityClient, queries, type ThermomixData } from '../lib/sanity';
-
-// Fonction helper pour convertir les URLs YouTube en URLs d'embed
-function getEmbedUrl(url: string): string {
-  if (!url) return '';
-
-  // YouTube
-  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const youtubeMatch = url.match(youtubeRegex);
-  if (youtubeMatch) {
-    return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
-  }
-
-  // Vimeo
-  const vimeoRegex = /vimeo\.com\/(\d+)/;
-  const vimeoMatch = url.match(vimeoRegex);
-  if (vimeoMatch) {
-    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-  }
-
-  // Retourner l'URL telle quelle si ce n'est pas YouTube ou Vimeo
-  return url;
-}
+import { getEmbedUrl } from '../lib/utils';
 
 // Récupérer les données Thermomix depuis Sanity
 const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix);
