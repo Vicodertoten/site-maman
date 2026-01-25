@@ -95,17 +95,18 @@ Voir le guide complet dans [`DEVELOPMENT.md`](./DEVELOPMENT.md) pour:
 
 ## 📊 Newsletter
 
-Les inscriptions à la newsletter sont automatiquement enregistrées :
-- **Sanity CMS** : Interface d'administration
-- **Fichier CSV** : `newsletter_subscriptions.csv` (email, date, status)
+Les inscriptions utilisent **Netlify Forms** :
+- **Dashboard Netlify** : Gestion et export CSV automatique
+- **Page de succès** : `/merci` après inscription
+- **Protection anti-spam** : Incluse par défaut
 
 ### Test de l'inscription
 ```bash
-# Démarrer le serveur
+# Démarrer le serveur local
 npm run dev
 
-# Tester dans un autre terminal
-node test-newsletter.js test@example.com
+# Tester le formulaire dans le navigateur
+# Les données apparaissent dans le dashboard Netlify après déploiement
 ```
 
 ## 📊 CMS Sanity

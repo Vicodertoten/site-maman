@@ -11,10 +11,13 @@
       Recevez mes dernières recettes et conseils nutritionnels directement dans votre boîte mail.
     </p>
 
-    <form id="newsletter-form" class="max-w-md mx-auto">
+    <form id="newsletter-form" name="newsletter" method="POST" data-netlify="true" action="/merci" class="max-w-md mx-auto">
+      <!-- Champ caché requis par Netlify Forms -->
+      <input type="hidden" name="form-name" value="newsletter" />
       <div class="flex gap-2">
         <input
           type="email"
+          name="email"
           id="newsletter-email"
           placeholder="Votre adresse email"
           class="flex-1 px-4 py-2 border border-mv-leaf/30 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-mv-leaf bg-white"
@@ -36,7 +39,6 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('newsletter-form') as HTMLFormElement;
-    const emailInput = document.getElementById('newsletter-email') as HTMLInputElement;
     const submitButton = document.getElementById('newsletter-submit') as HTMLButtonElement;
     const messageElement = document.getElementById('newsletter-message') as HTMLParagraphElement;
 
@@ -57,36 +59,25 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      const email = emailInput.value.trim();
-
-      if (!email) {
-        showMessage('Veuillez saisir votre adresse email', true);
-        return;
-      }
-
       setLoading(true);
 
       try {
-        const response = await fetch('/api/newsletter', {
+        // Utiliser l'API Fetch pour soumettre à Netlify Forms
+        const formData = new FormData(form);
+        const response = await fetch('/', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email }),
+          body: formData,
         });
 
-        const data = await response.json();
-
         if (response.ok) {
-          showMessage(data.message);
-          emailInput.value = '';
+          showMessage('Inscription réussie ! Merci de votre intérêt.');
+          form.reset();
         } else {
-          showMessage(data.error || 'Une erreur est survenue', true);
+          throw new Error('Erreur lors de l\'inscription');
         }
       } catch (error) {
         console.error('Erreur:', error);
-        showMessage('Erreur de connexion. Veuillez réessayer.', true);
+        showMessage('Erreur lors de l\'inscription. Veuillez réessayer.', true);
       } finally {
         setLoading(false);
       }

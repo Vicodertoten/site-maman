@@ -1,0 +1,40 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout title="Inscription réussie - Gastronomade">
+  <div class="min-h-screen bg-mv-cream py-16">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="bg-white rounded-lg shadow-lg p-8 md:p-12">
+        <div class="mb-6">
+          <svg class="mx-auto h-16 w-16 text-mv-leaf" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-serif font-bold text-mv-forest mb-4">
+          Merci pour votre inscription !
+        </h1>
+
+        <p class="text-lg text-mv-forest/80 mb-6 leading-relaxed">
+          Votre inscription à la newsletter a bien été enregistrée. Vous recevrez bientôt mes dernières recettes et conseils nutritionnels.
+        </p>
+
+        <div class="space-y-4">
+          <p class="text-mv-forest/70">
+            En attendant, découvrez mes services :
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/recettes" class="inline-block bg-mv-leaf text-mv-cream px-6 py-3 rounded-lg font-semibold hover:bg-mv-forest transition-colors">
+              Voir les recettes
+            </a>
+            <a href="/about" class="inline-block bg-mv-cream text-mv-forest border border-mv-leaf px-6 py-3 rounded-lg font-semibold hover:bg-mv-leaf hover:text-mv-cream transition-colors">
+              Mes services
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</MainLayout>
