@@ -11,9 +11,7 @@
       Recevez mes dernières recettes et conseils nutritionnels directement dans votre boîte mail.
     </p>
 
-    <form id="newsletter-form" name="newsletter" method="POST" data-netlify="true" class="max-w-md mx-auto">
-      <!-- Champ caché requis par Netlify Forms -->
-      <input type="hidden" name="form-name" value="newsletter" />
+    <form id="newsletter-form" class="max-w-md mx-auto">
       <div class="flex gap-2">
         <input
           type="email"
@@ -122,19 +120,21 @@
         // Créer les données du formulaire
         const formData = new FormData(form);
 
-        // Envoyer à Netlify Forms
-        const response = await fetch('/', {
+        // Envoyer à la Netlify Function
+        const response = await fetch('/.netlify/functions/newsletter', {
           method: 'POST',
           body: formData,
         });
 
-        if (response.ok) {
+        const data = await response.json();
+
+        if (response.ok && data.success) {
           // Succès : afficher le modal et réinitialiser le formulaire
           showModal();
           form.reset();
         } else {
           // Erreur : afficher un message d'erreur
-          alert('Une erreur est survenue lors de l\'inscription. Veuillez réessayer.');
+          alert(data.error || 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.');
         }
       } catch (error) {
         console.error('Erreur lors de l\'inscription:', error);

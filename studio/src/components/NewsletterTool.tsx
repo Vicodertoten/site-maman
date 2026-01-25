@@ -3,11 +3,18 @@ import { DownloadIcon, UsersIcon } from '@sanity/icons'
 import { useState, useEffect } from 'react'
 import { useClient } from 'sanity'
 
+interface Subscriber {
+  _id: string
+  email: string
+  subscribedAt: string
+  status: string
+}
+
 export function NewsletterTool() {
   const client = useClient({ apiVersion: '2024-01-01' })
-  const [subscribers, setSubscribers] = useState([])
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchSubscribers()
@@ -27,7 +34,7 @@ export function NewsletterTool() {
       setSubscribers(result)
     } catch (err) {
       console.error('Erreur lors de la récupération des abonnés:', err)
-      setError(err.message)
+      setError(err instanceof Error ? err.message : 'Une erreur inconnue est survenue')
     } finally {
       setLoading(false)
     }
