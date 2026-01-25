@@ -37,50 +37,18 @@
 </div>
 
 <script>
+  // Amélioration UX pour Netlify Forms
   document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('newsletter-form') as HTMLFormElement;
     const submitButton = document.getElementById('newsletter-submit') as HTMLButtonElement;
-    const messageElement = document.getElementById('newsletter-message') as HTMLParagraphElement;
 
-    const showMessage = (message: string, isError: boolean = false) => {
-      messageElement.textContent = message;
-      messageElement.className = `text-sm mt-2 transition-opacity ${isError ? 'text-red-600' : 'text-green-600'}`;
-      messageElement.style.opacity = '1';
-
-      setTimeout(() => {
-        messageElement.style.opacity = '0';
-      }, 5000);
-    };
-
-    const setLoading = (loading: boolean) => {
-      submitButton.disabled = loading;
-      submitButton.textContent = loading ? 'Inscription...' : 'S\'inscrire';
-    };
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      setLoading(true);
-
-      try {
-        // Utiliser l'API Fetch pour soumettre à Netlify Forms
-        const formData = new FormData(form);
-        const response = await fetch('/', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          showMessage('Inscription réussie ! Merci de votre intérêt.');
-          form.reset();
-        } else {
-          throw new Error('Erreur lors de l\'inscription');
-        }
-      } catch (error) {
-        console.error('Erreur:', error);
-        showMessage('Erreur lors de l\'inscription. Veuillez réessayer.', true);
-      } finally {
-        setLoading(false);
-      }
+    // Indicateur de chargement pendant la soumission
+    form.addEventListener('submit', () => {
+      submitButton.disabled = true;
+      submitButton.textContent = 'Inscription...';
     });
+
+    // Netlify Forms gère automatiquement la redirection vers /merci
+    // en cas de succès, ou affiche les erreurs directement
   });
 </script>
