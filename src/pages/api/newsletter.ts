@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
-import { writeFileSync, readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { sanityClient, sanityWriteClient } from '../../lib/sanity';
 
 // Désactiver le prerendering pour cette route API
 export const prerender = false;
@@ -18,38 +17,28 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Chemin du fichier CSV
-    const csvPath = join(process.cwd(), 'newsletter.csv');
-
-    // Vérifier si le fichier existe et lire son contenu
-    let csvContent = '';
-    let existingEmails: string[] = [];
-
-    if (existsSync(csvPath)) {
-      csvContent = readFileSync(csvPath, 'utf-8');
-      existingEmails = csvContent.split('\n').filter(line => line.trim() !== '');
-    } else {
-      // Créer l'en-tête si le fichier n'existe pas
-      csvContent = 'Email,Date d\'inscription\n';
-    }
-
     // Vérifier si l'email existe déjà
-    const emailExists = existingEmails.some(line => line.startsWith(email + ','));
+    const existingSubscription = await sanityClient.fetch(
+      `*[_type == "newsletter" && email == $email][0]`,
+      { email }
+    );
 
-    if (emailExists) {
+    if (existingSubscription) {
       return new Response(JSON.stringify({ error: 'Cet email est déjà inscrit à la newsletter' }), {
         status: 409,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Ajouter la nouvelle inscription
-    const now = new Date().toISOString();
-    const newLine = `${email},${now}\n`;
-    csvContent += newLine;
+    // Créer la nouvelle inscription dans Sanity
+    const newSubscription = {
+      _type: 'newsletter',
+      email,
+      subscribedAt: new Date().toISOString(),
+      status: 'active'
+    };
 
-    // Écrire dans le fichier
-    writeFileSync(csvPath, csvContent, 'utf-8');
+    await sanityWriteClient.create(newSubscription);
 
     return new Response(JSON.stringify({
       success: true,

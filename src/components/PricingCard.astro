@@ -13,34 +13,36 @@ interface Props {
 const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = false }: Props = Astro.props;
 ---
 
-<div class={`bg-white rounded-lg shadow-lg hover:shadow-xl p-6 border-2 transition-all duration-300 transform hover:-translate-y-1 ${highlight ? 'border-gastro-terracotta transform scale-105' : 'border-gastro-cream'} relative`}>
+<div class={`mv-card p-4 sm:p-6 lg:p-8 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${highlight ? 'ring-2 ring-mv-leaf scale-105' : ''} relative`} role="article">
 
   <div class="text-center mb-6">
-    <h3 class="text-2xl font-serif font-bold text-gastro-charcoal mb-2">{title}</h3>
-    <p class="text-gastro-burgundy mb-4">{subtitle}</p>
-    <div class="text-3xl font-bold text-gastro-charcoal">
-      {price} <span class="text-lg font-normal text-gastro-burgundy">{period}</span>
+    <h3 class="text-xl sm:text-2xl font-serif font-bold text-mv-forest mb-2 leading-tight">{title}</h3>
+    <p class="text-mv-plum text-sm sm:text-base mb-4 leading-relaxed">{subtitle}</p>
+    <div class="text-2xl sm:text-3xl font-bold text-mv-coral">
+      {price} <span class="text-base sm:text-lg font-normal text-mv-forest/70">{period}</span>
     </div>
   </div>
 
-  <ul class="space-y-3 mb-6">
+  <ul class="space-y-3 mb-6" role="list">
     {features.map(feature => (
-      <li class="flex items-start">
-        <svg class="h-5 w-5 text-gastro-terracotta mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <li class="flex items-start" role="listitem">
+        <svg class="h-4 w-4 sm:h-5 sm:w-5 text-mv-leaf mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
         </svg>
-        <span class="text-gastro-charcoal/80 text-sm">{feature}</span>
+        <span class="text-mv-forest text-sm leading-relaxed">{feature}</span>
       </li>
     ))}
   </ul>
 
   <a
     href={ctaLink}
-    class={`block w-full text-center py-3 px-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
+    class={`block w-full text-center py-3 px-4 font-semibold mv-pill text-sm sm:text-base transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 ${
       highlight
-        ? 'bg-gastro-terracotta text-gastro-cream hover:bg-gastro-charcoal'
-        : 'bg-gastro-charcoal text-gastro-cream hover:bg-gastro-terracotta'
+        ? 'mv-btn-primary'
+        : 'mv-btn-secondary'
     }`}
+    role="button"
+    aria-label={`${ctaText} pour ${title}`}
   >
     {ctaText}
   </a>

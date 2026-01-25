@@ -1,55 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
 :root {
-  --gastro-terracotta: #CD853F;
-  --gastro-saffron: #F4C430;
-  --gastro-burgundy: #800020;
-  --gastro-olive: #556B2F;
-  --gastro-cream: #FBF8F1;
-  --gastro-charcoal: #36454F;
-  --gastro-bg: var(--gastro-cream);
-  --gastro-text: var(--gastro-charcoal);
-  --gastro-accent: var(--gastro-terracotta);
+  /* Palette de couleurs exacte selon STYLE.md */
+  --mv-cream: #FBF8F1;  /* Fond doux et organique */
+  --mv-forest: #2A3D34;  /* Texte principal, autorité */
+  --mv-leaf: #4A7C59;    /* Actions positives, santé */
+  --mv-coral: #E85D3A;   /* Alertes, prix */
+  --mv-plum: #5A2A3D;    /* Sections intimes */
 
-  --font-family-serif: 'Crimson Text', 'Times New Roman', serif;
+  /* Variables pour la compatibilité */
+  --mv-bg: var(--mv-cream);
+  --mv-text: var(--mv-forest);
+  --mv-accent: var(--mv-leaf);
+
+  /* Polices */
+  --font-family-serif: 'Lora', 'Times New Roman', serif;
   --font-family-sans: 'Inter', 'Helvetica Neue', sans-serif;
 }
 
-/* Styles de base */
+/* Styles de base selon STYLE.md */
 body {
   font-family: var(--font-family-sans);
-  background-color: var(--gastro-bg);
-  color: var(--gastro-text);
+  background-color: var(--mv-cream);
+  color: var(--mv-forest);
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-serif);
-  color: var(--gastro-charcoal);
+  color: var(--mv-forest);
+  font-weight: 600;
 }
 
-/* Classes utilitaires personnalisées avec les nouvelles couleurs Gastro */
-.bg-gastro-terracotta { background-color: var(--gastro-terracotta); }
-.bg-gastro-saffron { background-color: var(--gastro-saffron); }
-.bg-gastro-burgundy { background-color: var(--gastro-burgundy); }
-.bg-gastro-olive { background-color: var(--gastro-olive); }
-.bg-gastro-cream { background-color: var(--gastro-cream); }
-.bg-gastro-charcoal { background-color: var(--gastro-charcoal); }
+/* Classes utilitaires MV selon STYLE.md */
+.bg-mv-cream { background-color: var(--mv-cream); }
+.bg-mv-forest { background-color: var(--mv-forest); }
+.bg-mv-leaf { background-color: var(--mv-leaf); }
+.bg-mv-coral { background-color: var(--mv-coral); }
+.bg-mv-plum { background-color: var(--mv-plum); }
 
-.text-gastro-terracotta { color: var(--gastro-terracotta); }
-.text-gastro-saffron { color: var(--gastro-saffron); }
-.text-gastro-burgundy { color: var(--gastro-burgundy); }
-.text-gastro-olive { color: var(--gastro-olive); }
-.text-gastro-cream { color: var(--gastro-cream); }
-.text-gastro-charcoal { color: var(--gastro-charcoal); }
+.text-mv-cream { color: var(--mv-cream); }
+.text-mv-forest { color: var(--mv-forest); }
+.text-mv-leaf { color: var(--mv-leaf); }
+.text-mv-coral { color: var(--mv-coral); }
+.text-mv-plum { color: var(--mv-plum); }
 
-.border-gastro-terracotta { border-color: var(--gastro-terracotta); }
-.border-gastro-saffron { border-color: var(--gastro-saffron); }
-.border-gastro-burgundy { border-color: var(--gastro-burgundy); }
-.border-gastro-olive { border-color: var(--gastro-olive); }
-.border-gastro-cream { border-color: var(--gastro-cream); }
-.border-gastro-charcoal { border-color: var(--gastro-charcoal); }
+.border-mv-cream { border-color: var(--mv-cream); }
+.border-mv-forest { border-color: var(--mv-forest); }
+.border-mv-leaf { border-color: var(--mv-leaf); }
+.border-mv-coral { border-color: var(--mv-coral); }
+.border-mv-plum { border-color: var(--mv-plum); }
 
 /* Animations subtiles pour améliorer l'UX */
 @keyframes fadeInUp {
@@ -74,14 +77,59 @@ h1, h2, h3, h4, h5, h6 {
   transition-timing-function: ease-in-out;
 }
 
-/* Styles pour les cartes avec hover amélioré */
-.card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Styles pour les cartes selon STYLE.md */
+.mv-card {
+  background-color: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(42, 61, 52, 0.15), 0 2px 4px -1px rgba(42, 61, 52, 0.1);
+  border: 1px solid rgba(74, 124, 89, 0.2);
 }
 
-.card-hover:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+/* Boutons aux bords arrondis */
+.mv-pill {
+  border-radius: 9999px;
+}
+
+/* Ombre légère pour aspect flottant */
+.mv-shadow {
+  box-shadow: 0 4px 6px -1px rgba(42, 61, 52, 0.15), 0 2px 4px -1px rgba(42, 61, 52, 0.1);
+}
+
+/* Boutons selon STYLE.md */
+.mv-btn-primary {
+  background-color: var(--mv-forest);
+  color: var(--mv-cream);
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.mv-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(42, 61, 52, 0.2);
+}
+
+.mv-btn-secondary {
+  background-color: transparent;
+  color: var(--mv-leaf);
+  border: 2px solid var(--mv-leaf);
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.mv-btn-secondary:hover {
+  background-color: var(--mv-leaf);
+  color: var(--mv-cream);
+  transform: translateY(-2px);
+}
+
+/* Séparateurs selon STYLE.md */
+.mv-separator {
+  border: 0;
+  height: 1px;
+  background-color: rgba(74, 124, 89, 0.3);
 }
 
 /* Boutons avec effet pulse subtil */

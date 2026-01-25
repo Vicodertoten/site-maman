@@ -20,10 +20,10 @@ function getCategoryName(category: string): string {
 // Fonction pour obtenir la couleur de difficulté
 function getDifficultyColor(difficulty: string): string {
   switch (difficulty) {
-    case 'facile': return 'bg-gastro-olive/20 text-gastro-olive';
-    case 'moyen': return 'bg-gastro-saffron/20 text-gastro-saffron';
-    case 'difficile': return 'bg-gastro-burgundy/20 text-gastro-burgundy';
-    default: return 'bg-gastro-cream text-gastro-charcoal';
+    case 'facile': return 'bg-mv-leaf/30 text-mv-leaf border border-mv-leaf/50';
+    case 'moyen': return 'bg-mv-leaf/30 text-mv-leaf border border-mv-leaf/50';
+    case 'difficile': return 'bg-mv-red/30 text-mv-coral border border-mv-red/50';
+    default: return 'bg-mv-cream text-mv-forest border border-mv-leaf';
   }
 }
 
@@ -39,12 +39,12 @@ const uniqueTags = Array.from(allTags).sort();
 
 <MainLayout title="Recettes - Gastronomade">
   <!-- Hero Section -->
-  <section class="bg-gradient-to-b from-gastro-cream to-white py-12">
+  <section class="bg-gradient-to-b from-mv-cream to-white py-12 sm:py-16 lg:py-20" role="banner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="text-4xl md:text-6xl font-serif font-bold text-gastro-charcoal mb-6">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
         Recettes
       </h1>
-      <p class="text-xl md:text-2xl text-gastro-burgundy mb-8 max-w-3xl mx-auto">
+      <p class="text-lg sm:text-xl md:text-2xl text-mv-plum mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
         Découvrez mes recettes saines et savoureuses
       </p>
     </div>
@@ -63,7 +63,7 @@ const uniqueTags = Array.from(allTags).sort();
                 type="text"
                 id="search-input"
                 placeholder="Rechercher une recette..."
-                class="w-full px-4 py-3 pl-12 border border-gastro-cream rounded-lg focus:ring-2 focus:ring-gastro-terracotta focus:border-transparent"
+                class="w-full px-4 py-3 pl-12 border border-mv-cream rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent"
               />
               <svg class="absolute left-4 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -75,14 +75,14 @@ const uniqueTags = Array.from(allTags).sort();
         <!-- Filter Tags -->
         <div class="flex flex-wrap justify-center gap-3" id="filter-buttons">
           <button
-            class="filter-btn px-4 py-2 bg-gastro-charcoal text-gastro-cream rounded-full text-sm font-medium hover:bg-gastro-terracotta hover:scale-105 transition-all duration-300 transform active"
+            class="filter-btn px-4 py-2 bg-mv-forest text-mv-cream rounded-full text-sm font-medium hover:bg-mv-leaf hover:scale-105 transition-all duration-300 transform active"
             data-filter="all"
           >
             Toutes ({recipes.length})
           </button>
           {uniqueTags.map(tag => (
             <button
-              class="filter-btn px-4 py-2 bg-gastro-cream text-gastro-charcoal rounded-full text-sm font-medium hover:bg-gastro-terracotta hover:text-gastro-cream hover:scale-105 transition-all duration-300 transform"
+              class="filter-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream hover:scale-105 transition-all duration-300 transform"
               data-filter={tag}
             >
               {tag.charAt(0).toUpperCase() + tag.slice(1)} ({recipes.filter(r => r.tags?.includes(tag)).length})
@@ -93,58 +93,69 @@ const uniqueTags = Array.from(allTags).sort();
 
       {recipes && recipes.length > 0 ? (
         <!-- Recipes Grid -->
-        <div id="recipes-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div id="recipes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8" role="grid">
           {recipes.map((recipe) => (
             <article
-              class="recipe-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 hover:scale-105 transition-all duration-300 transform"
+              class="recipe-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform group"
               data-title={recipe.title.toLowerCase()}
               data-description={recipe.description?.toLowerCase() || ''}
               data-tags={recipe.tags?.join(',').toLowerCase() || ''}
               data-category={recipe.category}
+              role="article"
             >
-              {recipe.featuredImage && (
-                <div class="h-48 bg-gray-200 overflow-hidden">
+              {recipe.featuredImageUrl && (
+                <div class="h-40 sm:h-48 bg-gray-200 overflow-hidden">
                   <img
-                    src={`${recipe.featuredImage}?w=400&h=300&fit=crop&auto=format`}
-                    alt={recipe.title}
-                    class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    src={`${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format`}
+                    alt={`Photo de ${recipe.title}`}
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     loading="lazy"
                   />
                 </div>
               )}
-              <div class="p-6">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium text-gastro-charcoal bg-gastro-charcoal/10 px-2 py-1 rounded">
+              <div class="p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                  <span class="text-xs sm:text-sm font-medium text-mv-forest bg-mv-forest/10 px-2 py-1 rounded self-start">
                     {getCategoryName(recipe.category)}
                   </span>
                   {recipe.difficulty && (
-                    <span class={`text-xs font-medium px-2 py-1 rounded ${getDifficultyColor(recipe.difficulty)}`}>
+                    <span class={`text-xs font-medium px-2 py-1 rounded self-end ${getDifficultyColor(recipe.difficulty)}`}>
                       {recipe.difficulty.charAt(0).toUpperCase() + recipe.difficulty.slice(1)}
                     </span>
                   )}
                 </div>
 
-                <h3 class="text-xl font-serif font-bold text-gray-900 mb-2">
+                <h3 class="text-lg sm:text-xl font-serif font-bold text-mv-forest mb-2 leading-tight">
                   {recipe.title}
                 </h3>
 
-                <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                <p class="text-mv-forest/80 text-sm mb-4 line-clamp-2 leading-relaxed">
                   {recipe.description}
                 </p>
 
-                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <div class="flex items-center justify-between text-xs sm:text-sm text-mv-forest/60 mb-4">
                   {recipe.prepTime && (
-                    <span>⏱️ {recipe.prepTime}min</span>
+                    <span class="flex items-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      {recipe.prepTime}min
+                    </span>
                   )}
                   {recipe.servings && (
-                    <span>👥 {recipe.servings} pers.</span>
+                    <span class="flex items-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                      </svg>
+                      {recipe.servings} pers.
+                    </span>
                   )}
                 </div>
 
                 {recipe.tags && recipe.tags.length > 0 && (
                   <div class="flex flex-wrap gap-1 mb-4">
                     {recipe.tags.slice(0, 3).map((tag) => (
-                      <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                      <span class="text-xs bg-mv-cream text-mv-forest px-2 py-1 rounded">
                         {tag}
                       </span>
                     ))}
@@ -153,7 +164,8 @@ const uniqueTags = Array.from(allTags).sort();
 
                 <a
                   href={`/recette/${recipe.slug?.current || recipe._id}`}
-                  class="inline-block w-full text-center bg-gastro-charcoal text-white px-4 py-2 rounded-lg font-medium hover:bg-gastro-charcoal-doux transition-colors"
+                  class="inline-block w-full text-center bg-mv-leaf text-mv-cream px-4 py-2 mv-pill font-semibold text-sm hover:bg-mv-forest transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2"
+                  aria-label={`Voir la recette ${recipe.title}`}
                 >
                   Voir la recette
                 </a>
@@ -165,16 +177,16 @@ const uniqueTags = Array.from(allTags).sort();
         <!-- Recipes Coming Soon -->
         <div class="text-center py-16">
           <div class="max-w-2xl mx-auto">
-            <svg class="mx-auto h-24 w-24 text-gastro-charcoal-doux mb-8" fill="currentColor" viewBox="0 0 24 24">
+            <svg class="mx-auto h-24 w-24 text-mv-forest-doux mb-8" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
-            <h2 class="text-3xl font-serif font-bold text-gastro-charcoal mb-4">
+            <h2 class="text-3xl font-serif font-bold text-mv-forest mb-4">
               Recettes à venir
             </h2>
             <p class="text-lg text-gray-600 mb-8">
               Je prépare une collection de recettes saines et délicieuses pour vous accompagner dans votre voyage culinaire.
             </p>
-            <div class="bg-gastro-cream rounded-lg p-6 inline-block">
+            <div class="bg-mv-cream rounded-lg p-6 inline-block">
               <p class="text-gray-700">
                 <strong>Prochainement :</strong> Recettes connectées au CMS pour une expérience interactive
               </p>
@@ -195,7 +207,7 @@ const uniqueTags = Array.from(allTags).sort();
               </div>
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-serif font-bold text-gastro-charcoal mb-2">
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
                 Salade d'été aux herbes
               </h3>
               <p class="text-gray-600 mb-4">
@@ -207,7 +219,7 @@ const uniqueTags = Array.from(allTags).sort();
                 <span>📊 Facile</span>
               </div>
               <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-1 bg-gastro-charcoal-doux text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-mv-forest-doux text-white text-xs rounded-full">Végétarien</span>
                 <span class="px-2 py-1 bg-bois-clair text-gray-800 text-xs rounded-full">Rapide</span>
               </div>
             </div>
@@ -224,7 +236,7 @@ const uniqueTags = Array.from(allTags).sort();
               </div>
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-serif font-bold text-gastro-charcoal mb-2">
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
                 Soupe de légumes d'automne
               </h3>
               <p class="text-gray-600 mb-4">
@@ -236,7 +248,7 @@ const uniqueTags = Array.from(allTags).sort();
                 <span>📊 Moyen</span>
               </div>
               <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-1 bg-gastro-charcoal-doux text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-mv-forest-doux text-white text-xs rounded-full">Végétarien</span>
                 <span class="px-2 py-1 bg-naturel text-white text-xs rounded-full">Thermomix</span>
               </div>
             </div>
@@ -253,7 +265,7 @@ const uniqueTags = Array.from(allTags).sort();
               </div>
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-serif font-bold text-gastro-charcoal mb-2">
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
                 Quinoa aux légumes grillés
               </h3>
               <p class="text-gray-600 mb-4">
@@ -265,7 +277,7 @@ const uniqueTags = Array.from(allTags).sort();
                 <span>📊 Facile</span>
               </div>
               <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-1 bg-gastro-charcoal-doux text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-mv-forest-doux text-white text-xs rounded-full">Végétarien</span>
                 <span class="px-2 py-1 bg-bois-clair text-gray-800 text-xs rounded-full">Rapide</span>
                 <span class="px-2 py-1 bg-naturel text-white text-xs rounded-full">Saison</span>
               </div>
@@ -328,16 +340,16 @@ const uniqueTags = Array.from(allTags).sort();
             noResults.className = 'no-results col-span-full text-center py-16';
             noResults.innerHTML = `
               <div class="max-w-md mx-auto">
-                <svg class="mx-auto h-24 w-24 text-gastro-charcoal-doux mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mx-auto h-24 w-24 text-mv-forest-doux mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-.966-5.5-2.5"/>
                 </svg>
-                <h3 class="text-2xl font-serif font-bold text-gastro-charcoal mb-4">
+                <h3 class="text-2xl font-serif font-bold text-mv-forest mb-4">
                   Aucune recette trouvée
                 </h3>
                 <p class="text-gray-600 mb-6">
                   Essayez de modifier vos critères de recherche ou de filtre.
                 </p>
-                <button onclick="resetFilters()" class="bg-gastro-charcoal text-white px-6 py-3 rounded-lg font-medium hover:bg-gastro-charcoal-doux transition-colors">
+                <button onclick="resetFilters()" class="bg-mv-forest text-white px-6 py-3 rounded-lg font-medium hover:bg-mv-forest-doux transition-colors">
                   Voir toutes les recettes
                 </button>
               </div>
@@ -386,10 +398,10 @@ const uniqueTags = Array.from(allTags).sort();
 
         // Réinitialiser les boutons
         filterButtons.forEach(btn => {
-          btn.classList.remove('active', 'bg-gastro-charcoal', 'text-white');
+          btn.classList.remove('active', 'bg-mv-forest', 'text-white');
           btn.classList.add('bg-gray-200', 'text-gray-700');
         });
-        filterButtons[0].classList.add('active', 'bg-gastro-charcoal', 'text-white');
+        filterButtons[0].classList.add('active', 'bg-mv-forest', 'text-white');
         filterButtons[0].classList.remove('bg-gray-200', 'text-gray-700');
 
         filterRecipes();
@@ -408,12 +420,12 @@ const uniqueTags = Array.from(allTags).sort();
 
           // Réinitialiser tous les boutons
           filterButtons.forEach(btn => {
-            btn.classList.remove('active', 'bg-gastro-charcoal', 'text-white');
+            btn.classList.remove('active', 'bg-mv-forest', 'text-white');
             btn.classList.add('bg-gray-200', 'text-gray-700');
           });
 
           // Activer le bouton cliqué
-          this.classList.add('active', 'bg-gastro-charcoal', 'text-white');
+          this.classList.add('active', 'bg-mv-forest', 'text-white');
           this.classList.remove('bg-gray-200', 'text-gray-700');
 
           currentFilter = filter;

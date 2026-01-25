@@ -15,33 +15,38 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
 
 <MainLayout title={homeData?.title || "Gastronomade - Manger Vrai | Muriel Cruysmans"}>
   <!-- Hero Section -->
-  <section class="bg-gastro-cream py-16 fade-in-up">
+  <section class="bg-mv-cream py-12 sm:py-16 lg:py-20 fade-in-up" role="banner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="text-4xl md:text-6xl font-serif font-bold text-gastro-charcoal mb-6">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
         {homeData?.heroTitle || "Gastronomade"}
       </h1>
-      <p class="text-xl md:text-2xl text-gastro-burgundy mb-8 max-w-3xl mx-auto">
+      <p class="text-lg sm:text-xl md:text-2xl text-mv-plum mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
         {homeData?.heroSubtitle || "Découvrez l'art de manger vrai avec Muriel Cruysmans à Wavre"}
       </p>
-      <p class="text-lg text-gastro-charcoal/80 max-w-2xl mx-auto">
+      <p class="text-base sm:text-lg text-mv-forest/90 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed">
         {homeData?.heroDescription || "Un espace chaleureux et inspirant pour vos événements, cours de cuisine et moments gourmands"}
       </p>
+      <div class="mt-6 sm:mt-8">
+        <a href="#restaurant-section" class="inline-block bg-mv-leaf text-mv-cream px-6 sm:px-8 py-3 sm:py-4 mv-pill font-semibold text-sm sm:text-base hover:bg-mv-forest transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2" role="button">
+          Découvrir nos services
+        </a>
+      </div>
     </div>
   </section>
 
   <!-- Gastronomade Section -->
-  <section class="py-16 bg-white fade-in-up">
+  <section class="py-12 sm:py-16 lg:py-20 bg-mv-leaf fade-in-up" id="restaurant-section" role="main">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-serif font-bold text-gastro-charcoal mb-4">
+      <div class="text-center mb-6 sm:mb-8 lg:mb-10">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-mv-cream mb-3 leading-tight">
           {homeData?.locationSectionTitle || 'Location de l\'Espace "La Zboum"'}
         </h2>
-        <p class="text-lg text-gastro-burgundy max-w-2xl mx-auto">
+        <p class="text-base sm:text-lg text-mv-cream/90 max-w-2xl mx-auto leading-relaxed">
           {homeData?.locationSectionDescription || "Un cadre inspirant pour vos réunions d'entreprise, événements privés et soirées gourmandes"}
         </p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-8">
         <!-- Sociétés -->
         {societeLocations.length > 0 ? (
           <PricingCard
@@ -123,63 +128,68 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
   </section>
 
   <!-- Restaurant Section -->
-  <section id="restaurant-section" class="py-16 bg-gastro-cream">
+  <section id="restaurant-section" class="py-16 bg-mv-cream">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-serif font-bold text-gastro-charcoal mb-4">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-forest mb-3">
           {homeData?.restaurantSectionTitle || 'Restaurant Gastronomade'}
         </h2>
-        <p class="text-lg text-gastro-burgundy max-w-2xl mx-auto">
+        <p class="text-lg text-mv-plum max-w-2xl mx-auto">
           {homeData?.restaurantSectionDescription || "Découvrez notre carte saisonnière et nos événements culinaires"}
         </p>
       </div>
 
       <!-- Restaurant Content -->
       <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-lg shadow-lg p-8">
+        <div class="bg-mv-cream rounded-lg shadow-lg p-8 border border-mv-leaf">
           <div class="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 class="text-xl font-serif font-bold text-gastro-charcoal mb-4">{restaurantData?.menuTitle || "Menu du Chef"}</h3>
-              <p class="text-gastro-charcoal/80 mb-4">
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-4">{restaurantData?.menuTitle || "Menu du Chef"}</h3>
+              <p class="text-mv-forest/90 mb-4">
                 {restaurantData?.menuDescription || "Un menu unique élaboré avec des produits frais et locaux, changeant selon les saisons"}
               </p>
-              <div class="text-2xl font-bold text-gastro-charcoal">
-                {restaurantData?.price ? `${restaurantData.price}€` : "50€"} <span class="text-lg font-normal text-gastro-charcoal/60">par personne</span>
+              <div class="text-2xl font-bold text-mv-coral">
+                {restaurantData?.price ? `${restaurantData.price}€` : "50€"} <span class="text-lg font-normal text-mv-forest/60">par personne</span>
+              </div>
+              <div class="mt-6">
+                <a href="/contact" class="inline-block bg-mv-leaf text-mv-forest px-6 py-3 rounded-lg font-semibold hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                  Réserver maintenant
+                </a>
               </div>
             </div>
             <div>
-              <h3 class="text-xl font-serif font-bold text-gastro-charcoal mb-4">{restaurantData?.datesTitle || "Prochaines Dates"}</h3>
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-4">{restaurantData?.datesTitle || "Prochaines Dates"}</h3>
               <div class="space-y-2">
                 {restaurantData?.dates && restaurantData.dates.length > 0 ? (
                   restaurantData.dates.slice(0, 4).map((date, index) => (
-                    <div key={index} class="flex justify-between items-center py-2 border-b border-gastro-cream">
-                      <span class="text-gastro-charcoal/80">{date}</span>
-                      <span class="text-gastro-terracotta font-medium">2026</span>
+                    <div key={index} class="flex justify-between items-center py-2 border-b border-mv-leaf">
+                      <span class="text-mv-forest/90">{date}</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
                   ))
                 ) : (
                   <>
-                    <div class="flex justify-between items-center py-2 border-b border-gastro-cream">
-                      <span class="text-gastro-charcoal/80">Jeudi 5 mars</span>
-                      <span class="text-gastro-terracotta font-medium">2026</span>
+                    <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
+                      <span class="text-mv-forest/90">Jeudi 5 mars</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gastro-cream">
-                      <span class="text-gastro-charcoal/80">Jeudi 9 avril</span>
-                      <span class="text-gastro-terracotta font-medium">2026</span>
+                    <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
+                      <span class="text-mv-forest/90">Jeudi 9 avril</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gastro-cream">
-                      <span class="text-gastro-charcoal/80">Jeudi 21 mai</span>
-                      <span class="text-gastro-terracotta font-medium">2026</span>
+                    <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
+                      <span class="text-mv-forest/90">Jeudi 21 mai</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gastro-cream">
-                      <span class="text-gastro-charcoal/80">Jeudi 11 juin</span>
-                      <span class="text-gastro-terracotta font-medium">2026</span>
+                    <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
+                      <span class="text-mv-forest/90">Jeudi 11 juin</span>
+                      <span class="text-mv-leaf font-medium">2026</span>
                     </div>
                   </>
                 )}
               </div>
               <div class="mt-4 text-center">
-                <a href="/contact" class="inline-block bg-gastro-terracotta text-white px-6 py-2 rounded-lg font-medium hover:bg-gastro-charcoal hover:scale-105 transition-all duration-300 transform shadow-sm hover:shadow-md">
+                <a href="/contact" class="inline-block bg-mv-leaf text-white px-6 py-2 rounded-lg font-medium hover:bg-mv-forest hover:scale-105 transition-all duration-300 transform shadow-sm hover:shadow-md">
                   Réserver
                 </a>
               </div>
@@ -191,19 +201,19 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
   </section>
 
   <!-- Call to Action Section -->
-  <section class="py-16 bg-gastro-charcoal">
+  <section class="py-16 bg-mv-forest">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl md:text-4xl font-serif font-bold text-gastro-cream mb-6">
+      <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-cream mb-6">
         {homeData?.ctaTitle || "Prêt à vivre une expérience gastronomique unique ?"}
       </h2>
-      <p class="text-xl text-gastro-cream/90 mb-8">
+      <p class="text-xl text-mv-cream/90 mb-8">
         {homeData?.ctaDescription || "Contactez Muriel pour réserver votre espace ou découvrir ses services"}
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/contact" class="bg-gastro-terracotta text-white px-8 py-4 rounded-lg font-semibold hover:bg-gastro-saffron hover:scale-105 transition-all duration-300 transform shadow-md hover:shadow-lg">
+        <a href="/contact" class="bg-mv-leaf text-white px-8 py-4 rounded-lg font-semibold hover:bg-mv-coral hover:scale-105 transition-all duration-300 transform shadow-md hover:shadow-lg">
           {homeData?.ctaPrimaryButton || "Me contacter"}
         </a>
-        <a href="/about" class="border-2 border-gastro-cream text-gastro-cream px-8 py-4 rounded-lg font-semibold hover:bg-gastro-cream hover:text-gastro-charcoal hover:scale-105 transition-all duration-300 transform">
+        <a href="/about" class="border-2 border-mv-cream text-mv-cream px-8 py-4 rounded-lg font-semibold hover:bg-mv-cream hover:text-mv-forest hover:scale-105 transition-all duration-300 transform">
           {homeData?.ctaSecondaryButton || "En savoir plus"}
         </a>
       </div>

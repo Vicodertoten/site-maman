@@ -30,92 +30,94 @@ const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix)
 
 <MainLayout title="Thermomix - Gastronomade">
   <!-- Hero Section -->
-  <section class="bg-gradient-to-b from-gastro-cream to-white py-16">
+  <section class="bg-gradient-to-b from-mv-cream to-white py-12 sm:py-16 lg:py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="text-4xl md:text-6xl font-serif font-bold text-gastro-charcoal mb-6">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
         Thermomix
       </h1>
-      <p class="text-xl md:text-2xl text-gastro-burgundy mb-8 max-w-3xl mx-auto">
+      <p class="text-lg sm:text-xl md:text-2xl text-mv-forest/80 mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
         Découvrez la révolution culinaire avec Muriel Cruysmans
       </p>
     </div>
   </section>
 
   <!-- Content Grid -->
-  <section class="py-0 bg-white">
+  <section class="pb-12 sm:pb-16 lg:pb-20 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
         <!-- Video Section -->
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6 order-2 lg:order-1">
           {thermomixData?.videoUrl && (
-            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden">
+            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden shadow-sm">
               <iframe
                 src={getEmbedUrl(thermomixData.videoUrl)}
                 class="w-full h-full"
                 frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
+                title="Vidéo de présentation Thermomix"
               ></iframe>
             </div>
           )}
           {thermomixData?.demoRecipes && thermomixData.demoRecipes.length > 0 && (
-            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden">
+            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden shadow-sm">
               <iframe
                 src={getEmbedUrl(thermomixData.demoRecipes[0].videoUrl)}
                 class="w-full h-full"
                 frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
+                title="Démo recette Thermomix"
               ></iframe>
             </div>
           )}
         </div>
 
         <!-- Text Content -->
-        <div class="space-y-6">
-          <h2 class="text-3xl font-serif font-bold text-gastro-charcoal">
+        <div class="space-y-4 sm:space-y-6 order-1 lg:order-2">
+          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-mv-forest mb-3 leading-tight">
             Révolutionnez votre cuisine
           </h2>
           {thermomixData?.monthlyText ? (
-            <p class="text-gray-700 text-lg leading-relaxed">
+            <p class="text-mv-forest/80 text-base sm:text-lg leading-relaxed">
               {thermomixData.monthlyText}
             </p>
           ) : (
-            <p class="text-gray-700 text-lg leading-relaxed">
+            <p class="text-mv-forest/80 text-base sm:text-lg leading-relaxed">
               Le Thermomix est bien plus qu'un robot culinaire. C'est votre assistant personnel pour préparer des repas sains, savoureux et équilibrés en un temps record.
             </p>
           )}
-          <div class="space-y-4">
+          <div class="space-y-3 sm:space-y-4">
             <div class="flex items-start">
-              <svg class="h-6 w-6 text-gastro-charcoal-doux mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="h-5 sm:h-6 w-5 sm:w-6 text-mv-leaf mr-3 sm:mr-4 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
               </svg>
               <div>
-                <h3 class="font-semibold text-gray-900">Préparation rapide</h3>
-                <p class="text-gray-600">Préparez des repas complets en 30 minutes</p>
+                <h3 class="font-semibold text-mv-forest text-sm sm:text-base">Préparation rapide</h3>
+                <p class="text-mv-forest/70 text-sm sm:text-base">Préparez des repas complets en 30 minutes</p>
               </div>
             </div>
             <div class="flex items-start">
-              <svg class="h-6 w-6 text-gastro-charcoal-doux mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="h-5 sm:h-6 w-5 sm:w-6 text-mv-leaf mr-3 sm:mr-4 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
               </svg>
               <div>
-                <h3 class="font-semibold text-gray-900">Alimentation saine</h3>
-                <p class="text-gray-600">Contrôlez les ingrédients et les quantités</p>
+                <h3 class="font-semibold text-mv-forest text-sm sm:text-base">Alimentation saine</h3>
+                <p class="text-mv-forest/70 text-sm sm:text-base">Contrôlez les ingrédients et les quantités</p>
               </div>
             </div>
             <div class="flex items-start">
-              <svg class="h-6 w-6 text-gastro-charcoal-doux mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="h-5 sm:h-6 w-5 sm:w-6 text-mv-leaf mr-3 sm:mr-4 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
               </svg>
               <div>
-                <h3 class="font-semibold text-gray-900">Polyvalence</h3>
-                <p class="text-gray-600">Hacher, mixer, cuire, mijoter... tout est possible</p>
+                <h3 class="font-semibold text-mv-forest text-sm sm:text-base">Polyvalence</h3>
+                <p class="text-mv-forest/70 text-sm sm:text-base">Hacher, mixer, cuire, mijoter... tout est possible</p>
               </div>
             </div>
           </div>
-          <div class="pt-6">
-            <a href="/contact" class="inline-block bg-gastro-charcoal text-white px-8 py-4 rounded-lg font-semibold hover:bg-gastro-charcoal-doux transition-colors">
+          <div class="pt-4 sm:pt-6">
+            <a href="/contact" class="inline-block bg-mv-leaf text-mv-cream px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:bg-mv-forest transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 shadow-md hover:shadow-lg">
               S'inscrire à un cours Thermomix
             </a>
           </div>

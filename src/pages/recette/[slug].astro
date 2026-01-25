@@ -38,86 +38,87 @@ function getCategoryName(category: string): string {
 // Fonction pour obtenir la couleur de difficulté
 function getDifficultyColor(difficulty: string): string {
   switch (difficulty) {
-    case 'facile': return 'bg-gastro-terracotta/20 text-gastro-terracotta';
-    case 'moyen': return 'bg-gastro-saffron/20 text-gastro-saffron';
-    case 'difficile': return 'bg-gastro-burgundy/20 text-gastro-burgundy';
-    default: return 'bg-gastro-cream text-gastro-charcoal';
+    case 'facile': return 'bg-mv-leaf/30 text-mv-leaf border border-mv-leaf/50';
+    case 'moyen': return 'bg-mv-leaf/30 text-mv-leaf border border-mv-leaf/50';
+    case 'difficile': return 'bg-mv-red/30 text-mv-coral border border-mv-red/50';
+    default: return 'bg-mv-cream text-mv-forest border border-mv-leaf';
   }
 }
 ---
 
 <MainLayout title={`${recipe.title} - Recettes | Gastronomade`}>
-  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16 lg:pb-20">
     <!-- Header -->
-    <header class="text-center mb-12">
-      {recipe.featuredImage && (
-        <div class="mb-8">
+    <header class="text-center mb-6 sm:mb-8 lg:mb-10">
+      {recipe.featuredImageUrl && (
+        <div class="mb-6 sm:mb-8">
           <img
-            src={`${recipe.featuredImage}?w=800&h=400&fit=crop&auto=format`}
-            alt={recipe.title}
+            src={`${recipe.featuredImageUrl}?w=800&h=400&fit=crop&auto=format`}
+            alt={`Photo de ${recipe.title}`}
             class="w-full max-w-2xl mx-auto rounded-lg shadow-lg"
+            loading="lazy"
           />
         </div>
       )}
 
-      <div class="flex items-center justify-center gap-4 mb-4">
-        <span class="text-sm font-medium text-gastro-charcoal bg-gastro-charcoal/10 px-3 py-1 rounded-full">
+      <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <span class="text-xs sm:text-sm font-medium text-mv-forest bg-mv-forest/10 px-2 sm:px-3 py-1 rounded-full">
           {getCategoryName(recipe.category)}
         </span>
         {recipe.difficulty && (
-          <span class={`text-sm font-medium px-3 py-1 rounded-full ${getDifficultyColor(recipe.difficulty)}`}>
+          <span class={`text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full ${getDifficultyColor(recipe.difficulty)}`}>
             {recipe.difficulty.charAt(0).toUpperCase() + recipe.difficulty.slice(1)}
           </span>
         )}
       </div>
 
-      <h1 class="text-4xl md:text-5xl font-serif font-bold text-gastro-charcoal mb-4">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
         {recipe.title}
       </h1>
 
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+      <p class="text-base sm:text-lg md:text-xl text-mv-forest/70 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed">
         {recipe.description}
       </p>
 
       <!-- Recipe Meta -->
-      <div class="flex items-center justify-center gap-8 text-gray-600">
+      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-mv-forest/80">
         {recipe.prepTime && (
           <div class="text-center">
-            <div class="text-2xl font-bold text-gastro-charcoal">{recipe.prepTime}min</div>
-            <div class="text-sm">Préparation</div>
+            <div class="text-lg sm:text-xl md:text-2xl font-bold text-mv-forest">{recipe.prepTime}min</div>
+            <div class="text-xs sm:text-sm">Préparation</div>
           </div>
         )}
         {recipe.cookTime && recipe.cookTime > 0 && (
           <div class="text-center">
-            <div class="text-2xl font-bold text-gastro-charcoal">{recipe.cookTime}min</div>
-            <div class="text-sm">Cuisson</div>
+            <div class="text-lg sm:text-xl md:text-2xl font-bold text-mv-forest">{recipe.cookTime}min</div>
+            <div class="text-xs sm:text-sm">Cuisson</div>
           </div>
         )}
         {recipe.servings && (
           <div class="text-center">
-            <div class="text-2xl font-bold text-gastro-charcoal">{recipe.servings}</div>
-            <div class="text-sm">Personnes</div>
+            <div class="text-lg sm:text-xl md:text-2xl font-bold text-mv-forest">{recipe.servings}</div>
+            <div class="text-xs sm:text-sm">Personnes</div>
           </div>
         )}
       </div>
     </header>
 
-    <div class="grid md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-8">
       <!-- Ingredients -->
-      <div class="md:col-span-1">
-        <div class="bg-gastro-cream rounded-lg p-6 sticky top-8">
-          <h2 class="text-2xl font-serif font-bold text-gastro-charcoal mb-6">
+      <div class="lg:col-span-1">
+        <div class="bg-mv-cream rounded-lg p-4 sm:p-6 sticky top-8">
+          <h2 class="text-xl sm:text-2xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
             Ingrédients
           </h2>
           {recipe.ingredients && recipe.ingredients.length > 0 ? (
-            <ul class="space-y-3">
+            <ul class="space-y-2 sm:space-y-3">
               {recipe.ingredients.map((ingredient, index) => (
                 <li key={index} class="flex items-start">
-                  <span class="inline-block w-2 h-2 bg-gastro-charcoal rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span class="text-gray-700">
+                  <span class="inline-block w-1.5 sm:w-2 h-1.5 sm:h-2 bg-mv-forest rounded-full mt-1.5 sm:mt-2 mr-2 sm:mr-3 flex-shrink-0" aria-hidden="true"></span>
+                  <span class="text-mv-forest/80 text-sm sm:text-base leading-relaxed">
                     <span class="font-medium">{ingredient.name}</span>
                     {ingredient.quantity && (
-                      <span class="text-gray-600 ml-2">
+                      <span class="text-mv-forest/60 ml-1 sm:ml-2">
                         - {ingredient.quantity} {ingredient.unit}
                       </span>
                     )}
@@ -126,25 +127,25 @@ function getDifficultyColor(difficulty: string): string {
               ))}
             </ul>
           ) : (
-            <p class="text-gray-600">Ingrédients à venir...</p>
+            <p class="text-mv-forest/60 text-sm sm:text-base">Ingrédients à venir...</p>
           )}
         </div>
       </div>
 
       <!-- Instructions -->
-      <div class="md:col-span-2">
-        <div class="bg-white rounded-lg shadow-lg p-8">
-          <h2 class="text-2xl font-serif font-bold text-gastro-charcoal mb-6">
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8">
+          <h2 class="text-xl sm:text-2xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
             Instructions
           </h2>
           {recipe.instructions && recipe.instructions.length > 0 ? (
-            <div class="space-y-6">
+            <div class="space-y-4 sm:space-y-6">
               {recipe.instructions.map((block, index) => (
                 <div key={index} class="flex">
-                  <span class="flex-shrink-0 w-8 h-8 bg-gastro-charcoal text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                  <span class="flex-shrink-0 w-6 sm:w-8 h-6 sm:h-8 bg-mv-forest text-mv-cream rounded-full flex items-center justify-center text-xs sm:text-sm font-bold mr-3 sm:mr-4" aria-hidden="true">
                     {index + 1}
                   </span>
-                  <div class="text-gray-700 leading-relaxed">
+                  <div class="text-mv-forest/80 text-sm sm:text-base leading-relaxed">
                     {block.children?.map((child, childIndex) => (
                       <span key={childIndex}>{child.text}</span>
                     ))}
@@ -153,17 +154,17 @@ function getDifficultyColor(difficulty: string): string {
               ))}
             </div>
           ) : (
-            <p class="text-gray-600">Instructions à venir...</p>
+            <p class="text-mv-forest/60 text-sm sm:text-base">Instructions à venir...</p>
           )}
         </div>
 
         <!-- Tags -->
         {recipe.tags && recipe.tags.length > 0 && (
-          <div class="mt-8">
-            <h3 class="text-lg font-semibold text-gastro-charcoal mb-4">Tags</h3>
-            <div class="flex flex-wrap gap-2">
+          <div class="mt-6 sm:mt-8">
+            <h3 class="text-base sm:text-lg font-semibold text-mv-forest mb-3 sm:mb-4">Tags</h3>
+            <div class="flex flex-wrap gap-1.5 sm:gap-2">
               {recipe.tags.map((tag, index) => (
-                <span key={index} class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+                <span key={index} class="px-2 sm:px-3 py-1 bg-mv-cream text-mv-forest text-xs sm:text-sm rounded-full">
                   {tag}
                 </span>
               ))}
@@ -174,10 +175,11 @@ function getDifficultyColor(difficulty: string): string {
     </div>
 
     <!-- Navigation -->
-    <nav class="mt-16 text-center">
+    <nav class="mt-12 sm:mt-16 lg:mt-20 text-center">
       <a
         href="/recettes"
-        class="inline-flex items-center px-6 py-3 bg-gastro-charcoal text-white rounded-lg font-medium hover:bg-gastro-charcoal-doux transition-colors"
+        class="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-mv-leaf text-mv-cream rounded-lg font-semibold hover:bg-mv-forest transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 shadow-md hover:shadow-lg"
+        aria-label="Retour à la liste des recettes"
       >
         ← Retour aux recettes
       </a>

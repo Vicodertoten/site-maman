@@ -8,6 +8,15 @@ export const sanityClient = createClient({
   apiVersion: '2024-01-01',
 })
 
+// Client pour les opérations d'écriture (nécessite un token)
+export const sanityWriteClient = createClient({
+  projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
+  dataset: import.meta.env.PUBLIC_SANITY_DATASET || 'production',
+  useCdn: false,
+  apiVersion: '2024-01-01',
+  token: import.meta.env.SANITY_AUTH_TOKEN, // Token requis pour les écritures
+})
+
 // Types pour les données Sanity
 export interface RestaurantData {
   _id: string
@@ -152,6 +161,7 @@ export const queries = {
     monthlyText,
     videoUrl,
     featuredImage,
+    "featuredImageUrl": featuredImage.asset->url,
     demoRecipes,
     instagramUrl
   }`,
@@ -166,7 +176,8 @@ export const queries = {
     features,
     description,
     maxCapacity,
-    image
+    image,
+    "imageUrl": image.asset->url
   }`,
 
   // Recettes - Toutes les recettes publiques
@@ -177,6 +188,7 @@ export const queries = {
     category,
     description,
     featuredImage,
+    "featuredImageUrl": featuredImage.asset->url,
     prepTime,
     cookTime,
     servings,
@@ -196,6 +208,7 @@ export const queries = {
     category,
     description,
     featuredImage,
+    "featuredImageUrl": featuredImage.asset->url,
     prepTime,
     cookTime,
     servings,
@@ -214,6 +227,7 @@ export const queries = {
     slug,
     description,
     featuredImage,
+    "featuredImageUrl": featuredImage.asset->url,
     prepTime,
     difficulty,
     tags

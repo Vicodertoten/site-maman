@@ -4,26 +4,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Couleurs Gastro
-        'beige-creme': 'var(--gastro-cream)',
-        'terracotta': 'var(--gastro-terracotta)',
-        'safran': 'var(--gastro-saffron)',
-        'bourgogne': 'var(--gastro-burgundy)',
-        'olive': 'var(--gastro-olive)',
-        'charbon': 'var(--gastro-charcoal)',
+        // Couleurs MV selon STYLE.md
+        'mv-cream': 'var(--mv-cream)',
+        'mv-forest': 'var(--mv-forest)',
+        'mv-leaf': 'var(--mv-leaf)',
+        'mv-coral': 'var(--mv-coral)',
+        'mv-plum': 'var(--mv-plum)',
 
-        // Classes Gastro complètes
-        'gastro-terracotta': 'var(--gastro-terracotta)',
-        'gastro-saffron': 'var(--gastro-saffron)',
-        'gastro-burgundy': 'var(--gastro-burgundy)',
-        'gastro-olive': 'var(--gastro-olive)',
-        'gastro-cream': 'var(--gastro-cream)',
-        'gastro-charcoal': 'var(--gastro-charcoal)',
+        // Alias pour compatibilité
+        'gastro-cream': 'var(--mv-cream)',
+        'gastro-earth': 'var(--mv-forest)',
+        'gastro-sage': 'var(--mv-leaf)',
+        'gastro-copper': 'var(--mv-coral)',
       },
       fontFamily: {
-        // Typographie élégante
-        'serif': ['Crimson Text', 'serif'],
-        'sans': ['Inter', 'sans-serif'],
+        // Typographie selon STYLE.md
+        'serif': ['Lora', 'Times New Roman', 'serif'],
+        'sans': ['Inter', 'Helvetica Neue', 'sans-serif'],
       },
     },
   },
