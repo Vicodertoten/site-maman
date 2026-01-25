@@ -1,11 +1,48 @@
-node_modules
+# Dependencies
+node_modules/
+.pnpm-debug.log*
 
-# Local Netlify folder
-.netlify
+# Build outputs
+dist/
+.astro/
+.vercel/
+.netlify/
 
-# Newsletter subscriptions CSV (contains personal data)
-newsletter_subscriptions.csv
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
 
-# Test scripts
-test-newsletter.js
-add-test-newsletter.js
+# Sanity Studio
+.sanity/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Lock files (keep one based on your package manager)
+# yarn.lock
+# pnpm-lock.yaml

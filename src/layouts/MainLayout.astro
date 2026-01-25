@@ -4,18 +4,73 @@ import '../styles/global.css';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
 import { formatPhoneNumber } from '../lib/utils';
 
-const { title } = Astro.props;
+const {
+  title,
+  description = "Gastronomade - Manger Vrai - Muriel Cruysmans à Wavre",
+  image = "/images/Asset 4logo.png",
+  url = Astro.url.pathname
+} = Astro.props;
+
+const canonicalUrl = `https://gastronomade.netlify.app${url}`;
 ---
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="description" content="Gastronomade - Manger Vrai - Muriel Cruysmans à Wavre" />
+  <meta name="description" content={description} />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="/images/Asset 4logo.png" />
   <link rel="apple-touch-icon" href="/images/Asset 4logo.png" />
+  <link rel="canonical" href={canonicalUrl} />
   <title>{title}</title>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={`https://gastronomade.netlify.app${image}`} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:site_name" content="Gastronomade" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={`https://gastronomade.netlify.app${image}`} />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json" set:html={
+    JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Gastronomade",
+      "description": "Manger Vrai avec Muriel Cruysmans - Cuisine saine et gourmande à Wavre",
+      "url": "https://gastronomade.netlify.app",
+      "telephone": "+32 123 45 67 89",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Adresse de Wavre",
+        "addressLocality": "Wavre",
+        "addressRegion": "Brabant wallon",
+        "postalCode": "1300",
+        "addressCountry": "BE"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 50.717,
+        "longitude": 4.611
+      },
+      "openingHours": "Mo-Fr 09:00-18:00",
+      "priceRange": "$$",
+      "servesCuisine": ["Healthy", "French", "Belgian"],
+      "founder": {
+        "@type": "Person",
+        "name": "Muriel Cruysmans"
+      }
+    })
+  } />
 </head>
 <body class="bg-mv-cream font-sans text-mv-forest min-h-screen">
   <!-- Navigation -->

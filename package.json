@@ -9,16 +9,37 @@
     "preview": "astro preview",
     "astro": "astro",
     "studio": "cd studio && npm run dev",
-    "studio:build": "cd studio && npm run build"
+    "studio:build": "cd studio && npm run build",
+    "lint": "eslint . --ext .js,.ts,.astro",
+    "lint:fix": "eslint . --ext .js,.ts,.astro --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@astrojs/netlify": "^6.6.4",
+    "@astrojs/sitemap": "^3.7.0",
     "@sanity/client": "^6.29.1",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.15",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.1.18"
   },
-  "keywords": ["gastronomie", "cuisine", "santé", "recettes", "coaching"],
+  "keywords": [
+    "gastronomie",
+    "cuisine",
+    "santé",
+    "recettes",
+    "coaching"
+  ],
   "author": "Muriel Cruysmans",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-astro": "^1.5.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1"
+  }
 }

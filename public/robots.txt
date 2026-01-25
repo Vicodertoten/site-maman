@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Bloquer l'accès aux fichiers temporaires
+Disallow: /admin/
+Disallow: /.netlify/
+Disallow: /.env
+
+# Sitemap
+Sitemap: https://gastronomade.netlify.app/sitemap.xml
