@@ -1,24 +1,36 @@
 // Fonction Netlify pour la newsletter avec Sanity
 import { createClient } from '@sanity/client'
 
-const sanityClient = createClient({
-  projectId: process.env.PUBLIC_SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID || 'gjz41m8i',
-  dataset: process.env.PUBLIC_SANITY_DATASET || process.env.SANITY_DATASET || 'production',
-  useCdn: false,
-  token: process.env.SANITY_AUTH_TOKEN,
-  apiVersion: process.env.SANITY_API_VERSION || '2024-01-01',
-})
+let sanityClient: any = null
+
+// Initialiser le client Sanity de manière sécurisée
+try {
+  const projectId = process.env.PUBLIC_SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID
+  const dataset = process.env.PUBLIC_SANITY_DATASET || process.env.SANITY_DATASET || 'production'
+  const token = process.env.SANITY_AUTH_TOKEN
+  const apiVersion = process.env.SANITY_API_VERSION || '2024-01-01'
+
+  if (projectId && token) {
+    sanityClient = createClient({
+      projectId,
+      dataset,
+      useCdn: false,
+      token,
+      apiVersion,
+    })
+    console.log('Sanity client initialized successfully')
+  } else {
+    console.error('Missing required environment variables for Sanity client')
+  }
+} catch (error) {
+  console.error('Failed to initialize Sanity client:', error)
+}
 
 export default async (req: Request, context: any) => {
   console.log('Newsletter function called with method:', req.method)
-  console.log('Environment variables check:')
-  console.log('- PUBLIC_SANITY_PROJECT_ID:', !!process.env.PUBLIC_SANITY_PROJECT_ID)
-  console.log('- SANITY_PROJECT_ID:', !!process.env.SANITY_PROJECT_ID)
-  console.log('- SANITY_AUTH_TOKEN:', !!process.env.SANITY_AUTH_TOKEN)
 
   // Uniquement accepter les requêtes POST
   if (req.method !== 'POST') {
-    console.log('Method not allowed:', req.method)
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json' }
@@ -26,23 +38,13 @@ export default async (req: Request, context: any) => {
   }
 
   try {
-    // Vérifier que les variables d'environnement sont configurées
-    if (!process.env.PUBLIC_SANITY_PROJECT_ID && !process.env.SANITY_PROJECT_ID) {
-      console.error('Variable SANITY_PROJECT_ID manquante')
+    // Vérifier que le client Sanity est disponible
+    if (!sanityClient) {
+      console.error('Sanity client not available')
       return new Response(JSON.stringify({
-        error: 'Configuration serveur incomplète: SANITY_PROJECT_ID'
+        error: 'Service temporairement indisponible'
       }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
-    }
-
-    if (!process.env.SANITY_AUTH_TOKEN) {
-      console.error('Variable SANITY_AUTH_TOKEN manquante')
-      return new Response(JSON.stringify({
-        error: 'Configuration serveur incomplète: SANITY_AUTH_TOKEN'
-      }), {
-        status: 500,
+        status: 503,
         headers: { 'Content-Type': 'application/json' }
       })
     }
@@ -50,28 +52,35 @@ export default async (req: Request, context: any) => {
     // Récupérer les données du formulaire
     const formData = await req.formData()
     const email = formData.get('email') as string
-    console.log('Received email:', email)
+
+    if (!email) {
+      return new Response(JSON.stringify({ error: 'Email requis' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
 
     // Validation basique de l'email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!email || !emailRegex.test(email)) {
-      console.log('Invalid email:', email)
+    if (!emailRegex.test(email)) {
       return new Response(JSON.stringify({ error: 'Email invalide' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       })
     }
 
+    console.log('Processing newsletter subscription for:', email)
+
     // Vérifier si l'email existe déjà
-    console.log('Checking for existing subscription...')
     const existingSubscription = await sanityClient.fetch(
       `*[_type == "newsletter" && email == $email][0]`,
       { email }
     )
 
     if (existingSubscription) {
-      console.log('Email already exists:', email)
-      return new Response(JSON.stringify({ error: 'Cet email est déjà inscrit à la newsletter' }), {
+      return new Response(JSON.stringify({
+        error: 'Cet email est déjà inscrit à la newsletter'
+      }), {
         status: 409,
         headers: { 'Content-Type': 'application/json' }
       })
@@ -85,10 +94,8 @@ export default async (req: Request, context: any) => {
       status: 'active'
     }
 
-    console.log('Creating new subscription...')
     await sanityClient.create(newSubscription)
-
-    console.log(`Nouvelle inscription newsletter: ${email}`)
+    console.log('Newsletter subscription created successfully for:', email)
 
     return new Response(JSON.stringify({
       success: true,
@@ -100,7 +107,6 @@ export default async (req: Request, context: any) => {
 
   } catch (error) {
     console.error('Erreur lors de l\'inscription newsletter:', error)
-
     return new Response(JSON.stringify({
       error: 'Erreur serveur lors de l\'inscription'
     }), {
@@ -108,8 +114,4 @@ export default async (req: Request, context: any) => {
       headers: { 'Content-Type': 'application/json' }
     })
   }
-}
-
-export const config = {
-  path: '/api/newsletter'
 }
