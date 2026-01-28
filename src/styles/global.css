@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
 
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   /* Palette de couleurs exacte selon STYLE.md */
@@ -19,6 +21,34 @@
   --font-family-serif: 'Lora', 'Times New Roman', serif;
   --font-family-sans: 'Inter', 'Helvetica Neue', sans-serif;
 }
+
+/* Styles de base selon STYLE.md */
+body {
+  font-family: var(--font-family-sans);
+  background-color: var(--mv-cream);
+  color: var(--mv-forest);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-serif);
+  color: var(--mv-forest);
+  font-weight: 600;
+}
+
+/* Classes utilitaires MV selon STYLE.md */
+.bg-mv-cream { background-color: var(--mv-cream); }
+.bg-mv-forest { background-color: var(--mv-forest); }
+.bg-mv-leaf { background-color: var(--mv-leaf); }
+.bg-mv-coral { background-color: var(--mv-coral); }
+.bg-mv-plum { background-color: var(--mv-plum); }
+
+.text-mv-cream { color: var(--mv-cream); }
+.text-mv-forest { color: var(--mv-forest); }
+.text-mv-leaf { color: var(--mv-leaf); }
+.text-mv-coral { color: var(--mv-coral); }
+.text-mv-plum { color: var(--mv-plum); }
 
 /* Styles de base selon STYLE.md */
 body {
@@ -137,11 +167,82 @@ h1, h2, h3, h4, h5, h6 {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Améliorer la lisibilité des liens */
-a {
-  transition: all 0.2s ease-in-out;
+@layer utilities {
+  .text-mv-forest-50 { color: rgba(42, 61, 52, 0.5); }
+  .text-mv-forest-60 { color: rgba(42, 61, 52, 0.6); }
+  .text-mv-forest-70 { color: rgba(42, 61, 52, 0.7); }
+  .text-mv-forest-80 { color: rgba(42, 61, 52, 0.8); }
+  .text-mv-forest-90 { color: rgba(42, 61, 52, 0.9); }
+
+  .text-mv-leaf-40 { color: rgba(74, 124, 89, 0.4); }
+  .text-mv-leaf-80 { color: rgba(74, 124, 89, 0.8); }
+
+  .text-mv-coral-80 { color: rgba(232, 93, 58, 0.8); }
+
+  .text-mv-cream-90 { color: rgba(251, 248, 241, 0.9); }
+
+  .bg-mv-cream-50 { background-color: rgba(251, 248, 241, 0.5); }
+  .bg-mv-cream-80 { background-color: rgba(251, 248, 241, 0.8); }
+  .bg-mv-cream-90 { background-color: rgba(251, 248, 241, 0.9); }
+
+  .bg-mv-leaf-10 { background-color: rgba(74, 124, 89, 0.1); }
+  .bg-mv-leaf-30 { background-color: rgba(74, 124, 89, 0.3); }
+
+  .bg-mv-forest-10 { background-color: rgba(42, 61, 52, 0.1); }
+
+  .border-mv-leaf-20 { border-color: rgba(74, 124, 89, 0.2); }
+  .border-mv-leaf-30 { border-color: rgba(74, 124, 89, 0.3); }
+  .border-mv-leaf-50 { border-color: rgba(74, 124, 89, 0.5); }
+
+  .shadow-mv-forest-5 { box-shadow: 0 1px 3px 0 rgba(42, 61, 52, 0.1), 0 1px 2px 0 rgba(42, 61, 52, 0.06); }
+  .shadow-mv-forest-10 { box-shadow: 0 10px 15px -3px rgba(42, 61, 52, 0.1), 0 4px 6px -2px rgba(42, 61, 52, 0.05); }
 }
 
-a:hover {
-  text-decoration-thickness: 2px;
+/* Animations pour le filtrage dynamique */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.scroll-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.scroll-slide-in-left {
+  animation: slideInLeft 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.scroll-slide-in-right {
+  animation: slideInRight 0.6s ease-out forwards;
+  opacity: 0;
 }

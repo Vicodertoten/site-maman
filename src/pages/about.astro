@@ -30,7 +30,7 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
       <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
         {aboutData?.heroTitle || "Cours & Coaching"}
       </h1>
-      <p class="text-lg sm:text-xl md:text-2xl text-mv-forest/80 mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
+      <p class="text-lg sm:text-xl md:text-2xl text-mv-forest-80 mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
         {aboutData?.heroSubtitle || "Apprenez l'art de la cuisine santé avec Muriel Cruysmans"}
       </p>
     </div>
@@ -48,7 +48,7 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
       <div class="bg-mv-cream rounded-lg p-6 sm:p-8 md:p-12 shadow-sm">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
           <div class="space-y-4 sm:space-y-6 order-2 lg:order-1">
-            <p class="text-base sm:text-lg text-mv-forest/80 leading-relaxed">
+            <p class="text-base sm:text-lg text-mv-forest-80 leading-relaxed">
               {aboutData?.bio || "Passionnée de cuisine santé et de bien-être, Muriel Cruysmans est une chef cuisinière diplômée qui met son expertise au service de votre alimentation."}
             </p>
             <div class="space-y-3 sm:space-y-4">
@@ -57,7 +57,7 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
                   <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
-                  <span class="text-mv-forest/80 text-sm sm:text-base">{achievement}</span>
+                  <span class="text-mv-forest-80 text-sm sm:text-base">{achievement}</span>
                 </div>
               )) : (
                 <>
@@ -65,19 +65,19 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
                     <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
-                    <span class="text-mv-forest/80 text-sm sm:text-base">Diplômée restaurateur-traiteur (mai 2024)</span>
+                    <span class="text-mv-forest-80 text-sm sm:text-base">Diplômée restaurateur-traiteur (mai 2024)</span>
                   </div>
                   <div class="flex items-start">
                     <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
-                    <span class="text-mv-forest/80 text-sm sm:text-base">Auteur d'un livre de recettes</span>
+                    <span class="text-mv-forest-80 text-sm sm:text-base">Auteur d'un livre de recettes</span>
                   </div>
                   <div class="flex items-start">
                     <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
-                    <span class="text-mv-forest/80 text-sm sm:text-base">Spécialiste cuisine santé et bien-être</span>
+                    <span class="text-mv-forest-80 text-sm sm:text-base">Spécialiste cuisine santé et bien-être</span>
                   </div>
                 </>
               )}
@@ -94,7 +94,7 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
               />
             ) : null}
             <div class="aspect-[4/5] bg-gray-200 rounded-lg flex items-center justify-center" style={getImageUrl(aboutData?.photo) ? 'display: none;' : 'display: flex;'}>
-              <div class="text-center text-mv-forest/60">
+              <div class="text-center text-mv-forest-60">
                 <svg class="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
@@ -109,13 +109,13 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
   </section>
 
   <!-- Services Section -->
-  <section class="pb-12 sm:pb-16 lg:pb-20 bg-gray-50">
+  <section class="pb-12 sm:pb-16 lg:pb-20 bg-mv-cream">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-6 sm:mb-8 lg:mb-10">
         <h2 class="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
           Mes Services
         </h2>
-        <p class="text-base sm:text-lg text-mv-forest/70 max-w-2xl mx-auto leading-relaxed">
+        <p class="text-base sm:text-lg text-mv-forest-70 max-w-2xl mx-auto leading-relaxed">
           Cours de cuisine à la carte et coaching personnalisé pour votre bien-être alimentaire
         </p>
       </div>
@@ -196,7 +196,7 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
       <h2 class="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-mv-cream mb-4 sm:mb-6 leading-tight">
         Prêt à commencer votre voyage culinaire ?
       </h2>
-      <p class="text-lg sm:text-xl text-mv-cream/90 mb-6 sm:mb-8 leading-relaxed">
+      <p class="text-lg sm:text-xl text-mv-cream-90 mb-6 sm:mb-8 leading-relaxed">
         Contactez-moi pour un cours personnalisé ou un coaching adapté à vos besoins
       </p>
       <a href="/contact" class="inline-block bg-mv-leaf text-mv-cream px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:bg-mv-coral transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 focus:ring-offset-mv-forest shadow-md hover:shadow-lg">

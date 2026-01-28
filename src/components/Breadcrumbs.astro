@@ -1,0 +1,94 @@
+---
+// Breadcrumbs.astro - Fil d'Ariane pour la navigation
+export interface Props {
+  items: Array<{
+    label: string;
+    href?: string;
+    current?: boolean;
+  }>;
+  separator?: string;
+}
+
+const { items, separator = "/" } = Astro.props;
+---
+
+<nav aria-label="Fil d'Ariane" class="breadcrumbs">
+  <ol class="flex items-center space-x-2 text-sm text-mv-forest-70">
+    {items.map((item, index) => (
+      <li class="flex items-center">
+        {index > 0 && (
+          <span class="mx-2 text-mv-forest-50" aria-hidden="true">
+            {separator}
+          </span>
+        )}
+
+        {item.href && !item.current ? (
+          <a
+            href={item.href}
+            class="text-mv-forest hover:text-mv-leaf transition-colors duration-200 hover:underline"
+          >
+            {item.label}
+          </a>
+        ) : (
+          <span
+            class={`${
+              item.current
+                ? 'text-mv-leaf font-medium'
+                : 'text-mv-forest-60 cursor-default'
+            }`}
+            aria-current={item.current ? 'page' : undefined}
+          >
+            {item.label}
+          </span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs {
+    margin-bottom: 2rem;
+  }
+
+  .breadcrumbs ol {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  /* Animation d'entrée */
+  .breadcrumbs li {
+    animation: fadeInUp 0.3s ease-out forwards;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .breadcrumbs li:nth-child(1) { animation-delay: 0s; }
+  .breadcrumbs li:nth-child(2) { animation-delay: 0.1s; }
+  .breadcrumbs li:nth-child(3) { animation-delay: 0.2s; }
+  .breadcrumbs li:nth-child(4) { animation-delay: 0.3s; }
+  .breadcrumbs li:nth-child(5) { animation-delay: 0.4s; }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .breadcrumbs {
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumbs ol {
+      flex-wrap: wrap;
+    }
+
+    .breadcrumbs li {
+      margin-bottom: 0.25rem;
+    }
+  }
+</style>

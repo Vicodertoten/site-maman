@@ -1,0 +1,493 @@
+---
+// MicroInteractions.astro - Micro-interactions engageantes
+export interface Props {
+  enableHoverEffects?: boolean;
+  enableClickFeedback?: boolean;
+  enableScrollAnimations?: boolean;
+  enableLoadingAnimations?: boolean;
+}
+
+const {
+  enableHoverEffects = true,
+  enableClickFeedback = true,
+  enableScrollAnimations = true,
+  enableLoadingAnimations = true
+} = Astro.props;
+---
+
+<div class="micro-interactions-container">
+  <!-- Styles globaux pour les micro-interactions -->
+  <style>
+    /* Effets de survol */
+    .hover-lift {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hover-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .hover-scale {
+      transition: transform 0.2s ease;
+    }
+
+    .hover-scale:hover {
+      transform: scale(1.02);
+    }
+
+    .hover-glow {
+      transition: box-shadow 0.3s ease;
+    }
+
+    .hover-glow:hover {
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    }
+
+    /* Feedback de clic */
+    .click-feedback {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .click-feedback:active::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      animation: clickRipple 0.4s ease-out;
+    }
+
+    @keyframes clickRipple {
+      to {
+        width: 300px;
+        height: 300px;
+        opacity: 0;
+      }
+    }
+
+    /* Animations de défilement */
+    .scroll-fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .scroll-fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .scroll-slide-in-left {
+      opacity: 0;
+      transform: translateX(-30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .scroll-slide-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .scroll-slide-in-right {
+      opacity: 0;
+      transform: translateX(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .scroll-slide-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Animations de chargement */
+    .loading-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loading-shimmer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+      );
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .loading-pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .loading-bounce {
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    /* Indicateurs de progression */
+    .progress-bar {
+      position: relative;
+      height: 4px;
+      background: #e5e7eb;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #16a34a, #22c55e);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    /* Tooltips animés */
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip-content {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 1000;
+    }
+
+    .tooltip-content::before {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #1f2937;
+    }
+
+    .tooltip:hover .tooltip-content {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-5px);
+    }
+
+    /* Animations de succès/erreur */
+    .success-checkmark {
+      animation: checkmark 0.8s ease-in-out;
+    }
+
+    @keyframes checkmark {
+      0% {
+        transform: scale(0) rotate(45deg);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.2) rotate(45deg);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1) rotate(45deg);
+        opacity: 1;
+      }
+    }
+
+    .error-shake {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* Transitions de page */
+    .page-transition {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: pageEnter 0.5s ease forwards;
+    }
+
+    @keyframes pageEnter {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* États de chargement pour les boutons */
+    .btn-loading {
+      position: relative;
+      color: transparent !important;
+    }
+
+    .btn-loading::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Accessibilité - réduction du mouvement */
+    @media (prefers-reduced-motion: reduce) {
+      .hover-lift,
+      .hover-scale,
+      .hover-glow,
+      .click-feedback,
+      .scroll-fade-in,
+      .scroll-slide-in-left,
+      .scroll-slide-in-right,
+      .loading-shimmer,
+      .loading-pulse,
+      .loading-bounce,
+      .success-checkmark,
+      .error-shake,
+      .page-transition,
+      .progress-fill,
+      .tooltip-content {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</div>
+
+<script>
+  class MicroInteractions {
+    constructor(options = {}) {
+      this.options = {
+        enableHoverEffects: true,
+        enableClickFeedback: true,
+        enableScrollAnimations: true,
+        enableLoadingAnimations: true,
+        ...options
+      };
+
+      this.init();
+    }
+
+    init() {
+      if (this.options.enableScrollAnimations) {
+        this.initScrollAnimations();
+      }
+
+      if (this.options.enableClickFeedback) {
+        this.initClickFeedback();
+      }
+
+      if (this.options.enableHoverEffects) {
+        this.initHoverEffects();
+      }
+
+      if (this.options.enableLoadingAnimations) {
+        this.initLoadingAnimations();
+      }
+
+      this.initGlobalListeners();
+    }
+
+    initScrollAnimations() {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      // Observer tous les éléments avec des classes d'animation de défilement
+      document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(el => {
+        observer.observe(el);
+      });
+    }
+
+    initClickFeedback() {
+      document.addEventListener('click', (e) => {
+        const target = e.target.closest('.click-feedback');
+        if (target) {
+          // Le feedback est géré par CSS
+        }
+      });
+    }
+
+    initHoverEffects() {
+      // Les effets de survol sont gérés par CSS
+    }
+
+    initLoadingAnimations() {
+      // Les animations de chargement sont gérées par CSS
+    }
+
+    initGlobalListeners() {
+      // Écouteur pour les notifications de succès
+      window.addEventListener('showSuccess', (e) => {
+        this.showSuccessAnimation(e.detail.element);
+      });
+
+      // Écouteur pour les notifications d'erreur
+      window.addEventListener('showError', (e) => {
+        this.showErrorAnimation(e.detail.element);
+      });
+
+      // Écouteur pour les états de chargement des boutons
+      window.addEventListener('buttonLoading', (e) => {
+        this.setButtonLoading(e.detail.button, e.detail.loading);
+      });
+    }
+
+    showSuccessAnimation(element) {
+      if (!element) return;
+
+      element.classList.add('success-checkmark');
+      setTimeout(() => {
+        element.classList.remove('success-checkmark');
+      }, 800);
+    }
+
+    showErrorAnimation(element) {
+      if (!element) return;
+
+      element.classList.add('error-shake');
+      setTimeout(() => {
+        element.classList.remove('error-shake');
+      }, 500);
+    }
+
+    setButtonLoading(button, loading) {
+      if (!button) return;
+
+      if (loading) {
+        button.classList.add('btn-loading');
+        button.disabled = true;
+      } else {
+        button.classList.remove('btn-loading');
+        button.disabled = false;
+      }
+    }
+
+    // Méthodes utilitaires pour déclencher des animations depuis le code
+    static addHoverEffect(element, effect = 'lift') {
+      element.classList.add(`hover-${effect}`);
+    }
+
+    static addClickFeedback(element) {
+      element.classList.add('click-feedback');
+    }
+
+    static addScrollAnimation(element, animation = 'fade-in') {
+      element.classList.add(`scroll-${animation}`);
+    }
+
+    static addLoadingAnimation(element, animation = 'shimmer') {
+      element.classList.add(`loading-${animation}`);
+    }
+
+    static showTooltip(element, content, position = 'top') {
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+      tooltip.innerHTML = `
+        <div class="tooltip-content">
+          ${content}
+        </div>
+      `;
+
+      element.style.position = 'relative';
+      element.appendChild(tooltip);
+
+      // Supprimer après un délai
+      setTimeout(() => {
+        if (tooltip.parentNode) {
+          tooltip.parentNode.removeChild(tooltip);
+        }
+      }, 3000);
+    }
+
+    static createProgressBar(container, progress = 0) {
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      progressBar.innerHTML = '<div class="progress-fill"></div>';
+
+      container.appendChild(progressBar);
+
+      this.updateProgressBar(progressBar, progress);
+
+      return progressBar;
+    }
+
+    static updateProgressBar(progressBar, progress) {
+      const fill = progressBar.querySelector('.progress-fill');
+      if (fill) {
+        fill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+      }
+    }
+
+    static animatePageTransition() {
+      document.body.classList.add('page-transition');
+    }
+  }
+
+  // Initialiser les micro-interactions quand le DOM est prêt
+  document.addEventListener('DOMContentLoaded', () => {
+    window.microInteractions = new MicroInteractions({
+      enableHoverEffects: true,
+      enableClickFeedback: true,
+      enableScrollAnimations: true,
+      enableLoadingAnimations: true
+    });
+  });
+
+  // Exposer la classe globalement
+  window.MicroInteractions = MicroInteractions;
+</script>

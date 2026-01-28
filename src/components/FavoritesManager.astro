@@ -1,0 +1,193 @@
+---
+// FavoritesManager.astro - Système de gestion des favoris
+---
+
+<div id="favorites-manager" class="hidden">
+  <!-- Ce composant ne rend rien visuellement, il gère seulement la logique -->
+</div>
+
+<script>
+  class FavoritesManager {
+    constructor() {
+      this.favorites = new Set();
+      this.loadFromStorage();
+      this.init();
+    }
+
+    init() {
+      // Écouter les événements de clic sur les boutons favoris
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.favorite-btn')) {
+          e.preventDefault();
+          const button = e.target.closest('.favorite-btn');
+          const recipeId = button.dataset.recipeId;
+          const recipeTitle = button.dataset.recipeTitle;
+
+          if (this.isFavorite(recipeId)) {
+            this.removeFavorite(recipeId);
+            this.showFeedback(`"${recipeTitle}" retiré des favoris`);
+          } else {
+            this.addFavorite(recipeId, recipeTitle);
+            this.showFeedback(`"${recipeTitle}" ajouté aux favoris`);
+          }
+
+          this.updateButton(button, recipeId);
+        }
+      });
+
+      // Mettre à jour tous les boutons favoris existants
+      this.updateAllButtons();
+    }
+
+    addFavorite(recipeId, recipeTitle) {
+      this.favorites.add(recipeId);
+      this.saveToStorage();
+
+      // Dispatch un événement personnalisé
+      window.dispatchEvent(new CustomEvent('favoriteAdded', {
+        detail: { recipeId, recipeTitle }
+      }));
+    }
+
+    removeFavorite(recipeId) {
+      this.favorites.delete(recipeId);
+      this.saveToStorage();
+
+      // Dispatch un événement personnalisé
+      window.dispatchEvent(new CustomEvent('favoriteRemoved', {
+        detail: { recipeId }
+      }));
+    }
+
+    isFavorite(recipeId) {
+      return this.favorites.has(recipeId);
+    }
+
+    getAllFavorites() {
+      return Array.from(this.favorites);
+    }
+
+    clearAllFavorites() {
+      if (confirm('Êtes-vous sûr de vouloir supprimer tous les favoris ?')) {
+        this.favorites.clear();
+        this.saveToStorage();
+        this.updateAllButtons();
+
+        // Dispatch un événement personnalisé
+        window.dispatchEvent(new CustomEvent('favoritesCleared'));
+      }
+    }
+
+    updateButton(button, recipeId) {
+      const isFav = this.isFavorite(recipeId);
+      const icon = button.querySelector('.favorite-icon');
+      const text = button.querySelector('.favorite-text');
+
+      button.classList.toggle('favorited', isFav);
+
+      if (icon) {
+        icon.classList.toggle('fill-current', isFav);
+        icon.classList.toggle('text-mv-coral', isFav);
+        icon.classList.toggle('text-gray-400', !isFav);
+      }
+
+      if (text) {
+        text.textContent = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+      }
+
+      // Animation
+      button.classList.add('animate-pulse');
+      setTimeout(() => {
+        button.classList.remove('animate-pulse');
+      }, 300);
+    }
+
+    updateAllButtons() {
+      document.querySelectorAll('.favorite-btn').forEach(button => {
+        const recipeId = button.dataset.recipeId;
+        this.updateButton(button, recipeId);
+      });
+    }
+
+    showFeedback(message) {
+      // Créer une notification temporaire
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-20 right-4 bg-mv-forest text-mv-cream px-4 py-2 rounded-lg shadow-lg z-50 animate-in slide-in-from-right-2';
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.classList.add('animate-out', 'slide-out-to-right-2');
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 2000);
+    }
+
+    saveToStorage() {
+      try {
+        localStorage.setItem('gastronomade-favorites', JSON.stringify(Array.from(this.favorites)));
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde des favoris:', error);
+      }
+    }
+
+    loadFromStorage() {
+      try {
+        const data = localStorage.getItem('gastronomade-favorites');
+        if (data) {
+          this.favorites = new Set(JSON.parse(data));
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des favoris:', error);
+        this.favorites = new Set();
+      }
+    }
+
+    // Méthode pour créer un bouton favori
+    static createFavoriteButton(recipeId, recipeTitle, size = 'normal') {
+      const sizeClasses = {
+        small: 'p-2',
+        normal: 'p-3',
+        large: 'p-4'
+      };
+
+      return `
+        <button
+          class="favorite-btn ${sizeClasses[size]} rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 border border-gray-200"
+          data-recipe-id="${recipeId}"
+          data-recipe-title="${recipeTitle}"
+          aria-label="Ajouter aux favoris"
+        >
+          <svg class="favorite-icon h-5 w-5 text-gray-400 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+          <span class="favorite-text sr-only">Ajouter aux favoris</span>
+        </button>
+      `;
+    }
+  }
+
+  // Initialiser quand le DOM est prêt
+  document.addEventListener('DOMContentLoaded', () => {
+    window.favoritesManager = new FavoritesManager();
+  });
+
+  // Exposer la classe globalement
+  window.FavoritesManager = FavoritesManager;
+</script>
+
+<style>
+  .favorite-btn.favorited .favorite-icon {
+    @apply text-mv-coral fill-current;
+  }
+
+  .favorite-btn:hover .favorite-icon {
+    @apply text-mv-coral-80;
+  }
+
+  .favorite-btn.favorited:hover .favorite-icon {
+    @apply text-mv-coral;
+  }
+</style>

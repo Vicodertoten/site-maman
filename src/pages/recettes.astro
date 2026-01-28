@@ -1,9 +1,64 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import SimpleRecipeFilters from '../components/SimpleRecipeFilters.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import EnhancedRecipeCard from '../components/EnhancedRecipeCard.astro';
+import MicroInteractions from '../components/MicroInteractions.astro';
+import SpacingOptimizer from '../components/SpacingOptimizer.astro';
+import ShoppingList from '../components/ShoppingList.astro';
+import FavoritesManager from '../components/FavoritesManager.astro';
+import LazyImage from '../components/LazyImage.astro';
+import AnimationOptimizer from '../components/AnimationOptimizer.astro';
 import { getRecipesData, type RecipeData } from '../lib/sanity';
 
 // Récupérer les recettes depuis Sanity
 const recipes = await getRecipesData();
+
+// Récupérer les paramètres de filtrage depuis l'URL
+const url = new URL(Astro.request.url);
+const searchQuery = url.searchParams.get('search') || '';
+const selectedCategory = url.searchParams.get('category') || '';
+const selectedDifficulty = url.searchParams.get('difficulty') || '';
+const selectedTags = url.searchParams.getAll('tags');
+
+// Fonction pour filtrer les recettes
+function filterRecipes(recipes: RecipeData[], filters: { search: string; category: string; difficulty: string; tags: string[] }) {
+  return recipes.filter(recipe => {
+    // Recherche textuelle
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      const matchesSearch =
+        recipe.title.toLowerCase().includes(searchLower) ||
+        recipe.description?.toLowerCase().includes(searchLower) ||
+        recipe.ingredients?.some(ing => ing.name.toLowerCase().includes(searchLower));
+      if (!matchesSearch) return false;
+    }
+
+    // Filtre par catégorie
+    if (filters.category && recipe.category !== filters.category) {
+      return false;
+    }
+
+    // Filtre par difficulté
+    if (filters.difficulty && recipe.difficulty !== filters.difficulty) {
+      return false;
+    }
+
+    // Filtre par tags
+    if (filters.tags.length > 0) {
+      const recipeTags = recipe.tags || [];
+      const hasMatchingTag = filters.tags.some(filterTag =>
+        recipeTags.some(recipeTag => recipeTag.toLowerCase().includes(filterTag.toLowerCase()))
+      );
+      if (!hasMatchingTag) return false;
+    }
+
+    return true;
+  });
+}
+
+// Pour le filtrage dynamique, on passe toutes les recettes au composant
+const allRecipes = recipes;
 
 // Fonction pour obtenir le nom de la catégorie
 function getCategoryName(category: string): string {
@@ -17,29 +72,50 @@ function getCategoryName(category: string): string {
   return categories[category] || category;
 }
 
-// Fonction pour obtenir la couleur de difficulté
-function getDifficultyColor(difficulty: string): string {
-  switch (difficulty) {
-    case 'facile': return 'bg-mv-leaf/30 text-mv-leaf border border-mv-leaf/50';
-    case 'moyen': return 'bg-mv-leaf/30 text-mv-leaf border border-mv-leaf/50';
-    case 'difficile': return 'bg-mv-red/30 text-mv-coral border border-mv-red/50';
-    default: return 'bg-mv-cream text-mv-forest border border-mv-leaf';
-  }
-}
-
-// Extraire tous les tags uniques des recettes
+// Extraire tous les tags uniques de toutes les recettes
 const allTags = new Set<string>();
-recipes.forEach(recipe => {
+allRecipes.forEach(recipe => {
   if (recipe.tags) {
     recipe.tags.forEach(tag => allTags.add(tag));
   }
 });
 const uniqueTags = Array.from(allTags).sort();
+
+// Préparer les données pour les composants
+const recipeCardsData = allRecipes.map(recipe => ({
+  id: recipe._id,
+  slug: recipe.slug?.current || recipe._id,
+  title: recipe.title,
+  description: recipe.description,
+  image: recipe.featuredImageUrl ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : undefined,
+  prepTime: recipe.prepTime,
+  cookTime: recipe.cookTime,
+  difficulty: recipe.difficulty,
+  category: recipe.category,
+  rating: recipe.rating || 4.5,
+  isNew: recipe.isNew || false,
+  isPopular: recipe.isPopular || false,
+  tags: recipe.tags,
+  ingredients: recipe.ingredients ? recipe.ingredients.map(ing => ing.name) : []
+}));
+
+// Fil d'Ariane
+const breadcrumbs = [
+  { label: 'Accueil', href: '/' },
+  { label: 'Recettes', current: true }
+];
 ---
 
 <MainLayout title="Recettes - Gastronomade">
+  <!-- Optimisation d'espacement et micro-interactions -->
+  <SpacingOptimizer enableResponsiveSpacing={true} enableDynamicSpacing={true} />
+  <MicroInteractions enableHoverEffects={true} enableClickFeedback={true} enableScrollAnimations={true} enableLoadingAnimations={true} />
+  <AnimationOptimizer enablePerformanceMode={true} enableReducedMotion={true} />
+  <FavoritesManager />
+  <ShoppingList />
+
   <!-- Hero Section -->
-  <section class="bg-gradient-to-b from-mv-cream to-white py-12 sm:py-16 lg:py-20" role="banner">
+  <section class="bg-gradient-to-b from-mv-cream to-white py-12 sm:py-16 lg:py-20 scroll-fade-in" role="banner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
         Recettes
@@ -50,132 +126,44 @@ const uniqueTags = Array.from(allTags).sort();
     </div>
   </section>
 
-  <!-- Recipes Grid -->
-  <section class="py-0 bg-white">
+  <!-- Recipes Section -->
+  <section class="py-0 bg-white scroll-fade-in">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Search and Filters -->
-      <div class="mb-12">
-        <!-- Search Bar -->
-        <div class="mb-6">
-          <div class="max-w-md mx-auto">
-            <div class="relative">
-              <input
-                type="text"
-                id="search-input"
-                placeholder="Rechercher une recette..."
-                class="w-full px-4 py-3 pl-12 border border-mv-cream rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent"
-              />
-              <svg class="absolute left-4 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-            </div>
-          </div>
-        </div>
+      <!-- Breadcrumbs -->
+      <Breadcrumbs items={breadcrumbs} />
 
-        <!-- Filter Tags -->
-        <div class="flex flex-wrap justify-center gap-3" id="filter-buttons">
-          <button
-            class="filter-btn px-4 py-2 bg-mv-forest text-mv-cream rounded-full text-sm font-medium hover:bg-mv-leaf hover:scale-105 transition-all duration-300 transform active"
-            data-filter="all"
-          >
-            Toutes ({recipes.length})
-          </button>
-          {uniqueTags.map(tag => (
-            <button
-              class="filter-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream hover:scale-105 transition-all duration-300 transform"
-              data-filter={tag}
-            >
-              {tag.charAt(0).toUpperCase() + tag.slice(1)} ({recipes.filter(r => r.tags?.includes(tag)).length})
-            </button>
-          ))}
-        </div>
-      </div>
+      <!-- Recipe Filters -->
+      <SimpleRecipeFilters
+        currentFilters={{
+          search: searchQuery,
+          category: selectedCategory,
+          difficulty: selectedDifficulty,
+          tags: selectedTags
+        }}
+        availableTags={uniqueTags}
+        totalRecipes={allRecipes.length}
+      />
 
-      {recipes && recipes.length > 0 ? (
-        <!-- Recipes Grid -->
+      {allRecipes && allRecipes.length > 0 ? (
+        <!-- Enhanced Recipes Grid -->
         <div id="recipes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8" role="grid">
-          {recipes.map((recipe) => (
-            <article
-              class="recipe-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform group"
-              data-title={recipe.title.toLowerCase()}
-              data-description={recipe.description?.toLowerCase() || ''}
-              data-tags={recipe.tags?.join(',').toLowerCase() || ''}
-              data-category={recipe.category}
-              role="article"
-            >
-              {recipe.featuredImageUrl && (
-                <div class="h-40 sm:h-48 bg-gray-200 overflow-hidden">
-                  <img
-                    src={`${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format`}
-                    alt={`Photo de ${recipe.title}`}
-                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                </div>
-              )}
-              <div class="p-4 sm:p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
-                  <span class="text-xs sm:text-sm font-medium text-mv-forest bg-mv-forest/10 px-2 py-1 rounded self-start">
-                    {getCategoryName(recipe.category)}
-                  </span>
-                  {recipe.difficulty && (
-                    <span class={`text-xs font-medium px-2 py-1 rounded self-end ${getDifficultyColor(recipe.difficulty)}`}>
-                      {recipe.difficulty.charAt(0).toUpperCase() + recipe.difficulty.slice(1)}
-                    </span>
-                  )}
-                </div>
-
-                <h3 class="text-lg sm:text-xl font-serif font-bold text-mv-forest mb-2 leading-tight">
-                  {recipe.title}
-                </h3>
-
-                <p class="text-mv-forest/80 text-sm mb-4 line-clamp-2 leading-relaxed">
-                  {recipe.description}
-                </p>
-
-                <div class="flex items-center justify-between text-xs sm:text-sm text-mv-forest/60 mb-4">
-                  {recipe.prepTime && (
-                    <span class="flex items-center">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      {recipe.prepTime}min
-                    </span>
-                  )}
-                  {recipe.servings && (
-                    <span class="flex items-center">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                      </svg>
-                      {recipe.servings} pers.
-                    </span>
-                  )}
-                </div>
-
-                {recipe.tags && recipe.tags.length > 0 && (
-                  <div class="flex flex-wrap gap-1 mb-4">
-                    {recipe.tags.slice(0, 3).map((tag) => (
-                      <span class="text-xs bg-mv-cream text-mv-forest px-2 py-1 rounded">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <a
-                  href={`/recette/${recipe.slug?.current || recipe._id}`}
-                  class="inline-block w-full text-center bg-mv-leaf text-mv-cream px-4 py-2 mv-pill font-semibold text-sm hover:bg-mv-forest transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2"
-                  aria-label={`Voir la recette ${recipe.title}`}
-                >
-                  Voir la recette
-                </a>
-              </div>
-            </article>
+          {recipeCardsData.map((recipe, index) => (
+            <div class={`scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`} style={`animation-delay: ${index * 0.1}s`}>
+              <EnhancedRecipeCard
+                recipe={{
+                  ...recipe,
+                  category: getCategoryName(recipe.category)
+                }}
+                showFavoriteButton={true}
+                showShoppingListButton={true}
+                compact={false}
+              />
+            </div>
           ))}
         </div>
       ) : (
         <!-- Recipes Coming Soon -->
-        <div class="text-center py-16">
+        <div class="text-center py-16 scroll-fade-in">
           <div class="max-w-2xl mx-auto">
             <svg class="mx-auto h-24 w-24 text-mv-forest-doux mb-8" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -183,11 +171,11 @@ const uniqueTags = Array.from(allTags).sort();
             <h2 class="text-3xl font-serif font-bold text-mv-forest mb-4">
               Recettes à venir
             </h2>
-            <p class="text-lg text-gray-600 mb-8">
+            <p class="text-lg text-mv-forest-80 mb-8">
               Je prépare une collection de recettes saines et délicieuses pour vous accompagner dans votre voyage culinaire.
             </p>
             <div class="bg-mv-cream rounded-lg p-6 inline-block">
-              <p class="text-gray-700">
+              <p class="text-mv-forest-80">
                 <strong>Prochainement :</strong> Recettes connectées au CMS pour une expérience interactive
               </p>
             </div>
@@ -197,9 +185,9 @@ const uniqueTags = Array.from(allTags).sort();
         <!-- Recipe Preview Cards -->
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
           <!-- Recipe Card 1 -->
-          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-            <div class="aspect-video bg-gray-200 flex items-center justify-center">
-              <div class="text-center text-gray-500">
+          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-mv-leaf-20 hover-lift click-feedback">
+            <div class="aspect-video bg-mv-cream flex items-center justify-center">
+              <div class="text-center text-mv-forest-60">
                 <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                 </svg>
@@ -210,7 +198,7 @@ const uniqueTags = Array.from(allTags).sort();
               <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
                 Salade d'été aux herbes
               </h3>
-              <p class="text-gray-600 mb-4">
+              <p class="text-mv-forest-80 mb-4">
                 Une salade fraîche et légère, parfaite pour les journées ensoleillées.
               </p>
               <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
@@ -226,7 +214,7 @@ const uniqueTags = Array.from(allTags).sort();
           </div>
 
           <!-- Recipe Card 2 -->
-          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover-lift click-feedback">
             <div class="aspect-video bg-gray-200 flex items-center justify-center">
               <div class="text-center text-gray-500">
                 <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
@@ -255,7 +243,7 @@ const uniqueTags = Array.from(allTags).sort();
           </div>
 
           <!-- Recipe Card 3 -->
-          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover-lift click-feedback">
             <div class="aspect-video bg-gray-200 flex items-center justify-center">
               <div class="text-center text-gray-500">
                 <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
@@ -287,154 +275,4 @@ const uniqueTags = Array.from(allTags).sort();
       )}
     </div>
   </section>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const searchInput = document.getElementById('search-input');
-      const filterButtons = document.querySelectorAll('.filter-btn');
-      const recipeCards = document.querySelectorAll('.recipe-card');
-      const recipesGrid = document.getElementById('recipes-grid');
-
-      let currentFilter = 'all';
-      let currentSearch = '';
-
-      // Fonction pour filtrer les recettes
-      function filterRecipes() {
-        const visibleCards = [];
-        let visibleCount = 0;
-
-        recipeCards.forEach(card => {
-          const title = card.dataset.title || '';
-          const description = card.dataset.description || '';
-          const tags = card.dataset.tags || '';
-          const category = card.dataset.category || '';
-
-          // Vérifier la recherche textuelle
-          const matchesSearch = currentSearch === '' ||
-            title.includes(currentSearch) ||
-            description.includes(currentSearch) ||
-            tags.includes(currentSearch);
-
-          // Vérifier le filtre
-          let matchesFilter = false;
-          if (currentFilter === 'all') {
-            matchesFilter = true;
-          } else {
-            matchesFilter = tags.includes(currentFilter.toLowerCase());
-          }
-
-          // Afficher/cacher la carte
-          if (matchesSearch && matchesFilter) {
-            card.style.display = 'block';
-            visibleCards.push(card);
-            visibleCount++;
-          } else {
-            card.style.display = 'none';
-          }
-        });
-
-        // Mettre à jour la grille si nécessaire
-        if (visibleCount === 0) {
-          if (!recipesGrid.querySelector('.no-results')) {
-            const noResults = document.createElement('div');
-            noResults.className = 'no-results col-span-full text-center py-16';
-            noResults.innerHTML = `
-              <div class="max-w-md mx-auto">
-                <svg class="mx-auto h-24 w-24 text-mv-forest-doux mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-.966-5.5-2.5"/>
-                </svg>
-                <h3 class="text-2xl font-serif font-bold text-mv-forest mb-4">
-                  Aucune recette trouvée
-                </h3>
-                <p class="text-gray-600 mb-6">
-                  Essayez de modifier vos critères de recherche ou de filtre.
-                </p>
-                <button onclick="resetFilters()" class="bg-mv-forest text-white px-6 py-3 rounded-lg font-medium hover:bg-mv-forest-doux transition-colors">
-                  Voir toutes les recettes
-                </button>
-              </div>
-            `;
-            recipesGrid.appendChild(noResults);
-          }
-        } else {
-          const noResults = recipesGrid.querySelector('.no-results');
-          if (noResults) {
-            noResults.remove();
-          }
-        }
-
-        // Mettre à jour les compteurs des boutons
-        updateButtonCounts();
-      }
-
-      // Fonction pour mettre à jour les compteurs des boutons
-      function updateButtonCounts() {
-        filterButtons.forEach(button => {
-          const filter = button.dataset.filter;
-          let count = 0;
-
-          if (filter === 'all') {
-            count = recipeCards.length;
-          } else {
-            recipeCards.forEach(card => {
-              const tags = card.dataset.tags || '';
-              if (tags.includes(filter.toLowerCase())) {
-                count++;
-              }
-            });
-          }
-
-          // Extraire le texte du bouton sans le compteur
-          const buttonText = button.textContent.replace(/\s*\(\d+\)$/, '');
-          button.textContent = `${buttonText} (${count})`;
-        });
-      }
-
-      // Fonction pour réinitialiser les filtres
-      window.resetFilters = function() {
-        currentFilter = 'all';
-        currentSearch = '';
-        searchInput.value = '';
-
-        // Réinitialiser les boutons
-        filterButtons.forEach(btn => {
-          btn.classList.remove('active', 'bg-mv-forest', 'text-white');
-          btn.classList.add('bg-gray-200', 'text-gray-700');
-        });
-        filterButtons[0].classList.add('active', 'bg-mv-forest', 'text-white');
-        filterButtons[0].classList.remove('bg-gray-200', 'text-gray-700');
-
-        filterRecipes();
-      };
-
-      // Écouteur pour la recherche
-      searchInput.addEventListener('input', function(e) {
-        currentSearch = e.target.value.toLowerCase().trim();
-        filterRecipes();
-      });
-
-      // Écouteurs pour les boutons de filtre
-      filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const filter = this.dataset.filter;
-
-          // Réinitialiser tous les boutons
-          filterButtons.forEach(btn => {
-            btn.classList.remove('active', 'bg-mv-forest', 'text-white');
-            btn.classList.add('bg-gray-200', 'text-gray-700');
-          });
-
-          // Activer le bouton cliqué
-          this.classList.add('active', 'bg-mv-forest', 'text-white');
-          this.classList.remove('bg-gray-200', 'text-gray-700');
-
-          currentFilter = filter;
-          filterRecipes();
-        });
-      });
-
-      // Initialiser avec le bouton "Toutes" actif
-      filterButtons[0].classList.add('active');
-    });
-  </script>
 </MainLayout>

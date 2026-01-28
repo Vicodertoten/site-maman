@@ -1,0 +1,534 @@
+---
+// RecipeFilters.astro - Filtres améliorés pour les recettes
+export interface Props {
+  currentFilters?: {
+    category?: string;
+    difficulty?: string;
+    time?: string;
+    search?: string;
+    tags?: string[];
+  };
+  recipes?: any[];
+}
+
+const { currentFilters = {}, recipes = [] } = Astro.props;
+---
+
+<div class="recipe-filters bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+  <!-- Barre de recherche -->
+  <div class="mb-6">
+    <div class="relative">
+      <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-mv-forest-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input
+        type="text"
+        id="recipe-search"
+        placeholder="Rechercher une recette..."
+        value={currentFilters.search || ''}
+        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent transition-colors"
+      />
+      <button
+        id="clear-search"
+        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-mv-forest-60 hover:text-mv-forest-80 hidden"
+        aria-label="Effacer la recherche"
+      >
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtres rapides -->
+  <div class="mb-6">
+    <h3 class="font-semibold text-mv-forest mb-3">Filtres rapides</h3>
+    <div class="flex flex-wrap gap-2">
+      <button
+        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
+        data-filter="category"
+        data-value=""
+      >
+        Toutes
+      </button>
+      <button
+        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
+        data-filter="category"
+        data-value="entree"
+      >
+        Entrées
+      </button>
+      <button
+        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
+        data-filter="category"
+        data-value="plat"
+      >
+        Plats principaux
+      </button>
+      <button
+        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
+        data-filter="category"
+        data-value="dessert"
+      >
+        Desserts
+      </button>
+      <button
+        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
+        data-filter="category"
+        data-value="accompagnement"
+      >
+        Accompagnements
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtres avancés -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Catégorie -->
+    <div>
+      <label for="category-filter" class="block text-sm font-medium text-mv-forest mb-2">
+        Catégorie
+      </label>
+      <select
+        id="category-filter"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent transition-colors"
+      >
+        <option value="">Toutes les catégories</option>
+        <option value="entree">Entrées</option>
+        <option value="plat">Plats principaux</option>
+        <option value="dessert">Desserts</option>
+        <option value="boisson">Boissons</option>
+        <option value="accompagnement">Accompagnements</option>
+      </select>
+    </div>
+
+    <!-- Difficulté -->
+    <div>
+      <label for="difficulty-filter" class="block text-sm font-medium text-mv-forest mb-2">
+        Difficulté
+      </label>
+      <select
+        id="difficulty-filter"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent transition-colors"
+      >
+        <option value="">Toutes les difficultés</option>
+        <option value="facile">Facile</option>
+        <option value="moyen">Moyen</option>
+        <option value="difficile">Difficile</option>
+      </select>
+    </div>
+
+    <!-- Temps de préparation -->
+    <div>
+      <label for="time-filter" class="block text-sm font-medium text-mv-forest mb-2">
+        Temps de préparation
+      </label>
+      <select
+        id="time-filter"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent transition-colors"
+      >
+        <option value="">Tous les temps</option>
+        <option value="15">Moins de 15 min</option>
+        <option value="30">15-30 min</option>
+        <option value="60">30-60 min</option>
+        <option value="120">Plus d'1h</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Tags -->
+  <div class="mt-6">
+    <h3 class="font-semibold text-mv-forest mb-3">Tags</h3>
+    <div id="tags-container" class="grid grid-cols-2 md:grid-cols-3 gap-2">
+      <!-- Tags will be rendered here -->
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+    <div class="flex items-center space-x-4">
+      <span id="results-count" class="text-sm text-mv-forest-80">
+        0 recette{0 !== 1 ? 's' : ''} trouvée{0 !== 1 ? 's' : ''}
+      </span>
+      <button
+        id="clear-filters"
+        class="text-sm text-mv-forest hover:text-mv-leaf transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled
+      >
+        Effacer les filtres
+      </button>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <span class="text-sm text-mv-forest-80">Trier par:</span>
+      <select
+        id="sort-filter"
+        class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-mv-leaf focus:border-transparent"
+      >
+        <option value="recent">Plus récent</option>
+        <option value="popular">Plus populaire</option>
+        <option value="time">Temps de préparation</option>
+        <option value="difficulty">Difficulté</option>
+        <option value="name">Nom (A-Z)</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+  class RecipeFilters {
+    constructor() {
+      this.filters = {
+        search: '',
+        category: '',
+        difficulty: '',
+        time: '',
+        sort: 'recent',
+        tags: []
+      };
+      this.recipes = [];
+      this.filteredRecipes = [];      this.availableTags = [];      this.filterTimeout = null;
+      this.init();
+    }
+
+    init() {
+      this.bindEvents();
+      this.loadFromURL();
+      this.updateUI();
+    }
+
+    bindEvents() {
+      // Recherche
+      const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
+      const clearSearchBtn = document.getElementById('clear-search') as HTMLElement;
+
+      searchInput.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        this.filters.search = target.value.trim();
+        this.debouncedFilter();
+        this.updateClearSearchButton();
+      });
+
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        this.filters.search = '';
+        this.filter();
+        this.updateClearSearchButton();
+      });
+
+      // Filtres rapides
+      document.querySelectorAll('.filter-quick-btn').forEach(btn => {
+        const button = btn as HTMLElement;
+        button.addEventListener('click', () => {
+          const filter = button.dataset.filter;
+          const value = button.dataset.value;
+
+          // Mettre à jour le filtre
+          this.filters[filter] = value;
+
+          // Mettre à jour l'interface
+          this.updateQuickButtons();
+          this.updateSelectFilters();
+          this.filter();
+        });
+      });
+
+      // Filtres select
+      ['category', 'difficulty', 'time'].forEach(filter => {
+        const select = document.getElementById(`${filter}-filter`) as HTMLSelectElement;
+        select.addEventListener('change', (e) => {
+          const target = e.target as HTMLSelectElement;
+          this.filters[filter] = target.value;
+          this.updateQuickButtons();
+          this.filter();
+        });
+      });
+
+      // Tri
+      const sortSelect = document.getElementById('sort-filter') as HTMLSelectElement;
+      sortSelect.addEventListener('change', (e) => {
+        const target = e.target as HTMLSelectElement;
+        this.filters.sort = target.value;
+        this.sort();
+      });
+
+      // Effacer les filtres
+      document.getElementById('clear-filters').addEventListener('click', () => {
+        this.clearAllFilters();
+      });
+    }
+
+    debouncedFilter() {
+      clearTimeout(this.filterTimeout);
+      this.filterTimeout = setTimeout(() => {
+        this.filter();
+      }, 300);
+    }
+
+    filter() {
+      this.filteredRecipes = this.recipes.filter((recipe: any) => {
+        // Recherche textuelle
+        if (this.filters.search) {
+          const searchTerm = this.filters.search.toLowerCase();
+          const matchesSearch = recipe.title.toLowerCase().includes(searchTerm) ||
+                               recipe.description?.toLowerCase().includes(searchTerm) ||
+                               recipe.ingredients?.some((ing: string) => ing.toLowerCase().includes(searchTerm));
+          if (!matchesSearch) return false;
+        }
+
+        // Catégorie
+        if (this.filters.category && recipe.category !== this.filters.category) {
+          return false;
+        }
+
+        // Difficulté
+        if (this.filters.difficulty && recipe.difficulty !== this.filters.difficulty) {
+          return false;
+        }
+
+        // Temps
+        if (this.filters.time) {
+          const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
+          switch (this.filters.time) {
+            case '15':
+              if (totalTime >= 15) return false;
+              break;
+            case '30':
+              if (totalTime < 15 || totalTime >= 30) return false;
+              break;
+            case '60':
+              if (totalTime < 30 || totalTime >= 60) return false;
+              break;
+            case '120':
+              if (totalTime < 60) return false;
+              break;
+          }
+        }
+
+        // Tags
+        if (this.filters.tags && this.filters.tags.length > 0) {
+          const recipeTags = recipe.tags || [];
+          const hasMatchingTag = this.filters.tags.some(tag =>
+            recipeTags.some((recipeTag: string) => recipeTag.toLowerCase().includes(tag.toLowerCase()))
+          );
+          if (!hasMatchingTag) return false;
+        }
+
+        return true;
+      });
+
+      this.sort();
+      this.updateResults();
+      this.updateURL();
+    }
+
+    sort() {
+      this.filteredRecipes.sort((a: any, b: any) => {
+        switch (this.filters.sort) {
+          case 'name':
+            return a.title.localeCompare(b.title);
+          case 'time':
+            return (a.prepTime || 0) - (b.prepTime || 0);
+          case 'difficulty':
+            const difficultyOrder = { 'facile': 1, 'moyen': 2, 'difficile': 3 };
+            return difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty];
+          case 'popular':
+            return (b.popularity || 0) - (a.popularity || 0);
+          case 'recent':
+          default:
+            return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        }
+      });
+
+      this.updateResults();
+    }
+
+    updateResults() {
+      // Mettre à jour le compteur
+      const count = this.filteredRecipes.length;
+      const resultsCount = document.getElementById('results-count') as HTMLElement;
+      resultsCount.textContent = `${count} recette${count !== 1 ? 's' : ''} trouvée${count !== 1 ? 's' : ''}`;
+
+      // Dispatcher un événement avec les résultats filtrés
+      window.dispatchEvent(new CustomEvent('recipesFiltered', {
+        detail: { recipes: this.filteredRecipes, filters: this.filters }
+      }));
+    }
+
+    updateQuickButtons() {
+      document.querySelectorAll('.filter-quick-btn').forEach(btn => {
+        const filter = btn.dataset.filter;
+        const value = btn.dataset.value;
+
+        if (this.filters[filter] === value) {
+          btn.classList.remove('bg-mv-cream', 'text-mv-forest');
+          btn.classList.add('bg-mv-leaf', 'text-mv-cream');
+        } else {
+          btn.classList.remove('bg-mv-leaf', 'text-mv-cream');
+          btn.classList.add('bg-mv-cream', 'text-mv-forest');
+        }
+      });
+    }
+
+    updateSelectFilters() {
+      ['category', 'difficulty', 'time'].forEach(filter => {
+        const select = document.getElementById(`${filter}-filter`) as HTMLSelectElement;
+        select.value = this.filters[filter] || '';
+      });
+    }
+
+    updateClearSearchButton() {
+      const clearBtn = document.getElementById('clear-search') as HTMLElement;
+      if (this.filters.search) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+    }
+
+    clearAllFilters() {
+      this.filters = {
+        search: '',
+        category: '',
+        difficulty: '',
+        time: '',
+        sort: 'recent',
+        tags: []
+      };
+
+      // Reset UI
+      const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
+      searchInput.value = '';
+      const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
+      categoryFilter.value = '';
+      const difficultyFilter = document.getElementById('difficulty-filter') as HTMLSelectElement;
+      difficultyFilter.value = '';
+      const timeFilter = document.getElementById('time-filter') as HTMLSelectElement;
+      timeFilter.value = '';
+      const sortFilter = document.getElementById('sort-filter') as HTMLSelectElement;
+      sortFilter.value = 'recent';
+
+      // Reset tags
+      document.querySelectorAll('.tag-filter-checkbox').forEach(checkbox => {
+        (checkbox as HTMLInputElement).checked = false;
+      });
+
+      this.updateQuickButtons();
+      this.updateClearSearchButton();
+      this.filter();
+    }
+
+    updateUI() {
+      this.updateQuickButtons();
+      this.updateSelectFilters();
+      this.updateClearSearchButton();
+      this.updateTagCheckboxes();
+
+      const clearFiltersBtn = document.getElementById('clear-filters') as HTMLButtonElement;
+      const hasActiveFilters = Object.entries(this.filters).some(([key, value]) => {
+        if (key === 'tags') return value && value.length > 0;
+        return value && value !== '' && value !== 'recent';
+      });
+      clearFiltersBtn.disabled = !hasActiveFilters;
+    }
+
+    updateTagCheckboxes() {
+      document.querySelectorAll('.tag-filter-checkbox').forEach(checkbox => {
+        const input = checkbox as HTMLInputElement;
+        input.checked = this.filters.tags.includes(input.value);
+      });
+    }
+
+    loadFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+
+      this.filters.search = urlParams.get('search') || '';
+      this.filters.category = urlParams.get('category') || '';
+      this.filters.difficulty = urlParams.get('difficulty') || '';
+      this.filters.time = urlParams.get('time') || '';
+      this.filters.sort = urlParams.get('sort') || 'recent';
+      this.filters.tags = urlParams.get('tags') ? urlParams.get('tags').split(',') : [];
+
+      // Mettre à jour l'interface
+      const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
+      searchInput.value = this.filters.search;
+      this.updateUI();
+    }
+
+    updateURL() {
+      const url = new URL(window.location);
+      const params = url.searchParams;
+
+      // Nettoyer les paramètres existants
+      ['search', 'category', 'difficulty', 'time', 'sort', 'tags'].forEach(key => {
+        params.delete(key);
+      });
+
+      // Ajouter les nouveaux paramètres
+      Object.entries(this.filters).forEach(([key, value]) => {
+        if (key === 'tags' && value && value.length > 0) {
+          params.set(key, value.join(','));
+        } else if (value && value !== '' && value !== 'recent') {
+          params.set(key, value);
+        }
+      });
+
+      // Mettre à jour l'URL sans recharger la page
+      window.history.replaceState({}, '', url.toString());
+    }
+
+    setRecipes(recipes) {
+      this.recipes = recipes;
+      this.extractTags();
+      this.filter();
+    }
+
+    extractTags() {
+      const allTags = new Set<string>();
+      this.recipes.forEach((recipe: any) => {
+        if (recipe.tags) {
+          recipe.tags.forEach((tag: string) => allTags.add(tag));
+        }
+      });
+      this.availableTags = Array.from(allTags).sort();
+      this.renderTags();
+    }
+
+    renderTags() {
+      const tagsContainer = document.getElementById('tags-container');
+      if (!tagsContainer || !this.availableTags) return;
+
+      tagsContainer.innerHTML = this.availableTags.map(tag => `
+        <label class="flex items-center space-x-2 cursor-pointer">
+          <input type="checkbox" class="tag-filter-checkbox form-checkbox h-4 w-4 text-mv-leaf rounded focus:ring-mv-leaf" value="${tag}">
+          <span class="text-sm text-mv-forest">${tag}</span>
+        </label>
+      `).join('');
+
+      // Add event listeners
+      document.querySelectorAll('.tag-filter-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+          const target = e.target as HTMLInputElement;
+          if (target.checked) {
+            this.filters.tags.push(target.value);
+          } else {
+            this.filters.tags = this.filters.tags.filter(tag => tag !== target.value);
+          }
+          this.filter();
+        });
+      });
+    }
+
+    getActiveFilters() {
+      return { ...this.filters };
+    }
+  }
+
+  // Initialiser quand le DOM est prêt
+  document.addEventListener('DOMContentLoaded', () => {
+    window.recipeFilters = new RecipeFilters();
+  });
+
+  // Exposer la classe globalement
+  window.RecipeFilters = RecipeFilters;
+</script>

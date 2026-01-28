@@ -1,4 +1,6 @@
 // studio/schemas/newsletter.ts
+import type { Rule } from '@sanity/types'
+
 export const newsletter = {
   name: 'newsletter',
   title: 'Newsletter Subscriptions',
@@ -8,7 +10,7 @@ export const newsletter = {
       name: 'email',
       title: 'Email Address',
       type: 'string',
-      validation: Rule => Rule.required().email()
+      validation: (Rule: Rule) => Rule.required().email()
     },
     {
       name: 'subscribedAt',

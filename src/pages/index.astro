@@ -23,7 +23,7 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
       <p class="text-lg sm:text-xl md:text-2xl text-mv-plum mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
         {homeData?.heroSubtitle || "Découvrez l'art de manger vrai avec Muriel Cruysmans à Wavre"}
       </p>
-      <p class="text-base sm:text-lg text-mv-forest/90 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed">
+      <p class="text-base sm:text-lg text-mv-forest-90 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed">
         {homeData?.heroDescription || "Un espace chaleureux et inspirant pour vos événements, cours de cuisine et moments gourmands"}
       </p>
       <div class="mt-6 sm:mt-8">
@@ -41,7 +41,7 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
         <h2 class="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-mv-cream mb-3 leading-tight">
           {homeData?.locationSectionTitle || 'Location de l\'Espace "La Zboum"'}
         </h2>
-        <p class="text-base sm:text-lg text-mv-cream/90 max-w-2xl mx-auto leading-relaxed">
+        <p class="text-base sm:text-lg text-mv-cream-90 max-w-2xl mx-auto leading-relaxed">
           {homeData?.locationSectionDescription || "Un cadre inspirant pour vos réunions d'entreprise, événements privés et soirées gourmandes"}
         </p>
       </div>
@@ -145,11 +145,11 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
           <div class="grid md:grid-cols-2 gap-8">
             <div>
               <h3 class="text-xl font-serif font-bold text-mv-forest mb-4">{restaurantData?.menuTitle || "Menu du Chef"}</h3>
-              <p class="text-mv-forest/90 mb-4">
+              <p class="text-mv-forest-90 mb-4">
                 {restaurantData?.menuDescription || "Un menu unique élaboré avec des produits frais et locaux, changeant selon les saisons"}
               </p>
               <div class="text-2xl font-bold text-mv-coral">
-                {restaurantData?.price ? `${restaurantData.price}€` : "50€"} <span class="text-lg font-normal text-mv-forest/60">par personne</span>
+                {restaurantData?.price ? `${restaurantData.price}€` : "50€"} <span class="text-lg font-normal text-mv-forest-60">par personne</span>
               </div>
               <div class="mt-6">
                 <a href="/contact" class="inline-block bg-mv-leaf text-mv-forest px-6 py-3 rounded-lg font-semibold hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
@@ -163,26 +163,26 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
                 {restaurantData?.dates && restaurantData.dates.length > 0 ? (
                   restaurantData.dates.slice(0, 4).map((date, index) => (
                     <div key={index} class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest/90">{date}</span>
+                      <span class="text-mv-forest-90">{date}</span>
                       <span class="text-mv-leaf font-medium">2026</span>
                     </div>
                   ))
                 ) : (
                   <>
                     <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest/90">Jeudi 5 mars</span>
+                      <span class="text-mv-forest-90">Jeudi 5 mars</span>
                       <span class="text-mv-leaf font-medium">2026</span>
                     </div>
                     <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest/90">Jeudi 9 avril</span>
+                      <span class="text-mv-forest-90">Jeudi 9 avril</span>
                       <span class="text-mv-leaf font-medium">2026</span>
                     </div>
                     <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest/90">Jeudi 21 mai</span>
+                      <span class="text-mv-forest-90">Jeudi 21 mai</span>
                       <span class="text-mv-leaf font-medium">2026</span>
                     </div>
                     <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest/90">Jeudi 11 juin</span>
+                      <span class="text-mv-forest-90">Jeudi 11 juin</span>
                       <span class="text-mv-leaf font-medium">2026</span>
                     </div>
                   </>
@@ -206,7 +206,7 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
       <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-cream mb-6">
         {homeData?.ctaTitle || "Prêt à vivre une expérience gastronomique unique ?"}
       </h2>
-      <p class="text-xl text-mv-cream/90 mb-8">
+      <p class="text-xl text-mv-cream-90 mb-8">
         {homeData?.ctaDescription || "Contactez Muriel pour réserver votre espace ou découvrir ses services"}
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">

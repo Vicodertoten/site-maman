@@ -1,0 +1,265 @@
+---
+// AnimationOptimizer.astro - Optimisation des animations selon les performances
+---
+
+<div id="animation-optimizer" class="hidden">
+  <!-- Ce composant ne rend rien visuellement, il gère seulement les animations -->
+</div>
+
+<script>
+  class AnimationOptimizer {
+    constructor() {
+      this.prefersReducedMotion = false;
+      this.isLowPerformance = false;
+      this.init();
+    }
+
+    init() {
+      this.detectPreferences();
+      this.detectPerformance();
+      this.applyOptimizations();
+      this.setupPerformanceMonitoring();
+    }
+
+    detectPreferences() {
+      // Détecter la préférence de réduction de mouvement
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      this.prefersReducedMotion = mediaQuery.matches;
+
+      // Écouter les changements
+      mediaQuery.addEventListener('change', (e) => {
+        this.prefersReducedMotion = e.matches;
+        this.applyOptimizations();
+      });
+    }
+
+    detectPerformance() {
+      // Détecter les appareils à faible performance
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+
+      if (connection) {
+        // Vérifier la vitesse de connexion
+        const slowConnection = connection.effectiveType === 'slow-2g' ||
+                              connection.effectiveType === '2g' ||
+                              connection.saveData;
+
+        if (slowConnection) {
+          this.isLowPerformance = true;
+        }
+      }
+
+      // Vérifier le support hardware des animations
+      if (!window.requestAnimationFrame) {
+        this.isLowPerformance = true;
+      }
+
+      // Vérifier le nombre de cœurs CPU (si disponible)
+      if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) {
+        this.isLowPerformance = true;
+      }
+
+      // Test de performance simple
+      const startTime = performance.now();
+      requestAnimationFrame(() => {
+        const frameTime = performance.now() - startTime;
+        if (frameTime > 16.67) { // Plus de 60fps
+          this.isLowPerformance = true;
+        }
+      });
+    }
+
+    applyOptimizations() {
+      const body = document.body;
+
+      if (this.prefersReducedMotion) {
+        // Désactiver toutes les animations de mouvement
+        body.classList.add('reduce-motion');
+        this.disableMotionAnimations();
+      } else if (this.isLowPerformance) {
+        // Réduire les animations sur les appareils lents
+        body.classList.add('low-performance');
+        this.reduceAnimations();
+      } else {
+        // Animations complètes sur les appareils performants
+        body.classList.add('high-performance');
+        this.enableFullAnimations();
+      }
+    }
+
+    disableMotionAnimations() {
+      // Supprimer ou simplifier les animations CSS
+      const style = document.createElement('style');
+      style.textContent = `
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        .animate-in,
+        .animate-out,
+        .slide-in-from-right-2,
+        .slide-out-to-right-2 {
+          animation: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    reduceAnimations() {
+      // Réduire la durée et la complexité des animations
+      const style = document.createElement('style');
+      style.textContent = `
+        * {
+          animation-duration: 0.2s !important;
+          transition-duration: 0.2s !important;
+        }
+
+        .animate-pulse {
+          animation: none !important;
+        }
+
+        .hover\\:scale-105 {
+          transform: none !important;
+        }
+
+        .hover\\:scale-110 {
+          transform: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    enableFullAnimations() {
+      // S'assurer que les animations sont activées (par défaut)
+      const existingStyle = document.querySelector('style[data-animation-override]');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    }
+
+    setupPerformanceMonitoring() {
+      // Surveiller les performances en continu
+      let frameCount = 0;
+      let lastTime = performance.now();
+
+      const checkPerformance = () => {
+        frameCount++;
+        const currentTime = performance.now();
+
+        if (currentTime - lastTime >= 1000) { // Toutes les secondes
+          const fps = (frameCount * 1000) / (currentTime - lastTime);
+
+          if (fps < 30 && !this.isLowPerformance) {
+            // Performance dégradée détectée
+            this.isLowPerformance = true;
+            this.applyOptimizations();
+          } else if (fps > 50 && this.isLowPerformance && !this.prefersReducedMotion) {
+            // Performance améliorée
+            this.isLowPerformance = false;
+            this.applyOptimizations();
+          }
+
+          frameCount = 0;
+          lastTime = currentTime;
+        }
+
+        requestAnimationFrame(checkPerformance);
+      };
+
+      requestAnimationFrame(checkPerformance);
+    }
+
+    // Méthodes utilitaires pour les animations conditionnelles
+    static animateIfAllowed(element, animationClass, callback) {
+      if (window.animationOptimizer) {
+        const optimizer = window.animationOptimizer;
+
+        if (optimizer.prefersReducedMotion) {
+          // Pas d'animation, exécuter immédiatement le callback
+          if (callback) callback();
+          return;
+        }
+
+        if (optimizer.isLowPerformance) {
+          // Animation réduite
+          element.style.transition = 'all 0.2s ease';
+          element.classList.add(animationClass);
+          setTimeout(() => {
+            if (callback) callback();
+          }, 200);
+        } else {
+          // Animation complète
+          element.classList.add(animationClass);
+          element.addEventListener('animationend', () => {
+            if (callback) callback();
+          }, { once: true });
+        }
+      } else {
+        // Fallback: animation normale
+        element.classList.add(animationClass);
+        if (callback) {
+          element.addEventListener('animationend', callback, { once: true });
+        }
+      }
+    }
+
+    static throttleAnimation(callback, delay = 16) {
+      if (window.animationOptimizer?.isLowPerformance) {
+        // Réduire la fréquence sur les appareils lents
+        delay = Math.max(delay, 32);
+      }
+
+      let lastCall = 0;
+      return function(...args) {
+        const now = Date.now();
+        if (now - lastCall >= delay) {
+          lastCall = now;
+          callback.apply(this, args);
+        }
+      };
+    }
+  }
+
+  // Initialiser quand le DOM est prêt
+  document.addEventListener('DOMContentLoaded', () => {
+    window.animationOptimizer = new AnimationOptimizer();
+  });
+
+  // Exposer la classe globalement
+  window.AnimationOptimizer = AnimationOptimizer;
+</script>
+
+<style>
+  /* Styles de base pour les animations conditionnelles */
+  .reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .low-performance * {
+    animation-duration: 0.3s !important;
+    transition-duration: 0.3s !important;
+  }
+
+  .high-performance * {
+    /* Animations complètes activées */
+  }
+
+  /* Préférences utilisateur respectées */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

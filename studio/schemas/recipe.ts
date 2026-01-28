@@ -1,4 +1,5 @@
 // schemas/recipe.ts
+import type { Rule } from '@sanity/types'
 export const recipe = {
   name: 'recipe',
   title: 'Recettes',
@@ -123,6 +124,27 @@ export const recipe = {
       title: 'Date de publication',
       type: 'datetime',
       initialValue: () => new Date().toISOString()
+    },
+    {
+      name: 'rating',
+      title: 'Note (optionnel)',
+      type: 'number',
+      description: 'Note sur 5 étoiles (ex: 4.5)',
+      validation: (Rule: Rule) => Rule.min(0).max(5)
+    },
+    {
+      name: 'isNew',
+      title: 'Nouveau ?',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Marquer comme nouvelle recette'
+    },
+    {
+      name: 'isPopular',
+      title: 'Populaire ?',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Marquer comme recette populaire'
     }
   ],
   preview: {

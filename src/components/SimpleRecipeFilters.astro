@@ -1,0 +1,300 @@
+---
+// SimpleRecipeFilters.astro - Filtres dynamiques et efficaces pour les recettes
+export interface Props {
+  currentFilters: {
+    search?: string;
+    category?: string;
+    difficulty?: string;
+    tags?: string[];
+  };
+  availableTags: string[];
+  totalRecipes: number;
+}
+
+const { currentFilters, availableTags, totalRecipes } = Astro.props;
+---
+
+<div class="recipe-filters-dynamic bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+  <!-- Barre de recherche -->
+  <div class="mb-6">
+    <label for="search" class="block text-sm font-medium text-mv-forest mb-2">
+      Rechercher une recette
+    </label>
+    <input
+      type="text"
+      id="search"
+      value={currentFilters.search || ''}
+      placeholder="Nom de recette, ingrédient..."
+      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent transition-colors"
+    />
+  </div>
+
+  <!-- Filtres en grille -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Catégorie -->
+    <div>
+      <label for="category" class="block text-sm font-medium text-mv-forest mb-2">
+        Catégorie
+      </label>
+      <select
+        id="category"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent"
+      >
+        <option value="">Toutes les catégories</option>
+        <option value="entree">Entrées</option>
+        <option value="plat">Plats principaux</option>
+        <option value="dessert">Desserts</option>
+        <option value="boisson">Boissons</option>
+        <option value="accompagnement">Accompagnements</option>
+      </select>
+    </div>
+
+    <!-- Difficulté -->
+    <div>
+      <label for="difficulty" class="block text-sm font-medium text-mv-forest mb-2">
+        Difficulté
+      </label>
+      <select
+        id="difficulty"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent"
+      >
+        <option value="">Toutes les difficultés</option>
+        <option value="facile">Facile</option>
+        <option value="moyen">Moyen</option>
+        <option value="difficile">Difficile</option>
+      </select>
+    </div>
+
+    <!-- Tags -->
+    <div>
+      <label class="block text-sm font-medium text-mv-forest mb-2">
+        Tags
+      </label>
+      <div id="tags-container" class="max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2">
+        {availableTags.map(tag => (
+          <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
+            <input
+              type="checkbox"
+              class="tag-filter form-checkbox h-4 w-4 text-mv-leaf rounded focus:ring-mv-leaf"
+              value={tag}
+              checked={currentFilters.tags?.includes(tag)}
+            />
+            <span class="text-sm text-mv-forest">{tag}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-gray-200 mt-6">
+    <div class="text-sm text-mv-forest-80">
+      <span id="results-count">0</span> recette(s) trouvée(s) sur {totalRecipes}
+    </div>
+
+    <button
+      id="clear-filters"
+      class="bg-gray-200 text-mv-forest px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50"
+      disabled
+    >
+      Effacer les filtres
+    </button>
+  </div>
+</div>
+
+<script define:vars={{ availableTags }}>
+  class DynamicRecipeFilters {
+    constructor() {
+      this.filters = {
+        search: '',
+        category: '',
+        difficulty: '',
+        tags: []
+      };
+      this.allRecipes = [];
+      this.filteredRecipes = [];
+      this.filterTimeout = null;
+      this.init();
+    }
+
+    init() {
+      this.loadRecipes();
+      this.bindEvents();
+      this.updateUI();
+    }
+
+    loadRecipes() {
+      // Charger les recettes depuis les données passées par Astro
+      const recipeCards = document.querySelectorAll('.enhanced-recipe-card');
+      this.allRecipes = Array.from(recipeCards).map(card => {
+        const cardElement = card as HTMLElement;
+        return {
+          element: cardElement,
+          id: cardElement.dataset.recipeId,
+          title: cardElement.dataset.recipeTitle || '',
+          category: cardElement.dataset.recipeCategory || '',
+          difficulty: cardElement.dataset.recipeDifficulty || '',
+          tags: (cardElement.dataset.recipeTags || '').split(',').filter(tag => tag.trim()),
+          ingredients: (cardElement.dataset.recipeIngredients || '').split(',').filter(ing => ing.trim())
+        };
+      });
+      this.filteredRecipes = [...this.allRecipes];
+      this.updateResults();
+    }
+
+    bindEvents() {
+      // Recherche
+      const searchInput = document.getElementById('search') as HTMLInputElement;
+      searchInput.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        this.filters.search = target.value.trim();
+        this.debouncedFilter();
+      });
+
+      // Catégorie
+      const categorySelect = document.getElementById('category') as HTMLSelectElement;
+      categorySelect.addEventListener('change', (e) => {
+        const target = e.target as HTMLSelectElement;
+        this.filters.category = target.value;
+        this.filter();
+      });
+
+      // Difficulté
+      const difficultySelect = document.getElementById('difficulty') as HTMLSelectElement;
+      difficultySelect.addEventListener('change', (e) => {
+        const target = e.target as HTMLSelectElement;
+        this.filters.difficulty = target.value;
+        this.filter();
+      });
+
+      // Tags
+      document.querySelectorAll('.tag-filter').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+          const target = e.target as HTMLInputElement;
+          if (target.checked) {
+            this.filters.tags.push(target.value);
+          } else {
+            this.filters.tags = this.filters.tags.filter(tag => tag !== target.value);
+          }
+          this.filter();
+        });
+      });
+
+      // Effacer les filtres
+      document.getElementById('clear-filters').addEventListener('click', () => {
+        this.clearAllFilters();
+      });
+    }
+
+    debouncedFilter() {
+      clearTimeout(this.filterTimeout);
+      this.filterTimeout = setTimeout(() => {
+        this.filter();
+      }, 300);
+    }
+
+    filter() {
+      this.filteredRecipes = this.allRecipes.filter(recipe => {
+        // Recherche textuelle
+        if (this.filters.search) {
+          const searchLower = this.filters.search.toLowerCase();
+          const matchesSearch =
+            recipe.title.toLowerCase().includes(searchLower) ||
+            recipe.ingredients.some(ing => ing.toLowerCase().includes(searchLower));
+          if (!matchesSearch) return false;
+        }
+
+        // Catégorie
+        if (this.filters.category && recipe.category !== this.filters.category) {
+          return false;
+        }
+
+        // Difficulté
+        if (this.filters.difficulty && recipe.difficulty !== this.filters.difficulty) {
+          return false;
+        }
+
+        // Tags
+        if (this.filters.tags.length > 0) {
+          const hasMatchingTag = this.filters.tags.some(filterTag =>
+            recipe.tags.some(recipeTag => recipeTag.toLowerCase().includes(filterTag.toLowerCase()))
+          );
+          if (!hasMatchingTag) return false;
+        }
+
+        return true;
+      });
+
+      this.updateResults();
+      this.updateUI();
+    }
+
+    updateResults() {
+      const count = this.filteredRecipes.length;
+      const resultsCount = document.getElementById('results-count') as HTMLElement;
+      resultsCount.textContent = count.toString();
+
+      // Afficher/masquer les cartes
+      this.allRecipes.forEach(recipe => {
+        const shouldShow = this.filteredRecipes.includes(recipe);
+        recipe.element.style.display = shouldShow ? 'block' : 'none';
+
+        // Animation d'entrée pour les cartes visibles
+        if (shouldShow) {
+          recipe.element.style.animationDelay = '0ms';
+          recipe.element.classList.add('scroll-fade-in');
+        }
+      });
+    }
+
+    updateUI() {
+      // Mettre à jour les sélections
+      const categorySelect = document.getElementById('category') as HTMLSelectElement;
+      categorySelect.value = this.filters.category;
+
+      const difficultySelect = document.getElementById('difficulty') as HTMLSelectElement;
+      difficultySelect.value = this.filters.difficulty;
+
+      // Mettre à jour les checkboxes des tags
+      document.querySelectorAll('.tag-filter').forEach(checkbox => {
+        const input = checkbox as HTMLInputElement;
+        input.checked = this.filters.tags.includes(input.value);
+      });
+
+      // Activer/désactiver le bouton effacer
+      const clearBtn = document.getElementById('clear-filters') as HTMLButtonElement;
+      const hasActiveFilters = this.filters.search || this.filters.category || this.filters.difficulty || this.filters.tags.length > 0;
+      clearBtn.disabled = !hasActiveFilters;
+    }
+
+    clearAllFilters() {
+      this.filters = {
+        search: '',
+        category: '',
+        difficulty: '',
+        tags: []
+      };
+
+      // Reset UI
+      const searchInput = document.getElementById('search') as HTMLInputElement;
+      searchInput.value = '';
+
+      const categorySelect = document.getElementById('category') as HTMLSelectElement;
+      categorySelect.value = '';
+
+      const difficultySelect = document.getElementById('difficulty') as HTMLSelectElement;
+      difficultySelect.value = '';
+
+      document.querySelectorAll('.tag-filter').forEach(checkbox => {
+        (checkbox as HTMLInputElement).checked = false;
+      });
+
+      this.filter();
+    }
+  }
+
+  // Initialiser quand le DOM est prêt
+  document.addEventListener('DOMContentLoaded', () => {
+    window.dynamicRecipeFilters = new DynamicRecipeFilters();
+  });
+</script>

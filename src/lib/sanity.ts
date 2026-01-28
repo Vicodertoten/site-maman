@@ -65,6 +65,7 @@ export interface RecipeData {
   category: string
   description: string
   featuredImage: any
+  featuredImageUrl?: string
   prepTime: number
   cookTime: number
   servings: number
@@ -78,6 +79,9 @@ export interface RecipeData {
   tags: string[]
   isPremium: boolean
   publishedAt: string
+  rating?: number
+  isNew?: boolean
+  isPopular?: boolean
 }
 
 export interface AboutData {
@@ -197,7 +201,10 @@ export const queries = {
     instructions,
     tags,
     isPremium,
-    publishedAt
+    publishedAt,
+    rating,
+    isNew,
+    isPopular
   }`,
 
   // Recette spécifique par slug
@@ -217,7 +224,10 @@ export const queries = {
     instructions,
     tags,
     isPremium,
-    publishedAt
+    publishedAt,
+    rating,
+    isNew,
+    isPopular
   }`,
 
   // Recettes par catégorie

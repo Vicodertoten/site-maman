@@ -3,8 +3,6 @@ import { defineConfig } from 'astro/config';
 import netlify from '@astrojs/netlify';
 import sitemap from '@astrojs/sitemap';
 
-import tailwindcss from '@tailwindcss/vite';
-
 // https://astro.build/config
 export default defineConfig({
   site: 'https://gastronomade.netlify.app',
@@ -15,8 +13,5 @@ export default defineConfig({
     service: {
       entrypoint: 'astro/assets/services/sharp',
     },
-  },
-  vite: {
-    plugins: [tailwindcss()],
   },
 });

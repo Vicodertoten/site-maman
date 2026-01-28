@@ -6,14 +6,17 @@ export async function getStaticPaths() {
   const { getRecipesData } = await import('../../lib/sanity');
   const recipes = await getRecipesData();
 
-  return recipes.map((recipe) => ({
-    params: {
-      slug: recipe.slug?.current || recipe._id
-    },
-    props: {
-      recipe
-    }
-  }));
+  return recipes.map((recipe) => {
+    const slug = recipe.slug?.current || recipe._id;
+    return {
+      params: {
+        slug: slug
+      },
+      props: {
+        recipe
+      }
+    };
+  });
 }
 
 const { recipe } = Astro.props as { recipe: RecipeData };
@@ -38,9 +41,9 @@ function getCategoryName(category: string): string {
 // Fonction pour obtenir la couleur de difficulté
 function getDifficultyColor(difficulty: string): string {
   switch (difficulty) {
-    case 'facile': return 'bg-mv-leaf/30 text-mv-leaf border border-mv-leaf/50';
-    case 'moyen': return 'bg-mv-leaf/30 text-mv-leaf border border-mv-leaf/50';
-    case 'difficile': return 'bg-mv-red/30 text-mv-coral border border-mv-red/50';
+    case 'facile': return 'bg-mv-leaf-30 text-mv-leaf border border-mv-leaf-50';
+    case 'moyen': return 'bg-mv-coral-30 text-mv-coral border border-mv-coral-50';
+    case 'difficile': return 'bg-mv-coral-50 text-mv-coral border border-mv-coral-50';
     default: return 'bg-mv-cream text-mv-forest border border-mv-leaf';
   }
 }
@@ -62,7 +65,7 @@ function getDifficultyColor(difficulty: string): string {
       )}
 
       <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-        <span class="text-xs sm:text-sm font-medium text-mv-forest bg-mv-forest/10 px-2 sm:px-3 py-1 rounded-full">
+        <span class="text-xs sm:text-sm font-medium text-mv-forest bg-mv-forest-10 px-2 sm:px-3 py-1 rounded-full">
           {getCategoryName(recipe.category)}
         </span>
         {recipe.difficulty && (
@@ -76,12 +79,12 @@ function getDifficultyColor(difficulty: string): string {
         {recipe.title}
       </h1>
 
-      <p class="text-base sm:text-lg md:text-xl text-mv-forest/70 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed">
+      <p class="text-base sm:text-lg md:text-xl text-mv-forest-70 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed">
         {recipe.description}
       </p>
 
       <!-- Recipe Meta -->
-      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-mv-forest/80">
+      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-mv-forest-80">
         {recipe.prepTime && (
           <div class="text-center">
             <div class="text-lg sm:text-xl md:text-2xl font-bold text-mv-forest">{recipe.prepTime}min</div>
@@ -115,10 +118,10 @@ function getDifficultyColor(difficulty: string): string {
               {recipe.ingredients.map((ingredient, index) => (
                 <li key={index} class="flex items-start">
                   <span class="inline-block w-1.5 sm:w-2 h-1.5 sm:h-2 bg-mv-forest rounded-full mt-1.5 sm:mt-2 mr-2 sm:mr-3 flex-shrink-0" aria-hidden="true"></span>
-                  <span class="text-mv-forest/80 text-sm sm:text-base leading-relaxed">
+                  <span class="text-mv-forest-80 text-sm sm:text-base leading-relaxed">
                     <span class="font-medium">{ingredient.name}</span>
                     {ingredient.quantity && (
-                      <span class="text-mv-forest/60 ml-1 sm:ml-2">
+                      <span class="text-mv-forest-60 ml-1 sm:ml-2">
                         - {ingredient.quantity} {ingredient.unit}
                       </span>
                     )}
@@ -127,7 +130,7 @@ function getDifficultyColor(difficulty: string): string {
               ))}
             </ul>
           ) : (
-            <p class="text-mv-forest/60 text-sm sm:text-base">Ingrédients à venir...</p>
+            <p class="text-mv-forest-60 text-sm sm:text-base">Ingrédients à venir...</p>
           )}
         </div>
       </div>
@@ -145,7 +148,7 @@ function getDifficultyColor(difficulty: string): string {
                   <span class="flex-shrink-0 w-6 sm:w-8 h-6 sm:h-8 bg-mv-forest text-mv-cream rounded-full flex items-center justify-center text-xs sm:text-sm font-bold mr-3 sm:mr-4" aria-hidden="true">
                     {index + 1}
                   </span>
-                  <div class="text-mv-forest/80 text-sm sm:text-base leading-relaxed">
+                  <div class="text-mv-forest-80 text-sm sm:text-base leading-relaxed">
                     {block.children?.map((child, childIndex) => (
                       <span key={childIndex}>{child.text}</span>
                     ))}
@@ -154,7 +157,7 @@ function getDifficultyColor(difficulty: string): string {
               ))}
             </div>
           ) : (
-            <p class="text-mv-forest/60 text-sm sm:text-base">Instructions à venir...</p>
+            <p class="text-mv-forest-60 text-sm sm:text-base">Instructions à venir...</p>
           )}
         </div>
 

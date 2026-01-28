@@ -1,0 +1,307 @@
+---
+// ShoppingList.astro - Composant pour gérer les listes de courses
+---
+
+<div id="shopping-list" class="fixed top-4 right-4 z-50">
+  <!-- Bouton flottant -->
+  <button
+    id="shopping-list-toggle"
+    class="bg-mv-forest text-mv-cream p-3 rounded-full shadow-lg hover:bg-mv-leaf transition-all duration-300 hover:scale-110"
+    aria-label="Ouvrir la liste de courses"
+  >
+    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+    </svg>
+    <span id="shopping-count" class="absolute -top-2 -right-2 bg-mv-coral text-mv-cream text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+  </button>
+
+  <!-- Panneau de la liste de courses -->
+  <div id="shopping-panel" class="hidden absolute top-16 right-0 bg-white rounded-lg shadow-xl border border-gray-200 w-80 max-h-96 overflow-hidden">
+    <div class="p-4 border-b border-gray-200">
+      <h3 class="font-serif font-bold text-mv-forest text-lg">Ma liste de courses</h3>
+      <p class="text-sm text-mv-forest-70 mt-1">Ingrédients pour vos recettes</p>
+    </div>
+
+    <div id="shopping-items" class="max-h-64 overflow-y-auto p-4 space-y-2">
+      <!-- Les éléments seront ajoutés dynamiquement -->
+      <div class="text-center text-mv-forest-60 py-8">
+        <svg class="h-12 w-12 mx-auto mb-3 text-mv-leaf-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        <p class="text-sm">Votre liste est vide</p>
+        <p class="text-xs text-mv-forest-50 mt-1">Ajoutez des ingrédients depuis les recettes</p>
+      </div>
+    </div>
+
+    <div class="p-4 border-t border-mv-leaf-20 bg-mv-cream">
+      <div class="flex space-x-2">
+        <button
+          id="clear-shopping-list"
+          class="flex-1 bg-mv-cream text-mv-forest px-3 py-2 rounded-lg text-sm font-medium hover:bg-mv-leaf-10 transition-colors disabled:opacity-50"
+          disabled
+        >
+          Vider
+        </button>
+        <button
+          id="export-shopping-list"
+          class="flex-1 bg-mv-forest text-mv-cream px-3 py-2 rounded-lg text-sm font-medium hover:bg-mv-leaf transition-colors disabled:opacity-50"
+          disabled
+        >
+          Exporter
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  class ShoppingListManager {
+    constructor() {
+      this.items = new Map();
+      this.loadFromStorage();
+      this.init();
+    }
+
+    init() {
+      // Éléments DOM
+      this.toggleBtn = document.getElementById('shopping-list-toggle');
+      this.panel = document.getElementById('shopping-panel');
+      this.itemsContainer = document.getElementById('shopping-items');
+      this.countBadge = document.getElementById('shopping-count');
+      this.clearBtn = document.getElementById('clear-shopping-list');
+      this.exportBtn = document.getElementById('export-shopping-list');
+
+      // Événements
+      this.toggleBtn.addEventListener('click', () => this.togglePanel());
+      this.clearBtn.addEventListener('click', () => this.clearList());
+      this.exportBtn.addEventListener('click', () => this.exportList());
+
+      // Fermer en cliquant ailleurs
+      document.addEventListener('click', (e) => {
+        if (!this.panel.contains(e.target) && !this.toggleBtn.contains(e.target)) {
+          this.closePanel();
+        }
+      });
+
+      // Raccourci clavier
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.closePanel();
+        }
+      });
+
+      this.updateUI();
+    }
+
+    togglePanel() {
+      if (this.panel.classList.contains('hidden')) {
+        this.openPanel();
+      } else {
+        this.closePanel();
+      }
+    }
+
+    openPanel() {
+      this.panel.classList.remove('hidden');
+      this.panel.classList.add('animate-in', 'slide-in-from-right-2');
+    }
+
+    closePanel() {
+      this.panel.classList.add('hidden');
+      this.panel.classList.remove('animate-in', 'slide-in-from-right-2');
+    }
+
+    addItem(ingredient, quantity = 1, unit = '') {
+      const key = ingredient.toLowerCase().trim();
+      const existing = this.items.get(key);
+
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        this.items.set(key, {
+          name: ingredient,
+          quantity: quantity,
+          unit: unit,
+          checked: false
+        });
+      }
+
+      this.saveToStorage();
+      this.updateUI();
+
+      // Animation de feedback
+      this.showFeedback(`"${ingredient}" ajouté à la liste`);
+    }
+
+    removeItem(ingredient) {
+      const key = ingredient.toLowerCase().trim();
+      this.items.delete(key);
+      this.saveToStorage();
+      this.updateUI();
+    }
+
+    toggleItem(ingredient) {
+      const key = ingredient.toLowerCase().trim();
+      const item = this.items.get(key);
+      if (item) {
+        item.checked = !item.checked;
+        this.saveToStorage();
+        this.updateUI();
+      }
+    }
+
+    clearList() {
+      if (confirm('Êtes-vous sûr de vouloir vider la liste de courses ?')) {
+        this.items.clear();
+        this.saveToStorage();
+        this.updateUI();
+      }
+    }
+
+    exportList() {
+      const items = Array.from(this.items.values());
+      const text = items.map(item =>
+        `${item.checked ? '✓' : '○'} ${item.quantity} ${item.unit} ${item.name}`
+      ).join('\n');
+
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'liste-courses.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    updateUI() {
+      const items = Array.from(this.items.values());
+      const totalItems = items.length;
+      const checkedItems = items.filter(item => item.checked).length;
+
+      // Mettre à jour le badge
+      this.countBadge.textContent = totalItems.toString();
+      this.countBadge.classList.toggle('hidden', totalItems === 0);
+
+      // Mettre à jour les boutons
+      this.clearBtn.disabled = totalItems === 0;
+      this.exportBtn.disabled = totalItems === 0;
+
+      // Mettre à jour la liste
+      if (totalItems === 0) {
+        this.itemsContainer.innerHTML = `
+          <div class="text-center text-mv-forest-60 py-8">
+            <svg class="h-12 w-12 mx-auto mb-3 text-mv-leaf-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            <p class="text-sm">Votre liste est vide</p>
+            <p class="text-xs text-mv-forest-50 mt-1">Ajoutez des ingrédients depuis les recettes</p>
+          </div>
+        `;
+      } else {
+        this.itemsContainer.innerHTML = items.map(item => `
+          <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-mv-cream-50 transition-colors">
+            <input
+              type="checkbox"
+              ${item.checked ? 'checked' : ''}
+              class="shopping-item-checkbox h-4 w-4 text-mv-forest focus:ring-mv-leaf border-mv-leaf-30 rounded"
+              data-ingredient="${item.name}"
+            />
+            <span class="flex-1 text-sm ${item.checked ? 'line-through text-mv-forest-60' : 'text-mv-forest'}">
+              ${item.quantity} ${item.unit} ${item.name}
+            </span>
+            <button
+              class="shopping-item-remove text-mv-coral hover:text-mv-coral-80 p-1 rounded transition-colors"
+              data-ingredient="${item.name}"
+              aria-label="Retirer ${item.name}"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        `).join('');
+
+        // Attacher les événements aux nouveaux éléments
+        this.attachItemEvents();
+      }
+    }
+
+    attachItemEvents() {
+      // Événements pour les checkboxes
+      this.itemsContainer.querySelectorAll('.shopping-item-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+          this.toggleItem(e.target.dataset.ingredient);
+        });
+      });
+
+      // Événements pour les boutons de suppression
+      this.itemsContainer.querySelectorAll('.shopping-item-remove').forEach(button => {
+        button.addEventListener('click', (e) => {
+          this.removeItem(e.target.dataset.ingredient);
+        });
+      });
+    }
+
+    showFeedback(message) {
+      // Créer une notification temporaire
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-20 right-4 bg-mv-forest text-mv-cream px-4 py-2 rounded-lg shadow-lg z-50 animate-in slide-in-from-right-2';
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.classList.add('animate-out', 'slide-out-to-right-2');
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 2000);
+    }
+
+    saveToStorage() {
+      try {
+        const data = Array.from(this.items.entries());
+        localStorage.setItem('gastronomade-shopping-list', JSON.stringify(data));
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde:', error);
+      }
+    }
+
+    loadFromStorage() {
+      try {
+        const data = localStorage.getItem('gastronomade-shopping-list');
+        if (data) {
+          const parsed = JSON.parse(data);
+          this.items = new Map(parsed);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement:', error);
+        this.items = new Map();
+      }
+    }
+
+    // Méthode publique pour ajouter des ingrédients depuis les recettes
+    static addIngredients(ingredients) {
+      if (!window.shoppingListManager) {
+        window.shoppingListManager = new ShoppingListManager();
+      }
+      ingredients.forEach(ingredient => {
+        window.shoppingListManager.addItem(
+          ingredient.name,
+          ingredient.quantity || 1,
+          ingredient.unit || ''
+        );
+      });
+    }
+  }
+
+  // Initialiser quand le DOM est prêt
+  document.addEventListener('DOMContentLoaded', () => {
+    window.shoppingListManager = new ShoppingListManager();
+  });
+
+  // Exposer la classe globalement pour utilisation dans les recettes
+  window.ShoppingListManager = ShoppingListManager;
+</script>

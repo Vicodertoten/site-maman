@@ -1,0 +1,256 @@
+---
+// LazyImage.astro - Composant d'image avec chargement paresseux et indicateurs
+export interface Props {
+  src: string;
+  alt: string;
+  class?: string;
+  width?: number;
+  height?: number;
+  priority?: boolean;
+  placeholder?: string;
+}
+
+const {
+  src,
+  alt,
+  class: className = '',
+  width,
+  height,
+  priority = false,
+  placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOUI5QkE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPkNoYXJnZW1lbnQ8L3RleHQ+Cjwvc3ZnPg=='
+} = Astro.props;
+---
+
+<div class={`lazy-image-container ${className}`} style={`aspect-ratio: ${width && height ? width / height : 'auto'};`}>
+  <img
+    src={priority ? src : placeholder}
+    data-src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    class="lazy-image w-full h-full object-cover transition-opacity duration-300"
+    loading={priority ? 'eager' : 'lazy'}
+    decoding="async"
+  />
+
+  <!-- Indicateur de chargement -->
+  <div class="loading-indicator absolute inset-0 flex items-center justify-center bg-mv-cream-80 backdrop-blur-sm">
+    <div class="loading-spinner w-8 h-8 border-2 border-mv-leaf border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <!-- Message d'erreur (caché par défaut) -->
+  <div class="error-indicator absolute inset-0 flex items-center justify-center bg-mv-cream hidden">
+    <div class="text-center p-4">
+      <svg class="h-8 w-8 text-mv-forest-60 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+      <p class="text-sm text-mv-forest-80">Erreur de chargement</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  class LazyImageLoader {
+    constructor() {
+      this.init();
+    }
+
+    init() {
+      // Utiliser Intersection Observer pour le lazy loading
+      if ('IntersectionObserver' in window) {
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              this.loadImage(entry.target);
+            }
+          });
+        }, {
+          rootMargin: '50px 0px',
+          threshold: 0.01
+        });
+
+        // Observer toutes les images lazy
+        document.querySelectorAll('.lazy-image[data-src]').forEach(img => {
+          this.observer.observe(img);
+        });
+      } else {
+        // Fallback pour les navigateurs sans Intersection Observer
+        this.loadAllImages();
+      }
+
+      // Gérer les images prioritaires (chargées immédiatement)
+      document.querySelectorAll('.lazy-image:not([data-src])').forEach(img => {
+        this.handleImageLoad(img);
+      });
+    }
+
+    loadImage(img) {
+      const src = img.dataset.src;
+      if (!src) return;
+
+      // Masquer l'indicateur de chargement
+      const container = img.closest('.lazy-image-container');
+      const loadingIndicator = container?.querySelector('.loading-indicator');
+
+      // Charger l'image
+      const newImg = new Image();
+
+      newImg.onload = () => {
+        img.src = src;
+        img.classList.add('loaded');
+        delete img.dataset.src;
+
+        // Masquer l'indicateur de chargement
+        if (loadingIndicator) {
+          loadingIndicator.style.opacity = '0';
+          setTimeout(() => {
+            loadingIndicator.style.display = 'none';
+          }, 300);
+        }
+
+        // Arrêter d'observer cette image
+        if (this.observer) {
+          this.observer.unobserve(img);
+        }
+      };
+
+      newImg.onerror = () => {
+        // Afficher l'indicateur d'erreur
+        const errorIndicator = container?.querySelector('.error-indicator');
+        const loadingIndicator = container?.querySelector('.loading-indicator');
+
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'none';
+        }
+
+        if (errorIndicator) {
+          errorIndicator.classList.remove('hidden');
+        }
+
+        // Arrêter d'observer cette image
+        if (this.observer) {
+          this.observer.unobserve(img);
+        }
+      };
+
+      newImg.src = src;
+    }
+
+    loadAllImages() {
+      // Fallback: charger toutes les images immédiatement
+      document.querySelectorAll('.lazy-image[data-src]').forEach(img => {
+        this.loadImage(img);
+      });
+    }
+
+    handleImageLoad(img) {
+      // Pour les images prioritaires déjà chargées
+      const container = img.closest('.lazy-image-container');
+      const loadingIndicator = container?.querySelector('.loading-indicator');
+
+      if (img.complete) {
+        // Image déjà chargée
+        img.classList.add('loaded');
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'none';
+        }
+      } else {
+        // Attendre le chargement
+        img.onload = () => {
+          img.classList.add('loaded');
+          if (loadingIndicator) {
+            loadingIndicator.style.opacity = '0';
+            setTimeout(() => {
+              loadingIndicator.style.display = 'none';
+            }, 300);
+          }
+        };
+
+        img.onerror = () => {
+          const errorIndicator = container?.querySelector('.error-indicator');
+          if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+          }
+          if (errorIndicator) {
+            errorIndicator.classList.remove('hidden');
+          }
+        };
+      }
+    }
+  }
+
+  // Initialiser quand le DOM est prêt
+  document.addEventListener('DOMContentLoaded', () => {
+    window.lazyImageLoader = new LazyImageLoader();
+  });
+
+  // Fonction utilitaire pour créer des images lazy
+  window.createLazyImage = (src, alt, className = '', options = {}) => {
+    const {
+      width,
+      height,
+      priority = false,
+      placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOUI5QkE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPkNoYXJnZW1lbnQ8L3RleHQ+Cjwvc3ZnPg=='
+    } = options;
+
+    return `
+      <div class="lazy-image-container ${className}" style="aspect-ratio: ${width && height ? width / height : 'auto'};">
+        <img
+          src="${priority ? src : placeholder}"
+          ${!priority ? `data-src="${src}"` : ''}
+          alt="${alt}"
+          ${width ? `width="${width}"` : ''}
+          ${height ? `height="${height}"` : ''}
+          class="lazy-image w-full h-full object-cover transition-opacity duration-300"
+          loading="${priority ? 'eager' : 'lazy'}"
+          decoding="async"
+        />
+        <div class="loading-indicator absolute inset-0 flex items-center justify-center bg-mv-cream-80 backdrop-blur-sm">
+          <div class="loading-spinner w-8 h-8 border-2 border-mv-leaf border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <div class="error-indicator absolute inset-0 flex items-center justify-center bg-mv-cream hidden">
+          <div class="text-center p-4">
+            <svg class="h-8 w-8 text-mv-forest-60 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <p class="text-sm text-mv-forest-80">Erreur de chargement</p>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+</script>
+
+<style>
+  .lazy-image {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .lazy-image.loaded {
+    opacity: 1;
+  }
+
+  .lazy-image-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loading-indicator,
+  .error-indicator {
+    pointer-events: none;
+  }
+
+  .loading-spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

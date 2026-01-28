@@ -14,7 +14,7 @@ const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix)
       <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
         Thermomix
       </h1>
-      <p class="text-lg sm:text-xl md:text-2xl text-mv-forest/80 mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
+      <p class="text-lg sm:text-xl md:text-2xl text-mv-forest-80 mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
         Découvrez la révolution culinaire avec Muriel Cruysmans
       </p>
     </div>
@@ -58,11 +58,11 @@ const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix)
             Révolutionnez votre cuisine
           </h2>
           {thermomixData?.monthlyText ? (
-            <p class="text-mv-forest/80 text-base sm:text-lg leading-relaxed">
+            <p class="text-mv-forest-80 text-base sm:text-lg leading-relaxed">
               {thermomixData.monthlyText}
             </p>
           ) : (
-            <p class="text-mv-forest/80 text-base sm:text-lg leading-relaxed">
+            <p class="text-mv-forest-80 text-base sm:text-lg leading-relaxed">
               Le Thermomix est bien plus qu'un robot culinaire. C'est votre assistant personnel pour préparer des repas sains, savoureux et équilibrés en un temps record.
             </p>
           )}
@@ -73,7 +73,7 @@ const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix)
               </svg>
               <div>
                 <h3 class="font-semibold text-mv-forest text-sm sm:text-base">Préparation rapide</h3>
-                <p class="text-mv-forest/70 text-sm sm:text-base">Préparez des repas complets en 30 minutes</p>
+                <p class="text-mv-forest-70 text-sm sm:text-base">Préparez des repas complets en 30 minutes</p>
               </div>
             </div>
             <div class="flex items-start">
@@ -82,7 +82,7 @@ const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix)
               </svg>
               <div>
                 <h3 class="font-semibold text-mv-forest text-sm sm:text-base">Alimentation saine</h3>
-                <p class="text-mv-forest/70 text-sm sm:text-base">Contrôlez les ingrédients et les quantités</p>
+                <p class="text-mv-forest-70 text-sm sm:text-base">Contrôlez les ingrédients et les quantités</p>
               </div>
             </div>
             <div class="flex items-start">
@@ -91,7 +91,7 @@ const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix)
               </svg>
               <div>
                 <h3 class="font-semibold text-mv-forest text-sm sm:text-base">Polyvalence</h3>
-                <p class="text-mv-forest/70 text-sm sm:text-base">Hacher, mixer, cuire, mijoter... tout est possible</p>
+                <p class="text-mv-forest-70 text-sm sm:text-base">Hacher, mixer, cuire, mijoter... tout est possible</p>
               </div>
             </div>
           </div>

@@ -5,17 +5,17 @@ export default {
     extend: {
       colors: {
         // Couleurs MV selon STYLE.md
-        'mv-cream': 'var(--mv-cream)',
-        'mv-forest': 'var(--mv-forest)',
-        'mv-leaf': 'var(--mv-leaf)',
-        'mv-coral': 'var(--mv-coral)',
-        'mv-plum': 'var(--mv-plum)',
+        'mv-cream': '#FBF8F1',
+        'mv-forest': '#2A3D34',
+        'mv-leaf': '#4A7C59',
+        'mv-coral': '#E85D3A',
+        'mv-plum': '#5A2A3D',
 
         // Alias pour compatibilité
-        'gastro-cream': 'var(--mv-cream)',
-        'gastro-earth': 'var(--mv-forest)',
-        'gastro-sage': 'var(--mv-leaf)',
-        'gastro-copper': 'var(--mv-coral)',
+        'gastro-cream': '#FBF8F1',
+        'gastro-earth': '#2A3D34',
+        'gastro-sage': '#4A7C59',
+        'gastro-copper': '#E85D3A',
       },
       fontFamily: {
         // Typographie selon STYLE.md
