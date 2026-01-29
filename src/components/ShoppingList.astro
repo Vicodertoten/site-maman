@@ -54,7 +54,10 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+  import { confirmDialog } from '../lib/confirm.js';
+  import { showToast } from '../lib/notify.js';
+
   class ShoppingListManager {
     constructor() {
       this.items = new Map();
@@ -271,12 +274,13 @@
       }
     }
 
-    clearList() {
-      if (confirm('Êtes-vous sûr de vouloir vider la liste de courses ?')) {
-        this.items.clear();
-        this.saveToStorage();
-        this.updateUI();
-      }
+    async clearList() {
+      const ok = await confirmDialog('Êtes-vous sûr de vouloir vider la liste de courses ?');
+      if (!ok) return;
+      this.items.clear();
+      this.saveToStorage();
+      this.updateUI();
+      showToast('La liste de courses a été vidée', { type: 'info' });
     }
 
     exportList() {
@@ -371,9 +375,11 @@
     }
 
     showFeedback(message) {
-      // Créer une notification temporaire
+      // Créer une notification temporaire (accessible)
       const notification = document.createElement('div');
       notification.className = 'fixed top-20 right-4 bg-mv-forest text-mv-cream px-4 py-2 rounded-lg shadow-lg z-50 animate-in slide-in-from-right-2';
+      notification.setAttribute('role', 'status');
+      notification.setAttribute('aria-live', 'polite');
       notification.textContent = message;
 
       document.body.appendChild(notification);

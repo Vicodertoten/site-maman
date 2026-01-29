@@ -301,6 +301,12 @@ const {
     }
 
     initScrollAnimations() {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) {
+        document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(el => el.classList.add('visible'));
+        return;
+      }
+
       const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -315,10 +321,32 @@ const {
         });
       }, observerOptions);
 
+      const observeEl = (el) => {
+        try {
+          if (el && !el.classList.contains('visible')) observer.observe(el);
+        } catch (e) {
+          // ignore non-elements
+        }
+      };
+
       // Observer tous les éléments avec des classes d'animation de défilement
-      document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(el => {
-        observer.observe(el);
+      document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(observeEl);
+
+      // Watch for dynamically added nodes (e.g. recipe cards injected client-side)
+      const mo = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const node of Array.from(m.addedNodes)) {
+            if (!(node instanceof Element)) continue;
+            if (node.matches && node.matches('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right')) {
+              observeEl(node);
+            } else {
+              node.querySelectorAll && node.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(observeEl);
+            }
+          }
+        }
       });
+
+      mo.observe(document.body, { childList: true, subtree: true });
     }
 
     initClickFeedback() {

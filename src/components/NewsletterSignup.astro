@@ -35,10 +35,10 @@
 </div>
 
 <!-- Modal de remerciement -->
-<div id="newsletter-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
+<div id="newsletter-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="newsletter-title" aria-describedby="newsletter-desc">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative" data-modal-panel tabindex="-1">
     <!-- Bouton de fermeture -->
-    <button id="modal-close" class="absolute top-4 right-4 text-mv-forest-60 hover:text-mv-forest transition-colors">
+    <button id="modal-close" class="absolute top-4 right-4 text-mv-forest-60 hover:text-mv-forest transition-colors" aria-label="Fermer la fenêtre">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
@@ -52,11 +52,11 @@
         </svg>
       </div>
 
-      <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
+      <h3 id="newsletter-title" class="text-xl font-serif font-bold text-mv-forest mb-2">
         Merci pour votre inscription !
       </h3>
 
-      <p class="text-mv-forest-80 mb-6 leading-relaxed">
+      <p id="newsletter-desc" class="text-mv-forest-80 mb-6 leading-relaxed">
         Votre inscription à la newsletter a bien été enregistrée. Vous recevrez bientôt mes dernières recettes et conseils nutritionnels.
       </p>
 
@@ -67,20 +67,26 @@
   </div>
 </div>
 
-<script>
-  // Gestionnaire du modal de remerciement
+<script type="module">
+  import { trapFocus } from '../lib/focus-trap.js';
+  import { showToast } from '../lib/notify.js';
+
+  // Gestionnaire du modal de remerciement (maintenant accessible + sans alert())
   document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('newsletter-form') as HTMLFormElement;
-    const submitButton = document.getElementById('newsletter-submit') as HTMLButtonElement;
-    const modal = document.getElementById('newsletter-modal') as HTMLElement;
-    const modalClose = document.getElementById('modal-close') as HTMLButtonElement;
-    const modalOk = document.getElementById('modal-ok') as HTMLButtonElement;
+    const form = document.getElementById('newsletter-form');
+    const submitButton = document.getElementById('newsletter-submit');
+    const modal = document.getElementById('newsletter-modal');
+    const modalPanel = modal?.querySelector('[data-modal-panel]');
+    const modalClose = document.getElementById('modal-close');
+    const modalOk = document.getElementById('modal-ok');
+    let releaseTrap = null;
 
     // Fonction pour afficher le modal
     const showModal = () => {
       modal.classList.remove('hidden');
       modal.classList.add('flex');
       document.body.style.overflow = 'hidden'; // Empêcher le scroll
+      releaseTrap = trapFocus(modalPanel, { initialFocus: modalOk, returnFocusTo: submitButton, onClose: hideModal });
     };
 
     // Fonction pour cacher le modal
@@ -88,6 +94,10 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = ''; // Restaurer le scroll
+      if (releaseTrap) {
+        releaseTrap();
+        releaseTrap = null;
+      }
     };
 
     // Gestionnaires d'événements pour fermer le modal
@@ -101,7 +111,7 @@
       }
     });
 
-    // Fermer le modal avec la touche Échap
+    // Fermer le modal avec la touche Échap (capture géré par focus-trap too)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
         hideModal();
@@ -133,12 +143,12 @@
           showModal();
           form.reset();
         } else {
-          // Erreur : afficher un message d'erreur
-          alert(data.error || 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.');
+          // Erreur : afficher un message d'erreur accessible
+          showToast(data.error || 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.', { type: 'error' });
         }
       } catch (error) {
         console.error('Erreur lors de l\'inscription:', error);
-        alert('Erreur de connexion. Veuillez vérifier votre connexion internet et réessayer.');
+        showToast('Erreur de connexion. Veuillez vérifier votre connexion internet et réessayer.', { type: 'error' });
       } finally {
         // Réactiver le bouton
         submitButton.disabled = false;

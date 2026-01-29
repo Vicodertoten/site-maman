@@ -6,7 +6,10 @@
   <!-- Ce composant ne rend rien visuellement, il gère seulement la logique -->
 </div>
 
-<script>
+<script type="module">
+  import { confirmDialog } from '../lib/confirm.js';
+  import { showToast } from '../lib/notify.js';
+
   class FavoritesManager {
     constructor() {
       this.favorites = new Set();
@@ -67,15 +70,17 @@
       return Array.from(this.favorites);
     }
 
-    clearAllFavorites() {
-      if (confirm('Êtes-vous sûr de vouloir supprimer tous les favoris ?')) {
-        this.favorites.clear();
-        this.saveToStorage();
-        this.updateAllButtons();
+    async clearAllFavorites() {
+      const ok = await confirmDialog('Êtes-vous sûr de vouloir supprimer tous les favoris ?');
+      if (!ok) return;
+      this.favorites.clear();
+      this.saveToStorage();
+      this.updateAllButtons();
 
-        // Dispatch un événement personnalisé
-        window.dispatchEvent(new CustomEvent('favoritesCleared'));
-      }
+      // Dispatch un événement personnalisé
+      window.dispatchEvent(new CustomEvent('favoritesCleared'));
+      // Accessible feedback
+      showToast('Tous les favoris ont été supprimés', { type: 'info' });
     }
 
     updateButton(button, recipeId) {
@@ -110,9 +115,11 @@
     }
 
     showFeedback(message) {
-      // Créer une notification temporaire
+      // Créer une notification temporaire (accessible)
       const notification = document.createElement('div');
       notification.className = 'fixed top-20 right-4 bg-mv-forest text-mv-cream px-4 py-2 rounded-lg shadow-lg z-50 animate-in slide-in-from-right-2';
+      notification.setAttribute('role', 'status');
+      notification.setAttribute('aria-live', 'polite');
       notification.textContent = message;
 
       document.body.appendChild(notification);

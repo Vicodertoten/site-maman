@@ -225,54 +225,7 @@ const canonicalUrl = `${SITE_URL}${url}`;
       }
     });
 
-    // Scroll reveal animations
-    document.addEventListener('DOMContentLoaded', () => {
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReduced) {
-        document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(el => el.classList.add('visible'));
-        return;
-      }
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
-
-      const observeEl = (el) => {
-        try {
-          if (el && !el.classList.contains('visible')) observer.observe(el);
-        } catch (e) {
-          // ignore non-elements
-        }
-      };
-
-      const observeAll = (root = document) => {
-        root.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(observeEl);
-      };
-
-      // Observe already existing elements
-      observeAll();
-
-      // Watch for dynamically added nodes (e.g. recipe cards injected client-side)
-      const mo = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-          for (const node of Array.from(m.addedNodes)) {
-            if (!(node instanceof Element)) continue;
-            if (node.matches && node.matches('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right')) {
-              observeEl(node);
-            } else {
-              node.querySelectorAll && node.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(observeEl);
-            }
-          }
-        }
-      });
-
-      mo.observe(document.body, { childList: true, subtree: true });
-    });
+    // Scroll reveal animations handled centrally by `MicroInteractions.astro` (IntersectionObserver + MutationObserver).
   </script>
 </body>
 </html>

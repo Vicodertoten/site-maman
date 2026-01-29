@@ -422,28 +422,14 @@ textarea {
     transform: translateX(0);
   }
 }
+/* NOTE: Scroll reveal animations are defined above using transitions for smoother control.
+   Keep a single source of truth to avoid duplicates and !important overrides. */
 
-.scroll-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-.scroll-slide-in-left {
-  animation: slideInLeft 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-.scroll-slide-in-right {
-  animation: slideInRight 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-/* Force visible state to override conflicting animation rules (fix: elements invisible but clickable) */
+/* The `.visible` state is set by MicroInteractions (IntersectionObserver) and should
+   simply make the element visible and reset transforms. */
 .scroll-fade-in.visible,
 .scroll-slide-in-left.visible,
 .scroll-slide-in-right.visible {
-  opacity: 1 !important;
-  transform: translate(0, 0) !important;
-  animation: none !important;
-  visibility: visible !important;
+  opacity: 1;
+  transform: translate(0, 0);
 }
