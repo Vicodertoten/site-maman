@@ -188,6 +188,23 @@ textarea {
   mask-repeat: no-repeat;
 }
 
+.hero-image-mask--strong {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 60%,
+    rgba(0, 0, 0, 0.4) 82%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 60%,
+    rgba(0, 0, 0, 0.4) 82%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
 .mv-section-title {
   font-family: var(--font-family-serif);
   font-weight: 700;
