@@ -2,16 +2,16 @@
 // MainLayout.astro - Layout principal épuré pour Gastronomade
 import '../styles/global.css';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
+import { formatPhoneNumber } from '../lib/utils';
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || import.meta.env.SITE_URL || 'https://www.murielcruysmans.com';
 const {
   title,
   description = "Gastronomade - Manger Vrai - Muriel Cruysmans à Wavre",
-  image = "/images/logo-manger-vrai.png",
+  image = "/images/Asset 4logo.png",
   url = Astro.url.pathname
 } = Astro.props;
 
-const canonicalUrl = `${siteUrl}${url}`;
+const canonicalUrl = `https://gastronomade.netlify.app${url}`;
 ---
 
 <!DOCTYPE html>
@@ -20,15 +20,15 @@ const canonicalUrl = `${siteUrl}${url}`;
   <meta charset="UTF-8" />
   <meta name="description" content={description} />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="/images/logo-manger-vrai.png" />
-  <link rel="apple-touch-icon" href="/images/logo-manger-vrai.png" />
+  <link rel="icon" type="image/png" href="/images/Asset 4logo.png" />
+  <link rel="apple-touch-icon" href="/images/Asset 4logo.png" />
   <link rel="canonical" href={canonicalUrl} />
   <title>{title}</title>
 
   <!-- Open Graph -->
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:image" content={`${siteUrl}${image}`} />
+  <meta property="og:image" content={`https://gastronomade.netlify.app${image}`} />
   <meta property="og:url" content={canonicalUrl} />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="fr_FR" />
@@ -38,7 +38,7 @@ const canonicalUrl = `${siteUrl}${url}`;
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={`${siteUrl}${image}`} />
+  <meta name="twitter:image" content={`https://gastronomade.netlify.app${image}`} />
 
   <!-- Structured Data (JSON-LD) -->
   <script type="application/ld+json" set:html={
@@ -47,7 +47,7 @@ const canonicalUrl = `${siteUrl}${url}`;
       "@type": "LocalBusiness",
       "name": "Gastronomade",
       "description": "Manger Vrai avec Muriel Cruysmans - Cuisine saine et gourmande à Wavre",
-      "url": siteUrl,
+      "url": "https://gastronomade.netlify.app",
       "telephone": "+32 123 45 67 89",
       "address": {
         "@type": "PostalAddress",
@@ -226,12 +226,9 @@ const canonicalUrl = `${siteUrl}${url}`;
 
     // Scroll reveal animations
     document.addEventListener('DOMContentLoaded', () => {
-      const animated = document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right');
-      if (!animated.length) return;
-
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) {
-        animated.forEach((el) => el.classList.add('visible'));
+        document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(el => el.classList.add('visible'));
         return;
       }
 
@@ -244,7 +241,36 @@ const canonicalUrl = `${siteUrl}${url}`;
         });
       }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
 
-      animated.forEach((el) => observer.observe(el));
+      const observeEl = (el) => {
+        try {
+          if (el && !el.classList.contains('visible')) observer.observe(el);
+        } catch (e) {
+          // ignore non-elements
+        }
+      };
+
+      const observeAll = (root = document) => {
+        root.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(observeEl);
+      };
+
+      // Observe already existing elements
+      observeAll();
+
+      // Watch for dynamically added nodes (e.g. recipe cards injected client-side)
+      const mo = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const node of Array.from(m.addedNodes)) {
+            if (!(node instanceof Element)) continue;
+            if (node.matches && node.matches('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right')) {
+              observeEl(node);
+            } else {
+              node.querySelectorAll && node.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(observeEl);
+            }
+          }
+        }
+      });
+
+      mo.observe(document.body, { childList: true, subtree: true });
     });
   </script>
 </body>
