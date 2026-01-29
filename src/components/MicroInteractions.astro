@@ -331,77 +331,18 @@ const {
     }
 
     initScrollAnimations() {
-      const prefersReduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)'
-      ).matches;
-      if (prefersReduced) {
-        document
-          .querySelectorAll(
-            '.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right'
-          )
-          .forEach(el => el.classList.add('visible'));
-        return;
-      }
-
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px',
-      };
-
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            // Marquer visible et désinscrire pour ne pas retrigger
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, observerOptions);
-
-      const observeEl = el => {
-        try {
-          if (el && !el.classList.contains('visible')) {
-            // Observer l'élément — l'état initial caché est géré via `.has-js` CSS pour éviter
-            // tout flash visible->invisible côté client.
-            observer.observe(el);
-          }
-        } catch (e) {
-          // ignore non-elements
-        }
-      };
-
-      // Observer tous les éléments avec des classes d'animation de défilement
+      // Simplest, most robust behavior: make all scroll-animated elements visible immediately.
+      // This removes IntersectionObserver/MutationObserver complexity and prevents flicker.
       document
-        .querySelectorAll(
-          '.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right'
-        )
-        .forEach(observeEl);
-
-      // Watch for dynamically added nodes (e.g. recipe cards injected client-side)
-      const mo = new MutationObserver(mutations => {
-        for (const m of mutations) {
-          for (const node of Array.from(m.addedNodes)) {
-            if (!(node instanceof Element)) continue;
-            if (
-              node.matches &&
-              node.matches(
-                '.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right'
-              )
-            ) {
-              observeEl(node);
-            } else {
-              node.querySelectorAll &&
-                node
-                  .querySelectorAll(
-                    '.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right'
-                  )
-                  .forEach(observeEl);
-            }
-          }
-        }
-      });
-
-      mo.observe(document.body, { childList: true, subtree: true });
+        .querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right')
+        .forEach((el) => {
+          el.classList.add('visible');
+          el.style.transition = 'none';
+          el.style.animation = 'none';
+          // Ensure any inline styles don't keep elements hidden
+          el.style.opacity = '';
+          el.style.transform = '';
+        });
     }
 
     initClickFeedback() {

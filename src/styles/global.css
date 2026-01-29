@@ -108,44 +108,26 @@ h6 {
   animation: fadeInUp 0.6s ease-out;
 }
 
-/* Animations au scroll */
-/* Lorsque JS est présent (classe .has-js ajoutée tôt dans le <head>),
-   on cache les éléments animés pour éviter un flash visible->invisible.
-   Les utilisateurs prefer-reduced-motion ne seront pas affectés. */
-.has-js .scroll-fade-in {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+/* Scroll animations disabled for stability — elements must be visible and functional. */
+.scroll-fade-in,
+.scroll-slide-in-left,
+.scroll-slide-in-right {
+  /* Visible by default */
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
 }
 
-.has-js .scroll-slide-in-left {
-  opacity: 0;
-  transform: translateX(-30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.has-js .scroll-slide-in-right {
-  opacity: 0;
-  transform: translateX(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-/* When visible, reset */
-.scroll-fade-in.visible,
-.scroll-slide-in-left.visible,
-.scroll-slide-in-right.visible {
-  opacity: 1;
-  transform: translate(0, 0);
-}
-
-/* Si l'utilisateur préfère réduire les animations, annuler les cachés */
+/* Keep prefers-reduced-motion honored */
 @media (prefers-reduced-motion: reduce) {
-  .has-js .scroll-fade-in,
-  .has-js .scroll-slide-in-left,
-  .has-js .scroll-slide-in-right {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  .scroll-fade-in,
+  .scroll-slide-in-left,
+  .scroll-slide-in-right {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
   }
 }
 
