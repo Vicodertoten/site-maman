@@ -20,7 +20,9 @@ const {
   <style>
     /* Effets de survol */
     .hover-lift {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
     .hover-lift:hover {
@@ -96,8 +98,12 @@ const {
     }
 
     @keyframes shimmer {
-      0% { left: -100%; }
-      100% { left: 100%; }
+      0% {
+        left: -100%;
+      }
+      100% {
+        left: 100%;
+      }
     }
 
     .loading-pulse {
@@ -105,8 +111,13 @@ const {
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
     }
 
     .loading-bounce {
@@ -114,9 +125,19 @@ const {
     }
 
     @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-10px); }
-      60% { transform: translateY(-5px); }
+      0%,
+      20%,
+      50%,
+      80%,
+      100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
     }
 
     /* Indicateurs de progression */
@@ -198,9 +219,16 @@ const {
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-5px);
+      }
+      75% {
+        transform: translateX(5px);
+      }
     }
 
     /* Transitions de page */
@@ -238,7 +266,9 @@ const {
     }
 
     @keyframes spin {
-      to { transform: translate(-50%, -50%) rotate(360deg); }
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
     }
 
     /* Accessibilité - réduction du mouvement */
@@ -274,7 +304,7 @@ const {
         enableClickFeedback: true,
         enableScrollAnimations: true,
         enableLoadingAnimations: true,
-        ...options
+        ...options,
       };
 
       this.init();
@@ -301,46 +331,73 @@ const {
     }
 
     initScrollAnimations() {
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const prefersReduced = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
       if (prefersReduced) {
-        document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(el => el.classList.add('visible'));
+        document
+          .querySelectorAll(
+            '.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right'
+          )
+          .forEach(el => el.classList.add('visible'));
         return;
       }
 
       const observerOptions = {
         threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        rootMargin: '0px 0px -50px 0px',
       };
 
-      const observer = new IntersectionObserver((entries) => {
+      const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
+            // Retirer l'état initial caché et marquer visible
+            entry.target.classList.remove('hidden-init');
             entry.target.classList.add('visible');
             observer.unobserve(entry.target);
           }
         });
       }, observerOptions);
 
-      const observeEl = (el) => {
+      const observeEl = el => {
         try {
-          if (el && !el.classList.contains('visible')) observer.observe(el);
+          if (el && !el.classList.contains('visible')) {
+            // Si les animations sont autorisées, appliquer un état initial "hidden-init" pour
+            // éviter le clignotement et permettre la transition quand l'élément devient visible.
+            if (!prefersReduced) el.classList.add('hidden-init');
+            observer.observe(el);
+          }
         } catch (e) {
           // ignore non-elements
         }
       };
 
       // Observer tous les éléments avec des classes d'animation de défilement
-      document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(observeEl);
+      document
+        .querySelectorAll(
+          '.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right'
+        )
+        .forEach(observeEl);
 
       // Watch for dynamically added nodes (e.g. recipe cards injected client-side)
-      const mo = new MutationObserver((mutations) => {
+      const mo = new MutationObserver(mutations => {
         for (const m of mutations) {
           for (const node of Array.from(m.addedNodes)) {
             if (!(node instanceof Element)) continue;
-            if (node.matches && node.matches('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right')) {
+            if (
+              node.matches &&
+              node.matches(
+                '.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right'
+              )
+            ) {
               observeEl(node);
             } else {
-              node.querySelectorAll && node.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right').forEach(observeEl);
+              node.querySelectorAll &&
+                node
+                  .querySelectorAll(
+                    '.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right'
+                  )
+                  .forEach(observeEl);
             }
           }
         }
@@ -350,7 +407,7 @@ const {
     }
 
     initClickFeedback() {
-      document.addEventListener('click', (e) => {
+      document.addEventListener('click', e => {
         const target = e.target.closest('.click-feedback');
         if (target) {
           // Le feedback est géré par CSS
@@ -368,17 +425,17 @@ const {
 
     initGlobalListeners() {
       // Écouteur pour les notifications de succès
-      window.addEventListener('showSuccess', (e) => {
+      window.addEventListener('showSuccess', e => {
         this.showSuccessAnimation(e.detail.element);
       });
 
       // Écouteur pour les notifications d'erreur
-      window.addEventListener('showError', (e) => {
+      window.addEventListener('showError', e => {
         this.showErrorAnimation(e.detail.element);
       });
 
       // Écouteur pour les états de chargement des boutons
-      window.addEventListener('buttonLoading', (e) => {
+      window.addEventListener('buttonLoading', e => {
         this.setButtonLoading(e.detail.button, e.detail.loading);
       });
     }
@@ -480,7 +537,7 @@ const {
       enableHoverEffects: true,
       enableClickFeedback: true,
       enableScrollAnimations: true,
-      enableLoadingAnimations: true
+      enableLoadingAnimations: true,
     });
   });
 
