@@ -2,16 +2,17 @@
 // MainLayout.astro - Layout principal épuré pour Gastronomade
 import '../styles/global.css';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
-import { formatPhoneNumber } from '../lib/utils';
+
+const SITE_URL = import.meta.env.PUBLIC_SITE_URL || 'https://gastronomade.netlify.app';
 
 const {
   title,
   description = "Gastronomade - Manger Vrai - Muriel Cruysmans à Wavre",
-  image = "/images/Asset 4logo.png",
+  image = "/images/logo-manger-vrai.png",
   url = Astro.url.pathname
 } = Astro.props;
 
-const canonicalUrl = `https://gastronomade.netlify.app${url}`;
+const canonicalUrl = `${SITE_URL}${url}`;
 ---
 
 <!DOCTYPE html>
@@ -20,15 +21,15 @@ const canonicalUrl = `https://gastronomade.netlify.app${url}`;
   <meta charset="UTF-8" />
   <meta name="description" content={description} />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="/images/Asset 4logo.png" />
-  <link rel="apple-touch-icon" href="/images/Asset 4logo.png" />
+  <link rel="icon" type="image/png" href="/images/logo-manger-vrai.png" />
+  <link rel="apple-touch-icon" href="/images/logo-manger-vrai.png" />
   <link rel="canonical" href={canonicalUrl} />
   <title>{title}</title>
 
   <!-- Open Graph -->
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:image" content={`https://gastronomade.netlify.app${image}`} />
+  <meta property="og:image" content={`${SITE_URL}${image}`} />
   <meta property="og:url" content={canonicalUrl} />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="fr_FR" />
@@ -38,7 +39,7 @@ const canonicalUrl = `https://gastronomade.netlify.app${url}`;
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={`https://gastronomade.netlify.app${image}`} />
+  <meta name="twitter:image" content={`${SITE_URL}${image}`} />
 
   <!-- Structured Data (JSON-LD) -->
   <script type="application/ld+json" set:html={
@@ -47,7 +48,7 @@ const canonicalUrl = `https://gastronomade.netlify.app${url}`;
       "@type": "LocalBusiness",
       "name": "Gastronomade",
       "description": "Manger Vrai avec Muriel Cruysmans - Cuisine saine et gourmande à Wavre",
-      "url": "https://gastronomade.netlify.app",
+      "url": SITE_URL,
       "telephone": "+32 123 45 67 89",
       "address": {
         "@type": "PostalAddress",

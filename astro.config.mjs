@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://gastronomade.netlify.app',
+  site: process.env.PUBLIC_SITE_URL || 'https://gastronomade.netlify.app',
   adapter: netlify(),
   integrations: [sitemap()],
   image: {

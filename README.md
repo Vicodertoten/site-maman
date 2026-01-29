@@ -26,7 +26,7 @@ npm run studio
 ### Technologies
 
 - **Framework**: Astro 5.x
-- **Styling**: Tailwind CSS 4.x
+- **Styling**: Tailwind CSS 3.x (project uses Tailwind v3.4.x)
 - **CMS**: Sanity
 - **Déploiement**: Netlify
 

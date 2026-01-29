@@ -6,5 +6,5 @@ Disallow: /admin/
 Disallow: /.netlify/
 Disallow: /.env
 
-# Sitemap
-Sitemap: https://gastronomade.netlify.app/sitemap.xml
+# Sitemap (utiliser un chemin relatif pour être portable)
+Sitemap: /sitemap.xml
