@@ -542,7 +542,9 @@ const formatPrice = (price?: number, currency?: string) => {
     window.recipeIndex = recipesIndex;
   </script>
 
-  <script>
+  <script type="module">
+    import { trapFocus } from '../lib/focus-trap.js';
+
     const escapeHtml = (value = '') =>
       value
         .toString()
@@ -798,6 +800,7 @@ const formatPrice = (price?: number, currency?: string) => {
       const openShopLinks = document.querySelectorAll('[data-open-shop]');
       const shopStatus = document.getElementById('shop-status');
       let lastFocusedElement = null;
+      let releaseTrap = null;
       const setShopStatus = (message) => {
         if (!shopStatus) return;
         shopStatus.textContent = message;
@@ -814,6 +817,10 @@ const formatPrice = (price?: number, currency?: string) => {
         modal.setAttribute('aria-hidden', 'true');
         clearShopStatus();
         document.body.style.overflow = '';
+        if (releaseTrap) {
+          try { releaseTrap(); } catch (e) {}
+          releaseTrap = null;
+        }
         if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
           lastFocusedElement.focus();
         }
@@ -825,8 +832,11 @@ const formatPrice = (price?: number, currency?: string) => {
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         const focusTarget = modalFocus || modalPanel || modal;
-        if (focusTarget && typeof focusTarget.focus === 'function') {
-          focusTarget.focus();
+        try {
+          releaseTrap = trapFocus(modalPanel || modal, { initialFocus: (modalFocus || modalPanel) ?? null, returnFocusTo: lastFocusedElement, onClose: closeModal });
+        } catch (e) {
+          // fallback: ensure panel is focused
+          if (focusTarget && typeof focusTarget.focus === 'function') focusTarget.focus();
         }
         loadPremiumRecipes();
       };
