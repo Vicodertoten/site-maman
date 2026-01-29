@@ -24,6 +24,13 @@ const canonicalUrl = `${SITE_URL}${url}`;
   <meta charset="UTF-8" />
   <meta name="description" content={description} />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>/* Set class early to avoid FOUT: hide animated elements immediately when JS is enabled */
+    try {
+      if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        document.documentElement.classList.add('has-js');
+      }
+    } catch (e) { /* ignore */ }
+  </script>
   <link rel="icon" type="image/png" href="/images/logo-manger-vrai.png" />
   <link rel="apple-touch-icon" href="/images/logo-manger-vrai.png" />
   <link rel="canonical" href={canonicalUrl} />

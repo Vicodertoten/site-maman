@@ -351,8 +351,7 @@ const {
       const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            // Retirer l'état initial caché et marquer visible
-            entry.target.classList.remove('hidden-init');
+            // Marquer visible et désinscrire pour ne pas retrigger
             entry.target.classList.add('visible');
             observer.unobserve(entry.target);
           }
@@ -362,9 +361,8 @@ const {
       const observeEl = el => {
         try {
           if (el && !el.classList.contains('visible')) {
-            // Si les animations sont autorisées, appliquer un état initial "hidden-init" pour
-            // éviter le clignotement et permettre la transition quand l'élément devient visible.
-            if (!prefersReduced) el.classList.add('hidden-init');
+            // Observer l'élément — l'état initial caché est géré via `.has-js` CSS pour éviter
+            // tout flash visible->invisible côté client.
             observer.observe(el);
           }
         } catch (e) {

@@ -109,46 +109,44 @@ h6 {
 }
 
 /* Animations au scroll */
-/* Par défaut, les éléments sont visibles pour éviter un rendu invisible si JS échoue. */
-.scroll-fade-in {
-  opacity: 1;
-  transform: translate(0, 0);
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s ease;
-}
-
-/* Classe appliquée par JS pour l'état initial avant l'animation */
-.scroll-fade-in.hidden-init {
+/* Lorsque JS est présent (classe .has-js ajoutée tôt dans le <head>),
+   on cache les éléments animés pour éviter un flash visible->invisible.
+   Les utilisateurs prefer-reduced-motion ne seront pas affectés. */
+.has-js .scroll-fade-in {
   opacity: 0;
   transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.scroll-slide-in-left {
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s ease;
-}
-.scroll-slide-in-left.hidden-init {
+.has-js .scroll-slide-in-left {
   opacity: 0;
   transform: translateX(-30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.scroll-slide-in-right {
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s ease;
-}
-.scroll-slide-in-right.hidden-init {
+.has-js .scroll-slide-in-right {
   opacity: 0;
   transform: translateX(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
+/* When visible, reset */
 .scroll-fade-in.visible,
 .scroll-slide-in-left.visible,
 .scroll-slide-in-right.visible {
   opacity: 1;
   transform: translate(0, 0);
+}
+
+/* Si l'utilisateur préfère réduire les animations, annuler les cachés */
+@media (prefers-reduced-motion: reduce) {
+  .has-js .scroll-fade-in,
+  .has-js .scroll-slide-in-left,
+  .has-js .scroll-slide-in-right {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* Transitions cohérentes pour éléments interactifs */
