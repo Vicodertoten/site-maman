@@ -1,14 +1,19 @@
 ---
 // NewsletterSignup.astro - Composant d'inscription à la newsletter
+import { getNewsletterSettingsData } from '../lib/sanity';
+
+const newsletterSettings = await getNewsletterSettingsData();
+const buttonLabel = newsletterSettings?.buttonLabel || "S'inscrire";
+const errorMessage = newsletterSettings?.errorMessage || "Une erreur est survenue lors de l'inscription. Veuillez réessayer.";
 ---
 
 <div id="newsletter-signup" class="mv-card p-6 my-8">
   <div class="text-center">
     <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
-      Restez informé(e)
+      {newsletterSettings?.title || 'Restez informé(e)'}
     </h3>
     <p class="text-mv-forest-80 mb-4">
-      Recevez mes dernières recettes et conseils nutritionnels directement dans votre boîte mail.
+      {newsletterSettings?.description || 'Abbonnez-vous à ma newsletter et recevez une recette par mois et les dernères nouvelles de mes activités.'}
     </p>
 
     <form id="newsletter-form" class="max-w-md mx-auto">
@@ -17,7 +22,7 @@
           type="email"
           name="email"
           id="newsletter-email"
-          placeholder="Votre adresse email"
+          placeholder={newsletterSettings?.inputPlaceholder || 'Votre adresse email'}
           class="mv-input flex-1"
           required
         />
@@ -26,7 +31,7 @@
           id="newsletter-submit"
           class="mv-btn mv-btn-primary hover:bg-mv-forest hover:scale-105 transition-all duration-300 transform shadow-sm hover:shadow-md"
         >
-          S'inscrire
+          {buttonLabel}
         </button>
       </div>
       <p id="newsletter-message" class="text-sm mt-2 opacity-0 transition-opacity"></p>
@@ -53,21 +58,21 @@
       </div>
 
       <h3 id="newsletter-title" class="text-xl font-serif font-bold text-mv-forest mb-2">
-        Merci pour votre inscription !
+        {newsletterSettings?.successTitle || 'Merci pour votre inscription !'}
       </h3>
 
       <p id="newsletter-desc" class="text-mv-forest-80 mb-6 leading-relaxed">
-        Votre inscription à la newsletter a bien été enregistrée. Vous recevrez bientôt mes dernières recettes et conseils nutritionnels.
+        {newsletterSettings?.successText || 'Votre inscription à la newsletter a bien été enregistrée. Vous recevrez bientôt mes dernières recettes et conseils nutritionnels.'}
       </p>
 
       <button id="modal-ok" class="mv-btn mv-btn-primary bg-mv-leaf text-mv-cream hover:bg-mv-forest transition-colors">
-        Parfait !
+        {newsletterSettings?.successButtonLabel || 'Parfait !'}
       </button>
     </div>
   </div>
 </div>
 
-<script type="module">
+<script type="module" define:vars={{ buttonLabel, errorMessage }}>
   import { trapFocus } from '../lib/focus-trap.js';
   import { showToast } from '../lib/notify.js';
 
@@ -144,7 +149,7 @@
           form.reset();
         } else {
           // Erreur : afficher un message d'erreur accessible
-          showToast(data.error || 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.', { type: 'error' });
+          showToast(data.error || errorMessage, { type: 'error' });
         }
       } catch (error) {
         console.error('Erreur lors de l\'inscription:', error);
@@ -152,7 +157,7 @@
       } finally {
         // Réactiver le bouton
         submitButton.disabled = false;
-        submitButton.textContent = 'S\'inscrire';
+        submitButton.textContent = buttonLabel;
       }
     });
   });

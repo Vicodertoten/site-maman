@@ -14,27 +14,15 @@ import {
 const fallbackAgendaSlots: CompanyAgendaSlot[] = [
   {
     date: '2026-02-19',
-    startTime: '09:00',
-    endTime: '12:00',
-    title: 'Atelier stratégie & cuisine',
-    status: 'Disponible',
-    notes: '3 créneaux restants pour les teams building de fin d’hiver'
+    status: 'Indisponible'
   },
   {
     date: '2026-03-04',
-    startTime: '14:00',
-    endTime: '17:00',
-    title: 'Séance de dégustation & rencontres',
-    status: 'Disponible',
-    notes: 'Créneau modulable pour réunions clients ou partenaires'
+    status: 'Indisponible'
   },
   {
     date: '2026-03-18',
-    startTime: '09:00',
-    endTime: '12:30',
-    title: 'Matinée inspirante pour comités de direction',
-    status: 'Réservé',
-    notes: 'Places confirmées par la société Cygne Energies'
+    status: 'Indisponible'
   }
 ];
 
@@ -45,10 +33,13 @@ const homeData = await sanityClient.fetch<HomeData>(queries.home);
 const companyAgenda = await sanityClient.fetch<CompanyAgendaData>(queries.companyAgenda);
 
 // Organiser les locations par type
-const societeLocations = locations.filter(loc => loc.type === 'societe');
-const priveLocations = locations.filter(loc => loc.type === 'prive');
+const hasLocationData = locations.length > 0
+const visibleLocations = locations.filter(loc => loc.isVisible !== false);
+const societeLocations = visibleLocations.filter(loc => loc.type === 'societe');
+const priveLocations = visibleLocations.filter(loc => loc.type === 'prive');
 
 const agendaSlots = (companyAgenda?.slots && companyAgenda.slots.length > 0 ? companyAgenda.slots : fallbackAgendaSlots)
+  .filter((slot) => slot?.isVisible !== false)
   .slice()
   .sort((a, b) => {
     const aDate = a?.date ? new Date(a.date).getTime() : Infinity;
@@ -62,15 +53,10 @@ const statusPalette: Record<string, {background: string; text: string; dot: stri
     text: 'text-mv-cream',
     dot: 'bg-mv-forest'
   },
-  'réservé': {
+  indisponible: {
     background: 'bg-mv-plum border border-mv-plum',
     text: 'text-mv-cream',
     dot: 'bg-mv-plum'
-  },
-  libre: {
-    background: 'bg-white border border-mv-forest',
-    text: 'text-mv-forest',
-    dot: 'border border-mv-forest bg-white'
   }
 }
 
@@ -78,8 +64,8 @@ const normalizeStatusKey = (status?: string) => {
   const normalized = (status ?? 'disponible').trim().toLowerCase()
     .replace(/[éèê]/g, 'e')
     .replace(/[àâ]/g, 'a')
-  if (normalized.includes('reserv')) return 'réservé'
-  if (normalized.includes('libre')) return 'libre'
+  if (normalized.includes('complet')) return 'indisponible'
+  if (normalized.includes('indisponible')) return 'indisponible'
   return 'disponible'
 }
 
@@ -90,6 +76,11 @@ const getStatusBackground = (status?: string) => {
 }
 
 const getStatusDotClass = (status?: string) => getStatusTheme(status).dot
+
+const getRestaurantStatusLabel = (status?: string) => {
+  const normalized = (status ?? '').toLowerCase()
+  return normalized.includes('complet') ? 'Complet' : 'Disponible'
+}
 
 const normalizeSlotDateKey = (value?: string) => {
   if (!value) return '';
@@ -132,17 +123,15 @@ const calendarBaseDate = getBaseCalendarDate(agendaSlots);
 const calendarWeekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const calendarLegendStates = [
   { label: 'Disponible', status: 'Disponible' },
-  { label: 'Réservé', status: 'Réservé' },
-  { label: 'Libre', status: 'Libre' }
+  { label: 'Indisponible', status: 'Indisponible' }
 ];
 
 const determineCellStatusLabel = (slots: CompanyAgendaSlot[]) => {
-  if (!slots || slots.length === 0) return 'Libre';
+  if (!slots || slots.length === 0) return 'Disponible';
   const normalized = slots
     .map(slot => (slot.status ?? 'Disponible').toLowerCase())
     .map(status => status.replace(/[éèê]/g, 'e'));
-  if (normalized.some(status => status.includes('reserv'))) return 'Réservé';
-  if (normalized.some(status => status.includes('demande'))) return 'Sur demande';
+  if (normalized.some(status => status.includes('indisponible'))) return 'Indisponible';
   return 'Disponible';
 };
 
@@ -220,15 +209,24 @@ const formatRestaurantDay = (value?: string) => {
   return parsed.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
-const restaurantStatus = restaurantData?.isFull ? 'Réservé' : 'Disponible'
-const restaurantSlots = (restaurantData?.dates && restaurantData.dates.length > 0 ? restaurantData.dates : fallbackRestaurantDates)
+const restaurantDateSlots = (restaurantData?.dateSlots && restaurantData.dateSlots.length > 0)
+  ? restaurantData.dateSlots.filter((slot) => slot?.isVisible !== false)
+  : [];
+
+const restaurantSlots = (restaurantDateSlots.length > 0 ? restaurantDateSlots : fallbackRestaurantDates.map(date => ({
+  date,
+  status: 'Disponible'
+})))
   .slice(0, 8)
-  .map(date => ({
-    date,
-    day: date ? new Date(date).getDate() : '',
-    label: formatRestaurantDay(date),
-    status: restaurantStatus
+  .map(slot => ({
+    date: slot?.date,
+    day: slot?.date ? new Date(slot.date).getDate() : '',
+    label: formatRestaurantDay(slot?.date),
+    status: slot?.status || 'Disponible'
   }))
+
+const showRestaurant = restaurantData?.isVisible !== false
+const showCompanyAgenda = companyAgenda?.isVisible !== false
 
 const heroBackgroundUrl = homeData?.heroBackgroundImage?.asset?.url
 const locationGallery = (homeData?.locationGallery || []).filter((image) => image?.url)
@@ -237,6 +235,12 @@ const whyHereItems = [
   "Maison en bois, chauffée au poêle",
   "Jusqu’à 14 personnes, terrasse et parking facile"
 ]
+
+const buildLocationFeatures = (location?: LocationData) => {
+  const base = location?.features || []
+  const details = location?.details || []
+  return [...base, ...details]
+}
 ---
 
 <MainLayout title={homeData?.title || "Gastronomade - Manger Vrai | Muriel Cruysmans"}>
@@ -304,13 +308,13 @@ const whyHereItems = [
                 subtitle={societeLocations[0].subtitle || "Réunions & Team-Buildings"}
                 price={societeLocations[0].price}
                 period="HTVA"
-                features={[]}
+                features={buildLocationFeatures(societeLocations[0])}
                 imageUrl={societeLocations[0].imageUrl ? `${societeLocations[0].imageUrl}?w=600&h=400&fit=crop&auto=format` : undefined}
                 imageAlt={societeLocations[0].title}
-                ctaText="Découvrir la privatisation"
-                ctaLink="/contact"
+                ctaText={societeLocations[0].ctaLabel || "Découvrir la privatisation"}
+                ctaLink={societeLocations[0].ctaLink || "/contact"}
               />
-            ) : (
+            ) : !hasLocationData ? (
               <PricingCard
                 title="Sociétés"
                 subtitle="Réunions & Team-Buildings"
@@ -320,7 +324,7 @@ const whyHereItems = [
                 ctaText="Découvrir la privatisation"
                 ctaLink="/contact"
               />
-            )}
+            ) : null}
           </div>
 
           <!-- Privé -->
@@ -331,13 +335,13 @@ const whyHereItems = [
                 subtitle={priveLocations[0].subtitle || "Événements privés"}
                 price={priveLocations[0].price}
                 period="HTVA"
-                features={[]}
+                features={buildLocationFeatures(priveLocations[0])}
                 imageUrl={priveLocations[0].imageUrl ? `${priveLocations[0].imageUrl}?w=600&h=400&fit=crop&auto=format` : undefined}
                 imageAlt={priveLocations[0].title}
-                ctaText="Organiser mon événement"
-                ctaLink="#entreprise-agenda"
+                ctaText={priveLocations[0].ctaLabel || "Organiser mon événement"}
+                ctaLink={priveLocations[0].ctaLink || "#entreprise-agenda"}
               />
-            ) : (
+            ) : !hasLocationData ? (
               <PricingCard
                 title="Privé"
                 subtitle="Événements privés"
@@ -347,24 +351,26 @@ const whyHereItems = [
                 ctaText="Organiser mon événement"
                 ctaLink="#entreprise-agenda"
               />
-            )}
+            ) : null}
           </div>
 
           <!-- Restaurant -->
-          <div class="scroll-slide-in-right">
-            <PricingCard
-              title={restaurantData?.title || "Restaurant éphémère"}
-              subtitle={restaurantData?.subtitle || "Un jeudi par mois"}
-              price={restaurantData?.price ? `${restaurantData.price}€` : "50€"}
-              period="/pers."
-              features={[]}
-              ctaText="Voir les prochaines dates"
-              ctaLink="#restaurant-section"
-              imageUrl={restaurantData?.imageUrl ? `${restaurantData.imageUrl}?w=600&h=400&fit=crop&auto=format` : undefined}
-              imageAlt={restaurantData?.imageAlt || restaurantData?.title || "Restaurant éphémère"}
-              highlight="true"
-            />
-          </div>
+          {showRestaurant && (
+            <div class="scroll-slide-in-right">
+              <PricingCard
+                title={restaurantData?.title || "Restaurant éphémère"}
+                subtitle={restaurantData?.subtitle || "Un jeudi par mois"}
+                price={restaurantData?.price ? `${restaurantData.price}€` : "50€"}
+                period="/pers."
+                features={restaurantData?.highlights || []}
+                ctaText="Voir les prochaines dates"
+                ctaLink="#restaurant-section"
+                imageUrl={restaurantData?.imageUrl ? `${restaurantData.imageUrl}?w=600&h=400&fit=crop&auto=format` : undefined}
+                imageAlt={restaurantData?.imageAlt || restaurantData?.title || "Restaurant éphémère"}
+                highlight="true"
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -423,9 +429,18 @@ const whyHereItems = [
   </section>
 
   <!-- Restaurant Section -->
-  <section id="restaurant-section" class="mv-section bg-gradient-to-b from-mv-cream to-white scroll-fade-in">
+  {showRestaurant && (
+    <section id="restaurant-section" class="mv-section bg-gradient-to-b from-mv-cream to-white scroll-fade-in">
     <div class="mv-container">
-      
+      <div class="max-w-3xl mb-8">
+        <p class="mv-kicker">Restaurant</p>
+        <h2 class="mv-section-title">
+          {homeData?.restaurantSectionTitle || 'Le jeudi de Gastronomade'}
+        </h2>
+        <p class="mv-lead text-mv-forest-70">
+          {homeData?.restaurantSectionDescription || 'Un menu végétal, créatif et de saison. La nature s’invite dans vos assiettes.'}
+        </p>
+      </div>
 
       <div class="max-w-5xl mx-auto">
         <div class="bg-white rounded-3xl border border-mv-leaf-20 p-8 shadow-xl">
@@ -437,6 +452,16 @@ const whyHereItems = [
               <p class="text-mv-forest-80 mb-4">
                 {restaurantData?.menuDescription || 'Un menu unique, imaginé pour des soirées conviviales autour de produits locaux et de saison.'}
               </p>
+              {restaurantData?.highlights && restaurantData.highlights.length > 0 && (
+                <ul class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-mv-forest-80">
+                  {restaurantData.highlights.map((item, index) => (
+                    <li class="flex items-start gap-2" key={index}>
+                      <span class="mt-1 h-1.5 w-1.5 rounded-full bg-mv-leaf/70" aria-hidden="true"></span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
               <div class="space-y-3 text-sm text-mv-forest-90">
                 <p class="font-semibold text-mv-forest">
                   {restaurantData?.price ? `${restaurantData.price}€/personne` : '50€/personne'}
@@ -458,7 +483,7 @@ const whyHereItems = [
                     <span class="text-2xl leading-none text-mv-forest">{slot.day || '?'}</span>
                     <span class="mt-1 block text-[0.65rem] text-mv-forest-70 leading-tight">{slot.label || 'Date à confirmer'}</span>
                     <span class={`mt-2 inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-[0.2em] ${getStatusBackground(slot.status)}`}>
-                      {restaurantStatus === 'Réservé' ? 'Complet' : 'Disponible'}
+                      {getRestaurantStatusLabel(slot.status)}
                     </span>
                   </article>
                 ))}
@@ -476,10 +501,12 @@ const whyHereItems = [
         </div>
       </div>
     </div>
-  </section>
+    </section>
+  )}
 
   <!-- Agenda Entreprises Section -->
-  <section id="entreprise-agenda" class="mv-section-tight bg-mv-cream" aria-labelledby="entreprise-agenda-title">
+  {showCompanyAgenda && (
+    <section id="entreprise-agenda" class="mv-section-tight bg-mv-cream" aria-labelledby="entreprise-agenda-title">
     <div class="mv-container max-w-5xl">
       <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between" id="entreprise-agenda-title">
         <div class="max-w-2xl">
@@ -602,7 +629,8 @@ const whyHereItems = [
         update(0)
       })()
     </script>
-  </section>
+    </section>
+  )}
 
   <section class="mv-section bg-white scroll-fade-in">
     <div class="mv-container">

@@ -26,28 +26,65 @@ export interface RestaurantData {
   imageUrl?: string
   imageAlt?: string
   menuTitle: string
-  datesTitle: string
   reservationTitle: string
-  dates: string[]
+  dateSlots?: Array<{
+    date?: string
+    status?: string
+    isVisible?: boolean
+  }>
   price: number
   menuDescription: string
-  isFull: boolean
+  highlights?: string[]
   minGuests: number
   depositAmount: number
+  isVisible?: boolean
 }
 
 export interface ThermomixData {
   _id: string
+  heroKicker?: string
+  heroTitle?: string
+  heroLead?: string
+  heroHighlights?: Array<{
+    label?: string
+    title?: string
+    text?: string
+    isVisible?: boolean
+  }>
+  heroPrimaryCtaLabel?: string
+  heroPrimaryCtaUrl?: string
+  heroSecondaryCtaLabel?: string
+  heroSecondaryCtaUrl?: string
+  heroVideoCaption?: string
   monthlyText: string
+  promoKicker?: string
+  promoTitle?: string
   videoUrl: string
   featuredImage: any
   featuredImageUrl?: string
-  demoRecipes: Array<{
-    title: string
-    description: string
-    videoUrl: string
+  benefitsTitle?: string
+  benefits?: Array<{
+    title?: string
+    text?: string
+    isVisible?: boolean
   }>
-  instagramUrl?: string
+  benefitsCtaLabel?: string
+  benefitsCtaLink?: string
+  demoTitle?: string
+  demoText?: string
+  demoPrimaryCtaLabel?: string
+  demoPrimaryCtaLink?: string
+  demoSecondaryCtaLabel?: string
+  demoSecondaryCtaLink?: string
+  demoDetails?: Array<{
+    label?: string
+    text?: string
+    isVisible?: boolean
+  }>
+  showHero?: boolean
+  showPromo?: boolean
+  showBenefits?: boolean
+  showDemo?: boolean
 }
 
 export interface LocationData {
@@ -58,18 +95,18 @@ export interface LocationData {
   price: string
   features: string[]
   description: string
+  details?: string[]
+  ctaLabel?: string
+  ctaLink?: string
   maxCapacity: number
   image: any
   imageUrl?: string
+  isVisible?: boolean
 }
 
 export interface CompanyAgendaSlot {
   date?: string
-  startTime?: string
-  endTime?: string
-  title?: string
   status?: string
-  notes?: string
 }
 
 export interface RecipeData {
@@ -146,18 +183,38 @@ export interface AboutData {
   title: string
   heroTitle: string
   heroSubtitle: string
+  heroCtaLabel?: string
+  heroCtaLink?: string
+  visionKicker?: string
+  visionTitle?: string
+  visionText?: string
+  visionCards?: Array<{
+    label?: string
+    title?: string
+    text?: string
+    isVisible?: boolean
+  }>
   aboutTitle: string
   bio: string
   photo: any
   achievements: string[]
+  aboutCtaLabel?: string
+  aboutCtaLink?: string
+  servicesTitle?: string
+  servicesSubtitle?: string
+  servicesCtaText?: string
+  servicesCtaLink?: string
   services: Array<{
     title: string
     description: string
     price: string
     features: string[]
   }>
-  contactTitle: string
-  contactText: string
+  showHero?: boolean
+  showVision?: boolean
+  showAboutSection?: boolean
+  showAchievements?: boolean
+  showServices?: boolean
 }
 
 export interface HomeData {
@@ -182,7 +239,6 @@ export interface HomeData {
   ctaTitle: string
   ctaDescription: string
   ctaPrimaryButton: string
-  ctaSecondaryButton: string
 }
 
 export interface CompanyAgendaData {
@@ -193,6 +249,7 @@ export interface CompanyAgendaData {
   calendarTitle?: string
   startMonth?: string
   monthsToShow?: number
+  isVisible?: boolean
 }
 
 export interface ContactData {
@@ -200,6 +257,18 @@ export interface ContactData {
   title: string
   heroTitle: string
   heroSubtitle: string
+  phoneLabel?: string
+  phoneButtonLabel?: string
+  emailLabel?: string
+  emailButtonLabel?: string
+  instagramLabel?: string
+  instagramHandle?: string
+  instagramButtonLabel?: string
+  instagramUrl?: string
+  mapTitle?: string
+  mapCtaLabel?: string
+  mapCtaUrl?: string
+  mapEmbedUrl?: string
   contactInfo: {
     phone: string
     email: string
@@ -215,6 +284,109 @@ export interface ContactData {
     text: string
     depositInfo: string
   }
+  showContactCards?: boolean
+  showPhoneCard?: boolean
+  showEmailCard?: boolean
+  showInstagramCard?: boolean
+  showBookingInfo?: boolean
+  showMap?: boolean
+}
+
+export interface SiteSettingsData {
+  _id: string
+  siteName?: string
+  siteTagline?: string
+  navigation?: Array<{
+    label?: string
+    href?: string
+    isVisible?: boolean
+  }>
+  footer?: {
+    brandTitle?: string
+    brandSubtitle?: string
+    contact?: {
+      phone?: string
+      email?: string
+    }
+    socialLinks?: Array<{
+      platform?: string
+      url?: string
+      label?: string
+      isVisible?: boolean
+    }>
+    copyrightText?: string
+  }
+  address?: {
+    street?: string
+    city?: string
+    region?: string
+    postalCode?: string
+    country?: string
+    isVisible?: boolean
+  }
+  seo?: {
+    defaultTitle?: string
+    defaultDescription?: string
+    shareImageUrl?: string
+    siteUrl?: string
+  }
+  showNavigation?: boolean
+  showFooter?: boolean
+  showNewsletter?: boolean
+}
+
+export interface RecipesPageData {
+  _id: string
+  pageTitle?: string
+  heroKicker?: string
+  heroTitle?: string
+  heroDescription?: string
+  heroShopLabel?: string
+  filtersEmptyTitle?: string
+  filtersEmptyText?: string
+  comingSoonTitle?: string
+  comingSoonText?: string
+  comingSoonHighlight?: string
+  previewCards?: Array<{
+    title?: string
+    description?: string
+    time?: string
+    servings?: string
+    difficulty?: string
+    tags?: string[]
+    isVisible?: boolean
+  }>
+  previewImageLabel?: string
+  shopBadgeLabel?: string
+  shopButtonAriaLabel?: string
+  shopKicker?: string
+  shopTitle?: string
+  shopDescription?: string
+  shopCloseLabel?: string
+  shopEmptyText?: string
+  shopCardPlaceholder?: string
+  shopActiveLabel?: string
+  shopBuyLabel?: string
+  shopDownloadLabel?: string
+  accessTitle?: string
+  accessText?: string
+  accessPlaceholder?: string
+  accessButtonLabel?: string
+  showHero?: boolean
+  showShop?: boolean
+  showPreviewCards?: boolean
+}
+
+export interface NewsletterSettingsData {
+  _id: string
+  title?: string
+  description?: string
+  inputPlaceholder?: string
+  buttonLabel?: string
+  successTitle?: string
+  successText?: string
+  successButtonLabel?: string
+  errorMessage?: string
 }
 
 // Requêtes GROQ pour récupérer les données
@@ -228,25 +400,53 @@ export const queries = {
     "imageUrl": image.asset->url,
     imageAlt,
     menuTitle,
-    datesTitle,
     reservationTitle,
-    dates,
+    dateSlots[]{
+      date,
+      status,
+      isVisible
+    },
     price,
     menuDescription,
-    isFull,
+    highlights,
     minGuests,
-    depositAmount
+    depositAmount,
+    isVisible
   }`,
 
   // Thermomix - Document unique
   thermomix: `*[_type == "thermomix"] | order(_updatedAt desc)[0] {
     _id,
+    heroKicker,
+    heroTitle,
+    heroLead,
+    heroHighlights,
+    heroPrimaryCtaLabel,
+    heroPrimaryCtaUrl,
+    heroSecondaryCtaLabel,
+    heroSecondaryCtaUrl,
+    heroVideoCaption,
     monthlyText,
+    promoKicker,
+    promoTitle,
     videoUrl,
     featuredImage,
     "featuredImageUrl": featuredImage.asset->url,
-    demoRecipes,
-    instagramUrl
+    benefitsTitle,
+    benefits,
+    benefitsCtaLabel,
+    benefitsCtaLink,
+    demoTitle,
+    demoText,
+    demoPrimaryCtaLabel,
+    demoPrimaryCtaLink,
+    demoSecondaryCtaLabel,
+    demoSecondaryCtaLink,
+    demoDetails,
+    showHero,
+    showPromo,
+    showBenefits,
+    showDemo
   }`,
 
   // Locations - Tous les types
@@ -258,9 +458,13 @@ export const queries = {
     price,
     features,
     description,
+    details,
+    ctaLabel,
+    ctaLink,
     maxCapacity,
     image,
-    "imageUrl": image.asset->url
+    "imageUrl": image.asset->url,
+    isVisible
   }`,
 
   companyAgenda: `*[_type == "companyAgenda"] | order(_updatedAt desc)[0] {
@@ -272,12 +476,9 @@ export const queries = {
     monthsToShow,
     slots[]{
       date,
-      startTime,
-      endTime,
-      title,
-      status,
-      notes
-    }
+      status
+    },
+    isVisible
   }`,
 
   // Recettes - Toutes les recettes gratuites (hors packs)
@@ -446,6 +647,12 @@ export const queries = {
     title,
     heroTitle,
     heroSubtitle,
+    heroCtaLabel,
+    heroCtaLink,
+    visionKicker,
+    visionTitle,
+    visionText,
+    visionCards,
     aboutTitle,
     bio,
     photo {
@@ -454,9 +661,18 @@ export const queries = {
       }
     },
     achievements,
+    aboutCtaLabel,
+    aboutCtaLink,
+    servicesTitle,
+    servicesSubtitle,
+    servicesCtaText,
+    servicesCtaLink,
     services,
-    contactTitle,
-    contactText
+    showHero,
+    showVision,
+    showAboutSection,
+    showAchievements,
+    showServices
   }`,
 
   // Contact - Informations de contact
@@ -465,9 +681,122 @@ export const queries = {
     title,
     heroTitle,
     heroSubtitle,
+    phoneLabel,
+    phoneButtonLabel,
+    emailLabel,
+    emailButtonLabel,
+    instagramLabel,
+    instagramHandle,
+    instagramButtonLabel,
+    instagramUrl,
+    mapTitle,
+    mapCtaLabel,
+    mapCtaUrl,
+    mapEmbedUrl,
     contactInfo,
     socialLinks,
-    bookingInfo
+    bookingInfo,
+    showContactCards,
+    showPhoneCard,
+    showEmailCard,
+    showInstagramCard,
+    showBookingInfo,
+    showMap
+  }`,
+  recipesPage: `*[_type == "recipesPage"][0] {
+    _id,
+    pageTitle,
+    heroKicker,
+    heroTitle,
+    heroDescription,
+    heroShopLabel,
+    filtersEmptyTitle,
+    filtersEmptyText,
+    comingSoonTitle,
+    comingSoonText,
+    comingSoonHighlight,
+    previewCards[]{
+      title,
+      description,
+      time,
+      servings,
+      difficulty,
+      tags,
+      isVisible
+    },
+    previewImageLabel,
+    shopBadgeLabel,
+    shopButtonAriaLabel,
+    shopKicker,
+    shopTitle,
+    shopDescription,
+    shopCloseLabel,
+    shopEmptyText,
+    shopCardPlaceholder,
+    shopActiveLabel,
+    shopBuyLabel,
+    shopDownloadLabel,
+    accessTitle,
+    accessText,
+    accessPlaceholder,
+    accessButtonLabel,
+    showHero,
+    showShop,
+    showPreviewCards
+  }`,
+  newsletterSettings: `*[_type == "newsletterSettings"][0] {
+    _id,
+    title,
+    description,
+    inputPlaceholder,
+    buttonLabel,
+    successTitle,
+    successText,
+    successButtonLabel,
+    errorMessage
+  }`,
+  // Réglages du site
+  siteSettings: `*[_type == "siteSettings"][0] {
+    _id,
+    siteName,
+    siteTagline,
+    navigation[]{
+      label,
+      href,
+      isVisible
+    },
+    footer{
+      brandTitle,
+      brandSubtitle,
+      contact{
+        phone,
+        email
+      },
+      socialLinks[]{
+        platform,
+        url,
+        label,
+        isVisible
+      },
+      copyrightText
+    },
+    address{
+      street,
+      city,
+      region,
+      postalCode,
+      country,
+      isVisible
+    },
+    seo{
+      defaultTitle,
+      defaultDescription,
+      "shareImageUrl": shareImage.asset->url,
+      siteUrl
+    },
+    showNavigation,
+    showFooter,
+    showNewsletter
   }`,
   // Home - Page d'accueil
   home: `*[_type == "home"] | order(_updatedAt desc)[0] {
@@ -491,8 +820,7 @@ export const queries = {
     restaurantSectionDescription,
     ctaTitle,
     ctaDescription,
-    ctaPrimaryButton,
-    ctaSecondaryButton
+    ctaPrimaryButton
   }`}
 
 // Fonctions utilitaires pour récupérer les données
@@ -584,6 +912,33 @@ export async function getHomeData(): Promise<HomeData | null> {
     return await sanityClient.fetch(queries.home)
   } catch (error) {
     console.error('Erreur lors de la récupération des données home:', error)
+    return null
+  }
+}
+
+export async function getSiteSettingsData(): Promise<SiteSettingsData | null> {
+  try {
+    return await sanityClient.fetch(queries.siteSettings)
+  } catch (error) {
+    console.error('Erreur lors de la récupération des réglages du site:', error)
+    return null
+  }
+}
+
+export async function getRecipesPageData(): Promise<RecipesPageData | null> {
+  try {
+    return await sanityClient.fetch(queries.recipesPage)
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données recettes:', error)
+    return null
+  }
+}
+
+export async function getNewsletterSettingsData(): Promise<NewsletterSettingsData | null> {
+  try {
+    return await sanityClient.fetch(queries.newsletterSettings)
+  } catch (error) {
+    console.error('Erreur lors de la récupération des réglages newsletter:', error)
     return null
   }
 }

@@ -7,11 +7,53 @@ import SpacingOptimizer from '../components/SpacingOptimizer.astro';
 import ShoppingList from '../components/ShoppingList.astro';
 import FavoritesManager from '../components/FavoritesManager.astro';
 import AnimationOptimizer from '../components/AnimationOptimizer.astro';
-import { getPacksData, getRecipesData } from '../lib/sanity';
+import { getPacksData, getRecipesData, getRecipesPageData } from '../lib/sanity';
 
 // Récupérer les recettes depuis Sanity
 const recipes = await getRecipesData();
 const packs = await getPacksData();
+const recipesPage = await getRecipesPageData();
+
+const showHero = recipesPage?.showHero !== false;
+const showShop = recipesPage?.showShop !== false;
+const showPreviewCards = recipesPage?.showPreviewCards !== false;
+
+const heroDescriptionTemplate = recipesPage?.heroDescription
+  || 'Retrouvez ici plein de recettes gratuites. Des {{shop}} sont aussi disponibles à la vente : ils débloquent l’ebook et les recettes premium directement sur le site.';
+const heroDescriptionParts = heroDescriptionTemplate.split('{{shop}}');
+const hasShopPlaceholder = heroDescriptionTemplate.includes('{{shop}}');
+
+const previewCards = (recipesPage?.previewCards && recipesPage.previewCards.length > 0)
+  ? recipesPage.previewCards
+  : [
+      {
+        title: 'Salade d\'été aux herbes',
+        description: 'Une salade fraîche et légère, parfaite pour les journées ensoleillées.',
+        time: '15 min',
+        servings: '4 pers.',
+        difficulty: 'Facile',
+        tags: ['Végétarien', 'Rapide'],
+        isVisible: true
+      },
+      {
+        title: 'Soupe de légumes d\'automne',
+        description: 'Un velouté réconfortant aux saveurs douces et épicées.',
+        time: '35 min',
+        servings: '6 pers.',
+        difficulty: 'Facile',
+        tags: ['Vegan', 'Saison'],
+        isVisible: true
+      },
+      {
+        title: 'Bowl protéiné gourmand',
+        description: 'Un repas complet et équilibré pour les journées actives.',
+        time: '25 min',
+        servings: '2 pers.',
+        difficulty: 'Moyen',
+        tags: ['Sans gluten', 'Équilibré'],
+        isVisible: true
+      }
+    ];
 
 // Récupérer les paramètres de filtrage depuis l'URL
 const url = new URL(Astro.request.url);
@@ -214,7 +256,7 @@ const formatPrice = (price?: number, currency?: string) => {
 
 ---
 
-<MainLayout title="Recettes - Gastronomade">
+<MainLayout title={recipesPage?.pageTitle || "Recettes - Gastronomade"}>
   <!-- Optimisation d'espacement et micro-interactions -->
   <SpacingOptimizer enableResponsiveSpacing={true} enableDynamicSpacing={true} />
   <MicroInteractions enableHoverEffects={true} enableClickFeedback={true} enableScrollAnimations={true} enableLoadingAnimations={true} />
@@ -225,26 +267,30 @@ const formatPrice = (price?: number, currency?: string) => {
   <!-- Recipes Section -->
   <section class="py-0 bg-white scroll-fade-in" id="recettes">
     <div class="mv-container">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center mb-8">
-        <div class="lg:col-span-7 space-y-5 sm:space-y-6">
-          <p class="mv-kicker">Recettes</p>
-          <h1 class="mv-hero-title">
-            Une cuisine simple, saine et généreuse.
-          </h1>
-          <p class="mv-hero-subtitle max-w-3xl text-mv-forest-80">
-            Retrouvez ici plein de recettes gratuites. Des
-            <button
-              type="button"
-              class="mx-1 underline decoration-mv-leaf-60 underline-offset-4 hover:text-mv-leaf transition-colors"
-              data-open-shop
-            >
-              ebooks
-            </button>
-            sont aussi disponibles à la vente : ils débloquent l’ebook et les recettes premium directement sur le site.
-          </p>
-          <p id="payment-status" class="text-sm text-mv-forest-70 hidden" role="status" aria-live="polite"></p>
+      {showHero && (
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center mb-8">
+          <div class="lg:col-span-7 space-y-5 sm:space-y-6">
+            <p class="mv-kicker">{recipesPage?.heroKicker || 'Recettes'}</p>
+            <h1 class="mv-hero-title">
+              {recipesPage?.heroTitle || 'Une cuisine simple, saine et généreuse.'}
+            </h1>
+            <p class="mv-hero-subtitle max-w-3xl text-mv-forest-80">
+              {heroDescriptionParts[0]}
+              {hasShopPlaceholder && (
+                <button
+                  type="button"
+                  class="mx-1 underline decoration-mv-leaf-60 underline-offset-4 hover:text-mv-leaf transition-colors"
+                  data-open-shop
+                >
+                  {recipesPage?.heroShopLabel || 'ebooks'}
+                </button>
+              )}
+              {heroDescriptionParts[1] || (!hasShopPlaceholder ? '' : '')}
+            </p>
+            <p id="payment-status" class="text-sm text-mv-forest-70 hidden" role="status" aria-live="polite"></p>
+          </div>
         </div>
-      </div>
+      )}
 
       <!-- Recipe Filters -->
       <RecipeFilters
@@ -289,8 +335,12 @@ const formatPrice = (price?: number, currency?: string) => {
 
         <div id="recipes-empty" class="hidden text-center py-12">
           <div class="max-w-xl mx-auto">
-            <p class="text-lg font-medium text-mv-forest mb-2">Aucune recette ne correspond à ces filtres.</p>
-            <p class="text-sm text-mv-forest-70">Essayez d'élargir votre recherche ou de réinitialiser les filtres.</p>
+            <p class="text-lg font-medium text-mv-forest mb-2">
+              {recipesPage?.filtersEmptyTitle || 'Aucune recette ne correspond à ces filtres.'}
+            </p>
+            <p class="text-sm text-mv-forest-70">
+              {recipesPage?.filtersEmptyText || "Essayez d'élargir votre recherche ou de réinitialiser les filtres."}
+            </p>
           </div>
         </div>
       ) : (
@@ -301,159 +351,108 @@ const formatPrice = (price?: number, currency?: string) => {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
             <h2 class="text-3xl font-serif font-bold text-mv-forest mb-4">
-              Recettes à venir
+              {recipesPage?.comingSoonTitle || 'Recettes à venir'}
             </h2>
             <p class="text-lg text-mv-forest-80 mb-8">
-              Je prépare une collection de recettes saines et délicieuses pour vous accompagner dans votre voyage culinaire.
+              {recipesPage?.comingSoonText || 'Je prépare une collection de recettes saines et délicieuses pour vous accompagner dans votre voyage culinaire.'}
             </p>
           <div class="bg-mv-cream rounded-lg p-6 inline-block border border-mv-leaf-20">
               <p class="text-mv-forest-80">
-                <strong>Prochainement :</strong> Recettes connectées au CMS pour une expérience interactive
+                {recipesPage?.comingSoonHighlight || 'Prochainement : Recettes connectées au CMS pour une expérience interactive'}
               </p>
             </div>
           </div>
         </div>
 
         <!-- Recipe Preview Cards -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-          <!-- Recipe Card 1 -->
-          <div class="mv-card overflow-hidden hover-lift click-feedback">
-            <div class="aspect-video bg-mv-cream flex items-center justify-center">
-              <div class="text-center text-mv-forest-60">
-                <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                </svg>
-                <p class="text-sm">Photo recette</p>
+        {showPreviewCards && (
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+            {previewCards.filter((card) => card?.isVisible !== false).map((card, index) => (
+              <div class="mv-card overflow-hidden hover-lift click-feedback" key={index}>
+                <div class="aspect-video bg-mv-cream flex items-center justify-center">
+                  <div class="text-center text-mv-forest-60">
+                    <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                    </svg>
+                    <p class="text-sm">{recipesPage?.previewImageLabel || 'Photo recette'}</p>
+                  </div>
+                </div>
+                <div class="p-6">
+                  <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
+                    {card.title}
+                  </h3>
+                  <p class="text-mv-forest-80 mb-4">
+                    {card.description}
+                  </p>
+                  <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
+                    <span>⏱️ {card.time}</span>
+                    <span>👥 {card.servings}</span>
+                    <span>📊 {card.difficulty}</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    {(card.tags || []).map((tag, tagIndex) => (
+                      <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full" key={tagIndex}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
-                Salade d'été aux herbes
-              </h3>
-              <p class="text-mv-forest-80 mb-4">
-                Une salade fraîche et légère, parfaite pour les journées ensoleillées.
-              </p>
-              <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
-                <span>⏱️ 15 min</span>
-                <span>👥 4 pers.</span>
-                <span>📊 Facile</span>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full">Végétarien</span>
-                <span class="px-2 py-1 bg-mv-cream text-mv-forest text-xs rounded-full">Rapide</span>
-              </div>
-            </div>
+            ))}
           </div>
-
-          <!-- Recipe Card 2 -->
-          <div class="mv-card overflow-hidden hover-lift click-feedback">
-            <div class="aspect-video bg-gray-200 flex items-center justify-center">
-              <div class="text-center text-mv-forest-60">
-                <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                </svg>
-                <p class="text-sm">Photo recette</p>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
-                Soupe de légumes d'automne
-              </h3>
-              <p class="text-mv-forest-70 mb-4">
-                Un velouté réconfortant aux saveurs d'automne, riche en nutriments.
-              </p>
-              <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
-                <span>⏱️ 45 min</span>
-                <span>👥 6 pers.</span>
-                <span>📊 Moyen</span>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full">Végétarien</span>
-                <span class="px-2 py-1 bg-mv-leaf text-white text-xs rounded-full">Thermomix</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recipe Card 3 -->
-          <div class="mv-card overflow-hidden hover-lift click-feedback">
-            <div class="aspect-video bg-gray-200 flex items-center justify-center">
-              <div class="text-center text-mv-forest-60">
-                <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                </svg>
-                <p class="text-sm">Photo recette</p>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
-                Quinoa aux légumes grillés
-              </h3>
-              <p class="text-mv-forest-70 mb-4">
-                Un plat complet et équilibré, source de protéines végétales.
-              </p>
-              <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
-                <span>⏱️ 30 min</span>
-                <span>👥 4 pers.</span>
-                <span>📊 Facile</span>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full">Végétarien</span>
-                <span class="px-2 py-1 bg-mv-cream text-mv-forest text-xs rounded-full">Rapide</span>
-                <span class="px-2 py-1 bg-mv-leaf text-white text-xs rounded-full">Saison</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
 
       )}
     </div>
   </section>
 
-  <button
-    id="open-shop"
-    class="fixed bottom-6 right-6 z-[70] relative inline-flex items-center justify-center h-11 w-11 rounded-full bg-white/95 text-mv-forest shadow-lg border border-mv-leaf-30 hover:shadow-xl hover:scale-[1.03] transition-all pointer-events-auto"
-    aria-haspopup="dialog"
-    aria-controls="shop-modal"
-    aria-label="Ouvrir la boutique"
-    data-open-shop
-    style="position: fixed; right: 1.5rem; bottom: 1.5rem; left: auto;"
-  >
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7h13L17 13M9 21a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2z"/>
-    </svg>
-    <span class="absolute -top-1 -right-1 text-[10px] uppercase tracking-[0.12em] bg-mv-leaf text-white px-1.5 py-0.5 rounded-full shadow">
-      Packs
-    </span>
-  </button>
+  {showShop && (
+    <>
+      <button
+        id="open-shop"
+        class="fixed bottom-6 right-6 z-[70] relative inline-flex items-center justify-center h-11 w-11 rounded-full bg-white/95 text-mv-forest shadow-lg border border-mv-leaf-30 hover:shadow-xl hover:scale-[1.03] transition-all pointer-events-auto"
+        aria-haspopup="dialog"
+        aria-controls="shop-modal"
+        aria-label={recipesPage?.shopButtonAriaLabel || "Ouvrir la boutique"}
+        data-open-shop
+        style="position: fixed; right: 1.5rem; bottom: 1.5rem; left: auto;"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7h13L17 13M9 21a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2z"/>
+        </svg>
+        <span class="absolute -top-1 -right-1 text-[10px] uppercase tracking-[0.12em] bg-mv-leaf text-white px-1.5 py-0.5 rounded-full shadow">
+          {recipesPage?.shopBadgeLabel || 'Packs'}
+        </span>
+      </button>
 
-  <div
-    id="shop-modal"
-    class="fixed inset-0 z-50 hidden"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="shop-title"
-    aria-describedby="shop-description"
-    aria-hidden="true"
-  >
-    <div class="absolute inset-0 bg-black/40" data-modal-close></div>
-    <div
-      class="relative z-10 mx-auto my-8 w-[min(960px,92vw)] bg-white rounded-3xl p-6 sm:p-8 shadow-2xl overflow-y-auto max-h-[90vh]"
-      data-modal-panel
-      tabindex="-1"
-    >
-      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
-        <div>
-          <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60">Boutique</p>
-          <h2 id="shop-title" class="text-2xl sm:text-3xl font-serif font-bold text-mv-forest mt-2">
-            Packs & ebooks
-          </h2>
-          <p id="shop-description" class="text-sm text-mv-forest-70 mt-2 max-w-2xl">
-            Les recettes restent au cœur du site. Les packs ajoutent l'ebook et débloquent les recettes premium ici.
-          </p>
-        </div>
-        <button class="mv-btn mv-btn-secondary text-sm" data-modal-close data-modal-focus>Fermer</button>
-      </div>
-      <p id="shop-status" class="text-sm text-mv-forest-70 mb-4 hidden" role="status" aria-live="polite"></p>
+      <div
+        id="shop-modal"
+        class="fixed inset-0 z-50 hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shop-title"
+        aria-describedby="shop-description"
+        aria-hidden="true"
+      >
+        <div class="absolute inset-0 bg-black/40" data-modal-close></div>
+        <div
+          class="relative z-10 mx-auto my-8 w-[min(960px,92vw)] bg-white rounded-3xl p-6 sm:p-8 shadow-2xl overflow-y-auto max-h-[90vh]"
+          data-modal-panel
+          tabindex="-1"
+        >
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+            <div>
+              <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60">{recipesPage?.shopKicker || 'Boutique'}</p>
+              <h2 id="shop-title" class="text-2xl sm:text-3xl font-serif font-bold text-mv-forest mt-2">
+                {recipesPage?.shopTitle || 'Packs & ebooks'}
+              </h2>
+              <p id="shop-description" class="text-sm text-mv-forest-70 mt-2 max-w-2xl">
+                {recipesPage?.shopDescription || "Les recettes restent au cœur du site. Les packs ajoutent l'ebook et débloquent les recettes premium ici."}
+              </p>
+            </div>
+            <button class="mv-btn mv-btn-secondary text-sm" data-modal-close data-modal-focus>
+              {recipesPage?.shopCloseLabel || 'Fermer'}
+            </button>
+          </div>
+          <p id="shop-status" class="text-sm text-mv-forest-70 mb-4 hidden" role="status" aria-live="polite"></p>
 
       {packCards.length > 0 ? (
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -470,7 +469,7 @@ const formatPrice = (price?: number, currency?: string) => {
                 </div>
               ) : (
                 <div class="w-full h-48 rounded-2xl bg-mv-cream flex items-center justify-center text-mv-forest-60">
-                  Pack premium
+                  {recipesPage?.shopCardPlaceholder || 'Pack premium'}
                 </div>
               )}
 
@@ -482,7 +481,7 @@ const formatPrice = (price?: number, currency?: string) => {
                       class="hidden text-xs uppercase tracking-[0.12em] text-mv-forest bg-mv-leaf-20 px-2 py-1 rounded-full"
                       data-pack-status
                     >
-                      Accès actif
+                      {recipesPage?.shopActiveLabel || 'Accès actif'}
                     </span>
                   </div>
                   <span class="text-sm text-mv-forest-70">{pack.recipeCount} recettes</span>
@@ -497,11 +496,11 @@ const formatPrice = (price?: number, currency?: string) => {
                   {formatPrice(pack.price, pack.currency)}
                 </div>
                 <div class="flex items-center gap-2">
-                  <button class="mv-btn buy-pack-btn" data-pack-id={pack.id} data-default-label="Acheter">
-                    Acheter
+                  <button class="mv-btn buy-pack-btn" data-pack-id={pack.id} data-default-label={recipesPage?.shopBuyLabel || 'Acheter'}>
+                    {recipesPage?.shopBuyLabel || 'Acheter'}
                   </button>
                   <button class="mv-btn mv-btn-secondary hidden download-pack-btn" data-pack-id={pack.id} style="display: none;">
-                    Télécharger l'ebook
+                    {recipesPage?.shopDownloadLabel || "Télécharger l'ebook"}
                   </button>
                 </div>
               </div>
@@ -510,33 +509,35 @@ const formatPrice = (price?: number, currency?: string) => {
         </div>
       ) : (
         <div class="mv-card p-6 text-mv-forest-70">
-          Les packs arrivent bientôt. Revenez très vite pour découvrir les collections premium.
+          {recipesPage?.shopEmptyText || 'Les packs arrivent bientôt. Revenez très vite pour découvrir les collections premium.'}
         </div>
       )}
 
       <div class="mt-8 mv-card p-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h3 class="text-lg font-semibold text-mv-forest">Déjà acheté un pack ?</h3>
-            <p class="text-sm text-mv-forest-70">Recevez votre lien d'accès permanent par email.</p>
+            <h3 class="text-lg font-semibold text-mv-forest">{recipesPage?.accessTitle || 'Déjà acheté un pack ?'}</h3>
+            <p class="text-sm text-mv-forest-70">{recipesPage?.accessText || "Recevez votre lien d'accès permanent par email."}</p>
           </div>
           <form id="access-form" class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <input
               type="email"
               name="email"
               required
-              placeholder="Votre email d'achat"
+              placeholder={recipesPage?.accessPlaceholder || "Votre email d'achat"}
               autocomplete="email"
               aria-label="Votre email d'achat"
               class="mv-input min-w-[220px]"
             />
-            <button type="submit" class="mv-btn">Envoyer le lien</button>
+            <button type="submit" class="mv-btn">{recipesPage?.accessButtonLabel || 'Envoyer le lien'}</button>
           </form>
         </div>
         <p id="access-status" class="text-sm text-mv-forest-70 mt-3" role="status" aria-live="polite"></p>
       </div>
     </div>
   </div>
+    </>
+  )}
 
   <script define:vars={{ recipesIndex }}>
     window.recipeIndex = recipesIndex;

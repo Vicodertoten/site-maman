@@ -21,183 +21,208 @@ function getImageUrl(image: any): string | null {
 
 // Récupérer les données depuis Sanity
 const aboutData = await sanityClient.fetch<AboutData>(queries.about);
+
+const showHero = aboutData?.showHero !== false;
+const showVision = aboutData?.showVision !== false;
+const showAboutSection = aboutData?.showAboutSection !== false;
+const showAchievements = aboutData?.showAchievements !== false;
+const showServices = aboutData?.showServices !== false;
+
+const visionCards = (aboutData?.visionCards && aboutData.visionCards.length > 0)
+  ? aboutData.visionCards
+  : [
+      {
+        label: 'Santé',
+        title: 'Équilibre & vitalité',
+        text: 'Des recettes accessibles, bonnes et saines, pour retrouver énergie et plaisir sans pression.',
+        isVisible: true
+      },
+      {
+        label: 'Transmission',
+        title: 'Apprendre en faisant',
+        text: 'Des gestes simples, des repères clairs, pour gagner en autonomie et en confiance.',
+        isVisible: true
+      },
+      {
+        label: 'Plaisir',
+        title: 'Cuisine vivante',
+        text: 'Végétal, saison, gourmandise : une cuisine qui fait du bien et qui rassemble.',
+        isVisible: true
+      }
+    ];
 ---
 
 <MainLayout title={aboutData?.title || "Cours & Coaching - Muriel Cruysmans"}>
   <!-- Hero Section -->
-  <section class="relative z-0 overflow-visible bg-mv-cream mv-section">
-    <div class="relative z-0 mv-container">
-      <img
-        src="/images/logo-manger-vrai.png"
-        alt="Logo Manger Vrai"
-        class="absolute w-64 sm:w-72 lg:w-70 z-[60] pointer-events-none opacity-90"
-        style="top: -20%; right: 0%;"
-        loading="lazy"
-      />
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        <div class="lg:col-span-7 space-y-4 relative z-10">
-          <h1 class="mv-hero-title">
-            {aboutData?.heroTitle || "Cours & coaching personnalisés"}
-          </h1>
-          <p class="mv-hero-subtitle text-mv-forest-80">
-            {aboutData?.heroSubtitle || "Une cuisine saine, vivante et joyeuse, pour apprendre à cuisiner simplement et mieux manger au quotidien."}
-          </p>
-          <div class="flex flex-wrap gap-3 pt-2">
-            <a href="/contact" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf">
-              Mes services
-            </a>
-           
+  {showHero && (
+    <section class="relative z-0 overflow-visible bg-mv-cream mv-section">
+      <div class="relative z-0 mv-container">
+        <img
+          src="/images/logo-manger-vrai.png"
+          alt="Logo Manger Vrai"
+          class="absolute w-64 sm:w-72 lg:w-70 z-[60] pointer-events-none opacity-90"
+          style="top: -20%; right: 0%;"
+          loading="lazy"
+        />
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div class="lg:col-span-7 space-y-4 relative z-10">
+            <h1 class="mv-hero-title">
+              {aboutData?.heroTitle || "Cours & coaching personnalisés"}
+            </h1>
+            <p class="mv-hero-subtitle text-mv-forest-80">
+              {aboutData?.heroSubtitle || "Une cuisine saine, vivante et joyeuse, pour apprendre à cuisiner simplement et mieux manger au quotidien."}
+            </p>
+            <div class="flex flex-wrap gap-3 pt-2">
+              <a href={aboutData?.heroCtaLink || "/contact"} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf">
+                {aboutData?.heroCtaLabel || "Mes services"}
+              </a>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  )}
 
   <!-- Vision Section -->
-  <section id="vision" class="mv-section bg-white">
-    <div class="mv-container max-w-5xl">
-      <div class="max-w-3xl">
-        <p class="mv-kicker">Vision</p>
-        <h2 class="mv-section-title">
-          {aboutData?.contactTitle || "Ma vision de la cuisine"}
-        </h2>
-        <p class="mv-lead text-mv-forest-70">
-          {aboutData?.contactText || "Je crois à une cuisine simple, locale et profondément humaine — une cuisine qui nourrit le corps, apaise l’esprit et crée du lien."}
-        </p>
-      </div>
+  {showVision && (
+    <section id="vision" class="mv-section bg-white">
+      <div class="mv-container max-w-5xl">
+        <div class="max-w-3xl">
+          <p class="mv-kicker">{aboutData?.visionKicker || "Vision"}</p>
+          <h2 class="mv-section-title">
+            {aboutData?.visionTitle || "Ma vision de la cuisine"}
+          </h2>
+          <p class="mv-lead text-mv-forest-70">
+            {aboutData?.visionText || "Je crois à une cuisine simple, locale et profondément humaine — une cuisine qui nourrit le corps, apaise l’esprit et crée du lien."}
+          </p>
+        </div>
 
-      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-        <div class="mv-card p-5 sm:p-6">
-          <p class="text-xs uppercase tracking-[0.3em] text-mv-forest-50">Santé</p>
-          <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">Équilibre & vitalité</h3>
-          <p class="mt-2 text-sm text-mv-forest-70">
-            Des recettes accessibles, bonnes et saines, pour retrouver énergie et plaisir sans pression.
-          </p>
-        </div>
-        <div class="mv-card p-5 sm:p-6">
-          <p class="text-xs uppercase tracking-[0.3em] text-mv-forest-50">Transmission</p>
-          <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">Apprendre en faisant</h3>
-          <p class="mt-2 text-sm text-mv-forest-70">
-            Des gestes simples, des repères clairs, pour gagner en autonomie et en confiance.
-          </p>
-        </div>
-        <div class="mv-card p-5 sm:p-6">
-          <p class="text-xs uppercase tracking-[0.3em] text-mv-forest-50">Plaisir</p>
-          <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">Cuisine vivante</h3>
-          <p class="mt-2 text-sm text-mv-forest-70">
-            Végétal, saison, gourmandise : une cuisine qui fait du bien et qui rassemble.
-          </p>
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          {visionCards.filter((card) => card?.isVisible !== false).map((card, index) => (
+            <div class="mv-card p-5 sm:p-6" key={index}>
+              <p class="text-xs uppercase tracking-[0.3em] text-mv-forest-50">{card.label}</p>
+              <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">{card.title}</h3>
+              <p class="mt-2 text-sm text-mv-forest-70">
+                {card.text}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  )}
 
   <!-- About Muriel Section -->
-  <section class="mv-section bg-mv-cream relative z-20">
-    <div class="mv-container max-w-6xl">
-      <div class="text-center mb-6 sm:mb-8 lg:mb-10">
-        <h2 class="mv-section-title mb-3 sm:mb-4">
-          {aboutData?.aboutTitle || "Muriel, cuisine & transmission"}
-        </h2>
-      </div>
+  {showAboutSection && (
+    <section class="mv-section bg-mv-cream relative z-20">
+      <div class="mv-container max-w-6xl">
+        <div class="text-center mb-6 sm:mb-8 lg:mb-10">
+          <h2 class="mv-section-title mb-3 sm:mb-4">
+            {aboutData?.aboutTitle || "Muriel, cuisine & transmission"}
+          </h2>
+        </div>
 
-      <div class="mv-card p-6 sm:p-8 md:p-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
-          <div class="space-y-4 sm:space-y-6 order-2 lg:order-1">
-            <p class="text-base sm:text-lg text-mv-forest-80 leading-relaxed">
-              {aboutData?.bio || "Passionnée de cuisine santé et de bien‑être, Muriel Cruysmans transmet une approche simple, sensible et généreuse de l’alimentation. Elle aime cuisiner en quantité, partager et donner envie de mieux manger, sans rigidité."}
-            </p>
-            <div class="space-y-3 sm:space-y-4">
-              {aboutData?.achievements ? aboutData.achievements.map((achievement, index) => (
-                <div class="flex items-start" key={index}>
-                  <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                  <span class="text-mv-forest-80 text-sm sm:text-base">{achievement}</span>
+        <div class="mv-card p-6 sm:p-8 md:p-12">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
+            <div class="space-y-4 sm:space-y-6 order-2 lg:order-1">
+              <p class="text-base sm:text-lg text-mv-forest-80 leading-relaxed">
+                {aboutData?.bio || "Passionnée de cuisine santé et de bien‑être, Muriel Cruysmans transmet une approche simple, sensible et généreuse de l’alimentation. Elle aime cuisiner en quantité, partager et donner envie de mieux manger, sans rigidité."}
+              </p>
+              {showAchievements && (
+                <div class="space-y-3 sm:space-y-4">
+                  {aboutData?.achievements ? aboutData.achievements.map((achievement, index) => (
+                    <div class="flex items-start" key={index}>
+                      <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                      <span class="text-mv-forest-80 text-sm sm:text-base">{achievement}</span>
+                    </div>
+                  )) : (
+                    <>
+                      <div class="flex items-start">
+                        <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-mv-forest-80 text-sm sm:text-base">Diplômée restaurateur-traiteur (mai 2024)</span>
+                      </div>
+                      <div class="flex items-start">
+                        <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-mv-forest-80 text-sm sm:text-base">Auteur d'un livre de recettes</span>
+                      </div>
+                      <div class="flex items-start">
+                        <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-mv-forest-80 text-sm sm:text-base">Spécialiste cuisine santé et bien-être</span>
+                      </div>
+                    </>
+                  )}
                 </div>
-              )) : (
-                <>
-                  <div class="flex items-start">
-                    <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-mv-forest-80 text-sm sm:text-base">Diplômée restaurateur-traiteur (mai 2024)</span>
-                  </div>
-                  <div class="flex items-start">
-                    <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-mv-forest-80 text-sm sm:text-base">Auteur d'un livre de recettes</span>
-                  </div>
-                  <div class="flex items-start">
-                    <svg class="h-5 w-5 text-mv-leaf mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-mv-forest-80 text-sm sm:text-base">Spécialiste cuisine santé et bien-être</span>
-                  </div>
-                </>
               )}
+              <a href={aboutData?.aboutCtaLink || "#services"} class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
+                {aboutData?.aboutCtaLabel || "Voir les services"}
+              </a>
             </div>
-            <a href="#services" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
-              Voir les services
-            </a>
-          </div>
-          <div class="bg-mv-cream rounded-2xl p-4 sm:p-6 shadow-sm order-1 lg:order-2 border border-mv-leaf-20">
-            {getImageUrl(aboutData?.photo) ? (
-              <img
-                src={`${getImageUrl(aboutData?.photo)}?w=500&h=600&fit=crop&auto=format`}
-                alt="Muriel Cruysmans"
-                class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-lg"
-                loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-              />
-            ) : null}
-            <div class="aspect-[4/5] bg-gray-200 rounded-lg flex items-center justify-center" style={getImageUrl(aboutData?.photo) ? 'display: none;' : 'display: flex;'}>
-              <div class="text-center text-mv-forest-60">
-                <svg class="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-                <p class="text-sm sm:text-base font-medium">Photo Muriel Cruysmans</p>
-                <p class="text-xs sm:text-sm mt-1 sm:mt-2">Ajoutez une photo dans le Sanity Studio</p>
+            <div class="bg-mv-cream rounded-2xl p-4 sm:p-6 shadow-sm order-1 lg:order-2 border border-mv-leaf-20">
+              {getImageUrl(aboutData?.photo) ? (
+                <img
+                  src={`${getImageUrl(aboutData?.photo)}?w=500&h=600&fit=crop&auto=format`}
+                  alt="Muriel Cruysmans"
+                  class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-lg"
+                  loading="lazy"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                />
+              ) : null}
+              <div class="aspect-[4/5] bg-gray-200 rounded-lg flex items-center justify-center" style={getImageUrl(aboutData?.photo) ? 'display: none;' : 'display: flex;'}>
+                <div class="text-center text-mv-forest-60">
+                  <svg class="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
+                  <p class="text-sm sm:text-base font-medium">Photo Muriel Cruysmans</p>
+                  <p class="text-xs sm:text-sm mt-1 sm:mt-2">Ajoutez une photo dans le Sanity Studio</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  )}
 
   <!-- Services Section -->
-  <section id="services" class="mv-section bg-mv-cream">
-    <div class="mv-container">
-      <div class="text-center mb-6 sm:mb-8 lg:mb-10">
-        <h2 class="mv-section-title mb-3 sm:mb-4">
-          Mes Services
-        </h2>
-        <p class="text-base sm:text-lg text-mv-forest-70 max-w-2xl mx-auto leading-relaxed">
-          Cours de cuisine à la carte et coaching personnalisé pour votre bien-être alimentaire
-        </p>
-      </div>
+  {showServices && (
+    <section id="services" class="mv-section bg-mv-cream">
+      <div class="mv-container">
+        <div class="text-center mb-6 sm:mb-8 lg:mb-10">
+          <h2 class="mv-section-title mb-3 sm:mb-4">
+            {aboutData?.servicesTitle || 'Mes Services'}
+          </h2>
+          <p class="text-base sm:text-lg text-mv-forest-70 max-w-2xl mx-auto leading-relaxed">
+            {aboutData?.servicesSubtitle || 'Cours de cuisine à la carte et coaching personnalisé pour votre bien-être alimentaire'}
+          </p>
+        </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-8">
-        {aboutData?.services ? aboutData.services.map((service, index) => (
-          <PricingCard
-            title={service.title}
-            subtitle={service.description}
-            price={service.price}
-            period=""
-            features={service.features}
-            priority={String(index + 1)}
-            ctaText="En savoir plus"
-            ctaLink="/contact"
-          />
-        )) : (
-          <>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-8">
+          {aboutData?.services ? aboutData.services.map((service, index) => (
             <PricingCard
-              title="Balade"
-              subtitle="Découverte culinaire"
-              price="125€"
+              title={service.title}
+              subtitle={service.description}
+              price={service.price}
               period=""
+              features={service.features}
+              priority={String(index + 1)}
+              ctaText={aboutData?.servicesCtaText || "En savoir plus"}
+              ctaLink={aboutData?.servicesCtaLink || "/contact"}
+            />
+          )) : (
+            <>
+              <PricingCard
+                title="Balade"
+                subtitle="Découverte culinaire"
+                price="125€"
+                period=""
               features={[
                 "Balade gourmande dans la nature",
                 "Découverte des produits locaux",
@@ -248,5 +273,6 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
       </div>
     </div>
   </section>
+  )}
 
 </MainLayout>

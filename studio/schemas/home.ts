@@ -102,13 +102,6 @@ export const home = {
       type: 'string',
       initialValue: 'Découvrir notre histoire',
       description: 'Bouton qui mène vers la page À propos.'
-    },
-    {
-      name: 'ctaSecondaryButton',
-      title: 'Texte bouton secondaire (optionnel)',
-      type: 'string',
-      initialValue: 'En savoir plus',
-      description: 'Optionnel (non utilisé pour le moment).'
     }
   ]
 }

@@ -2,13 +2,11 @@ import { Box, Card, Grid, Stack, Text } from '@sanity/ui'
 import { PatchEvent, set, unset } from 'sanity'
 import { useMemo, useCallback } from 'react'
 
-const statusCycle = ['Disponible', 'Réservé', 'Libre']
 const calendarWeekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
 const statusPalette: Record<string, { background: string; border: string; text: string }> = {
   Disponible: { background: '#e8f5f0', border: '#4a7c59', text: '#114433' },
-  Réservé: { background: '#fbe8f2', border: '#a34382', text: '#4e173a' },
-  Libre: { background: '#ffffff', border: '#d1d1d1', text: '#6a6a6a' }
+  Indisponible: { background: '#fbe8f2', border: '#a34382', text: '#4e173a' }
 }
 
 const normalizeDateKey = (value?: string) => {
@@ -41,20 +39,13 @@ const buildCalendarCells = (
       ? `${year}-${String(month + 1).padStart(2, '0')}-${String(dayIndex).padStart(2, '0')}`
       : undefined
     const existingSlot = dateKey ? slotsByDate.get(dateKey) : undefined
-    const status = existingSlot?.status ?? 'Libre'
+    const status = existingSlot?.status ?? 'Disponible'
     cells.push({ day, dateKey, isCurrentMonth, status })
   }
   return cells
 }
 
 const makeSlotKey = (dateKey: string) => `slot-${dateKey}-${Date.now().toString(36)}`
-
-const getNextStatus = (current?: string) => {
-  const normalized = (current ?? '').toLowerCase()
-  const index = statusCycle.findIndex(status => status.toLowerCase() === normalized)
-  if (index === -1) return statusCycle[0]
-  return statusCycle[(index + 1) % statusCycle.length]
-}
 
 interface CompanyAgendaCalendarInputProps {
   value?: Array<Record<string, unknown>>
@@ -111,21 +102,18 @@ export function CompanyAgendaCalendarInput({ value, onChange, readOnly, document
   const handleDayClick = useCallback((dateKey: string | undefined) => {
     if (readOnly || !dateKey) return
     const existing = slotsByDate.get(dateKey)
-    const nextStatus = getNextStatus(existing?.status as string | undefined)
-
     const filtered = slotArray.filter(slot => normalizeDateKey(slot?.date as string | undefined) !== dateKey)
-    if (nextStatus === 'Libre') {
+
+    if (existing?.status === 'Indisponible') {
       const nextValue = filtered.length === 0 ? null : filtered
       onChange(PatchEvent.from(nextValue ? set(nextValue) : unset()))
       return
     }
 
     const newSlot = {
-      ...existing,
       _key: existing?._key || makeSlotKey(dateKey),
       date: dateKey,
-      status: nextStatus,
-      title: existing?.title ?? 'Créneau entreprise'
+      status: 'Indisponible'
     }
     const combined = [...filtered, newSlot].sort((a, b) => {
       const dateA = new Date(a?.date as string ?? 0).getTime()
@@ -147,7 +135,7 @@ export function CompanyAgendaCalendarInput({ value, onChange, readOnly, document
     <Stack space={3}>
       <Card padding={3} tone="transparent">
         <Text size={1} muted>
-          Cliquez sur un jour pour faire tourner son statut (Disponible → Réservé → Libre).
+          Cliquez sur un jour pour basculer Disponible / Indisponible.
         </Text>
       </Card>
       <Grid columns={[1, 2]} gap={3}>
@@ -165,7 +153,7 @@ export function CompanyAgendaCalendarInput({ value, onChange, readOnly, document
             </Grid>
             <Grid columns={7} gap={1} style={{ marginTop: 4 }}>
               {month.cells.map((cell, index) => {
-                const palette = statusPalette[cell.status] ?? statusPalette.Libre
+                const palette = statusPalette[cell.status] ?? statusPalette.Disponible
                 return (
                   <Box
                     key={`${month.label}-${cell.dateKey ?? 'empty'}-${index}`}

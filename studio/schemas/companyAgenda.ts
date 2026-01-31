@@ -4,6 +4,13 @@ export const companyAgenda = {
   name: 'companyAgenda',
   title: 'Agenda entreprises',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'visibility',
+      title: 'Affichage (avancé)',
+      options: { collapsible: true, collapsed: true }
+    }
+  ],
   fields: [
     {
       name: 'title',
@@ -57,41 +64,28 @@ export const companyAgenda = {
               type: 'date'
             },
             {
-              name: 'startTime',
-              title: 'Heure de début',
-              type: 'string'
-            },
-            {
-              name: 'endTime',
-              title: 'Heure de fin',
-              type: 'string'
-            },
-            {
-              name: 'title',
-              title: 'Titre du créneau',
-              type: 'string'
-            },
-            {
               name: 'status',
               title: 'Statut',
               type: 'string',
               options: {
                 list: [
                   { title: 'Disponible', value: 'Disponible' },
-                  { title: 'Réservé', value: 'Réservé' },
-                  { title: 'Sur demande', value: 'Sur demande' }
+                  { title: 'Indisponible', value: 'Indisponible' }
                 ]
-              }
-            },
-            {
-              name: 'notes',
-              title: 'Notes',
-              type: 'text'
+              },
+              initialValue: 'Indisponible'
             }
           ]
         }
       ],
-      description: 'Ajoutez autant de créneaux que nécessaire pour montrer vos disponibilités, puis ajustez les statuts et les heures.'
+      description: 'Par défaut, tous les jours sont disponibles. Cliquez pour marquer des jours indisponibles.'
+    },
+    {
+      name: 'isVisible',
+      title: 'Afficher la section agenda',
+      type: 'boolean',
+      initialValue: true,
+      fieldset: 'visibility'
     }
   ]
 }

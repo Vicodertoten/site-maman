@@ -2,15 +2,23 @@
 const sanityClient = require('@sanity/client')
 const { randomUUID } = require('crypto')
 
+const projectId = process.env.SANITY_PROJECT_ID || process.env.PUBLIC_SANITY_PROJECT_ID
+const dataset = process.env.SANITY_DATASET || process.env.PUBLIC_SANITY_DATASET || 'production'
+
 const client = sanityClient({
-  projectId: 'gjz41m8i',
-  dataset: 'production',
+  projectId,
+  dataset,
   useCdn: false,
   apiVersion: '2024-01-01',
   token: process.env.SANITY_AUTH_TOKEN
 })
 
 async function ensureKeys() {
+  if (!projectId) {
+    console.error('Définis SANITY_PROJECT_ID avant de lancer ce script.')
+    process.exit(1)
+  }
+
   if (!process.env.SANITY_AUTH_TOKEN) {
     console.error('Définis SANITY_AUTH_TOKEN avant de lancer ce script.')
     process.exit(1)

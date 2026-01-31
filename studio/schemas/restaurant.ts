@@ -3,6 +3,13 @@ export const restaurant = {
   name: 'restaurant',
   title: 'Restaurant éphémère',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'visibility',
+      title: 'Affichage (avancé)',
+      options: { collapsible: true, collapsed: true }
+    }
+  ],
   fields: [
     {
       name: 'title',
@@ -38,25 +45,11 @@ export const restaurant = {
       description: 'Titre de la section menu'
     },
     {
-      name: 'datesTitle',
-      title: 'Titre de la section dates',
-      type: 'string',
-      initialValue: 'Prochaines dates',
-      description: 'Titre de la section dates'
-    },
-    {
       name: 'reservationTitle',
       title: 'Titre de la section réservation',
       type: 'string',
       initialValue: 'Prochaines soirées',
       description: 'Titre au-dessus des dates.'
-    },
-    {
-      name: 'dates',
-      title: 'Prochaines dates',
-      type: 'array',
-      of: [{ type: 'date' }],
-      description: 'Sélectionnez les dates des prochains jeudis soir'
     },
     {
       name: 'price',
@@ -73,11 +66,42 @@ export const restaurant = {
       initialValue: 'Un menu unique, créatif et très végétal, cuisiné au rythme des saisons.'
     },
     {
-      name: 'isFull',
-      title: 'Complet ?',
-      type: 'boolean',
-      initialValue: false,
-      description: 'Cochez si toutes les places sont réservées'
+      name: 'highlights',
+      title: 'Points forts (liste)',
+      type: 'array',
+      of: [{ type: 'string' }],
+      description: 'Détails à afficher sur la carte (ex: menu 3 services, produits locaux, etc.).'
+    },
+    {
+      name: 'dateSlots',
+      title: 'Prochaines dates (avec statut)',
+      type: 'array',
+      of: [{
+        type: 'object',
+        name: 'dateSlot',
+        fields: [
+          { name: 'date', title: 'Date', type: 'date' },
+          {
+            name: 'status',
+            title: 'Statut',
+            type: 'string',
+            options: {
+              list: [
+                { title: 'Disponible', value: 'Disponible' },
+                { title: 'Complet', value: 'Complet' }
+              ]
+            },
+            initialValue: 'Disponible'
+          },
+          {
+            name: 'isVisible',
+            title: 'Afficher',
+            type: 'boolean',
+            initialValue: true
+          }
+        ]
+      }],
+      description: 'Ajoutez les dates et indiquez si elles sont complètes.'
     },
     {
       name: 'minGuests',
@@ -92,6 +116,13 @@ export const restaurant = {
       type: 'number',
       initialValue: 25,
       description: 'Acompte par personne en euros'
+    },
+    {
+      name: 'isVisible',
+      title: 'Afficher cette offre',
+      type: 'boolean',
+      initialValue: true,
+      fieldset: 'visibility'
     }
   ]
 }

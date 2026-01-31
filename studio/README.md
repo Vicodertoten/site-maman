@@ -4,18 +4,17 @@ Studio d'administration pour gérer le contenu du site Gastronomade.
 
 ## Installation
 
-1. Créer un projet Sanity :
+1. Installer les dépendances :
    ```bash
    cd studio
    npm install
-   npx sanity init
    ```
 
 2. Configurer les variables d'environnement :
    Créer un fichier `.env.local` avec :
    ```
    SANITY_PROJECT_ID=votre-project-id
-   SANITY_DATASET=production. 
+   SANITY_DATASET=production
    ```
 
 ## Démarrage
@@ -26,6 +25,21 @@ npm run dev
 ```
 
 Le studio sera accessible sur `http://localhost:3333`
+
+## 🔄 Migration legacy (une seule fois)
+
+Si vous migrez depuis l’ancien modèle (dates restaurant, agenda entreprises, etc.) :
+
+```bash
+cd studio
+SANITY_PROJECT_ID=xxx SANITY_DATASET=production SANITY_AUTH_TOKEN=xxx \
+npm run migrate:legacy
+```
+
+Ce script :
+- Convertit les anciennes dates restaurant vers `dateSlots`
+- Passe l’agenda entreprises en mode “Indisponible” uniquement
+- Migre l’ancienne section Vision (About) vers les nouveaux champs
 
 ## 📧 Outil Newsletter
 

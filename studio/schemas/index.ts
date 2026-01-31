@@ -9,6 +9,9 @@ import { home } from './home'
 import { newsletter } from './newsletter'
 import { companyAgenda } from './companyAgenda'
 import { pack } from './pack'
+import { siteSettings } from './siteSettings'
+import { newsletterSettings } from './newsletterSettings'
+import { recipesPage } from './recipesPage'
 
 export const schemaTypes = [
   restaurant,
@@ -20,5 +23,8 @@ export const schemaTypes = [
   home,
   companyAgenda,
   newsletter,
-  pack
+  pack,
+  siteSettings,
+  newsletterSettings,
+  recipesPage
 ]

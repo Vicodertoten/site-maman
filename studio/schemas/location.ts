@@ -3,6 +3,13 @@ export const location = {
   name: 'location',
   title: 'Privatisation du lieu',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'visibility',
+      title: 'Affichage (avancé)',
+      options: { collapsible: true, collapsed: true }
+    }
+  ],
   fields: [
     {
       name: 'type',
@@ -55,6 +62,25 @@ export const location = {
       description: 'Texte plus long pour la page de détails.'
     },
     {
+      name: 'details',
+      title: 'Détails (liste)',
+      type: 'array',
+      of: [{ type: 'string' }],
+      description: 'Points supplémentaires à afficher (conditions, options, etc.).'
+    },
+    {
+      name: 'ctaLabel',
+      title: 'Bouton — Libellé',
+      type: 'string',
+      initialValue: 'Demander un devis'
+    },
+    {
+      name: 'ctaLink',
+      title: 'Bouton — Lien',
+      type: 'string',
+      initialValue: '/contact'
+    },
+    {
       name: 'maxCapacity',
       title: 'Capacité maximale',
       type: 'number',
@@ -69,6 +95,13 @@ export const location = {
       },
       description: 'Photo de l\'espace',
       validation: (Rule) => Rule.required()
+    },
+    {
+      name: 'isVisible',
+      title: 'Afficher cette offre',
+      type: 'boolean',
+      initialValue: true,
+      fieldset: 'visibility'
     }
   ],
   preview: {

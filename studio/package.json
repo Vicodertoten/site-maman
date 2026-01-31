@@ -8,7 +8,8 @@
     "dev": "sanity dev",
     "build": "sanity build",
     "start": "sanity start",
-    "setup": "./setup.sh"
+    "setup": "./setup.sh",
+    "migrate:legacy": "node scripts/migrateLegacyFields.js"
   },
   "dependencies": {
     "@sanity/icons": "^3.7.4",
