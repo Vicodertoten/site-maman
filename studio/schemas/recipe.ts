@@ -92,6 +92,9 @@ export const recipe = {
       options: {
         hotspot: true
       },
+      fields: [
+        { name: 'alt', title: 'Texte alternatif', type: 'string' }
+      ],
       description: 'Photo de la recette terminée',
       fieldset: 'presentation'
     },
@@ -99,7 +102,13 @@ export const recipe = {
       name: 'gallery',
       title: 'Galerie (optionnel)',
       type: 'array',
-      of: [{ type: 'image', options: { hotspot: true } }],
+      of: [{
+        type: 'image',
+        options: { hotspot: true },
+        fields: [
+          { name: 'alt', title: 'Texte alternatif', type: 'string' }
+        ]
+      }],
       description: 'Photos complémentaires pour la fiche recette',
       fieldset: 'presentation'
     },

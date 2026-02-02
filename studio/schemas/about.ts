@@ -103,11 +103,26 @@ export const about = {
       initialValue: 'Muriel, cuisine & transmission'
     },
     {
+      name: 'aboutLead',
+      title: 'Accroche personnelle',
+      type: 'string',
+      initialValue: 'Introduire du plaisir et du bon sens en respectant les principes d’une nutrition équilibrée.'
+    },
+    {
       name: 'bio',
       title: 'Texte bio',
       type: 'text',
-      initialValue: 'Passionnée de cuisine santé et de bien‑être, Muriel Cruysmans transmet une approche simple, sensible et généreuse de l’alimentation. Elle aime cuisiner en quantité, partager et donner envie de mieux manger, sans rigidité.',
+      initialValue: 'Je suis passionnée par l’alimentation depuis une vingtaine d’années et convaincue que c’est un des piliers de notre bonne santé.',
       description: 'Paragraphe principal de la section Muriel.'
+    },
+    {
+      name: 'aboutParagraphs',
+      title: 'Paragraphes complémentaires',
+      type: 'array',
+      of: [{ type: 'text' }],
+      initialValue: [
+        'Bien s’alimenter oui, mais dans le respect du travail et de la planète. Je privilégie les produits locaux, de saison, de culture biologique. Ma cuisine se veut simple, savoureuse, fraîche, nourrissante et conviviale. Rien n’est interdit, c’est en prenant conscience de notre manière de nous alimenter et en découvrant de délicieuses nouvelles alternatives que petit à petit les aliments indésirables sortent de nos assiettes.'
+      ]
     },
     {
       name: 'photo',
@@ -140,6 +155,45 @@ export const about = {
       title: 'Bouton section Muriel — Lien',
       type: 'string',
       initialValue: '#services'
+    },
+    {
+      name: 'journeyTitle',
+      title: 'Parcours — Titre',
+      type: 'string',
+      initialValue: 'Mon parcours'
+    },
+    {
+      name: 'journeyIntro',
+      title: 'Parcours — Introduction',
+      type: 'text',
+      initialValue: 'Après une licence en Affaires Publiques et Internationales (UCL), c’est la passion pour l’alimentation qui m’a guidé pour la suite.'
+    },
+    {
+      name: 'journeyItems',
+      title: 'Parcours — Points clés',
+      type: 'array',
+      of: [{ type: 'text' }],
+      initialValue: [
+        'Ma curiosité, ma gourmandise et mon envie de comprendre m’ont mené à travers de nombreuses conférences, formations et cours de cuisine (CERDEN, Taty Lauwers, Pol Grégoire, Coaching, pleine conscience, Formation potager, Cuisine sauvage et l’accès à la profession de traiteur-restaurateur).',
+        'J’ai mis en pratique tout ce savoir à travers des cours de cuisine (notamment à la Vie-Là à Ottignies), des animations au goût dans les écoles, des créations de recettes pour une nutritionniste, la publication de mon livre de recettes « Et si on mangeait vrai ? », la livraison de plats ressourçant et Gastronomade (notre restaurant et lieu mis en location).'
+      ]
+    },
+    {
+      name: 'signatureTitle',
+      title: 'Fil rouge — Titre',
+      type: 'string',
+      initialValue: 'Fil rouge de mes recettes'
+    },
+    {
+      name: 'signatureParagraphs',
+      title: 'Fil rouge — Paragraphes',
+      type: 'array',
+      of: [{ type: 'text' }],
+      initialValue: [
+        'L’important est de trouver l’équilibre. Chacun a le sien et il est toujours à moduler.',
+        'Je ne suis « anti » rien. C’est juste le bon sens qui a fait sortir de mon assiette tous les produits industriels, chémiqués, ....qui ne sont plus des aliments mais de la « bouffe ».',
+        'Quel plaisir d’offrir un festival de goûts, de textures et de saveurs à nos papilles à partir de produits simples, frais et naturels.'
+      ]
     },
     {
       name: 'servicesTitle',
@@ -262,6 +316,20 @@ export const about = {
     {
       name: 'showServices',
       title: 'Afficher la section Services',
+      type: 'boolean',
+      initialValue: true,
+      fieldset: 'visibility'
+    },
+    {
+      name: 'showJourney',
+      title: 'Afficher la section Parcours',
+      type: 'boolean',
+      initialValue: true,
+      fieldset: 'visibility'
+    },
+    {
+      name: 'showSignature',
+      title: 'Afficher la section Fil rouge',
       type: 'boolean',
       initialValue: true,
       fieldset: 'visibility'

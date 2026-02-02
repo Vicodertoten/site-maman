@@ -1,0 +1,19 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Section from '../components/Section.astro';
+
+export const prerender = false;
+---
+
+<MainLayout title="Page introuvable - Gastronomade" robots="noindex, nofollow">
+  <Section class="bg-white" containerClass="max-w-xl text-center">
+    <h1 class="text-3xl font-serif font-bold text-mv-forest mb-4" slot="content">Page introuvable</h1>
+    <p class="text-mv-forest-70" slot="content">
+      La page que vous cherchez n'existe pas ou n'est plus disponible.
+    </p>
+    <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center" slot="content">
+      <a href="/" class="mv-btn mv-btn-primary">Retour à l'accueil</a>
+      <a href="/recettes" class="mv-btn mv-btn-secondary">Voir les recettes</a>
+    </div>
+  </Section>
+</MainLayout>

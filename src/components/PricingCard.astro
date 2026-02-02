@@ -15,7 +15,7 @@ interface Props {
 const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = false, imageUrl, imageAlt }: Props = Astro.props;
 ---
 
-<div class={`mv-card p-4 sm:p-6 lg:p-8 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${highlight ? 'ring-2 ring-mv-leaf scale-105' : ''} relative`} role="article">
+<div class={`mv-card p-4 sm:p-6 lg:p-8 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${highlight ? 'ring-2 ring-mv-leaf scale-105' : ''} relative flex h-full flex-col`} role="article">
   {imageUrl && (
     <div class="mb-5 overflow-hidden rounded-2xl border border-mv-leaf-20 bg-mv-cream">
       <img
@@ -23,20 +23,21 @@ const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = 
         alt={imageAlt || title}
         class="h-40 w-full object-cover sm:h-44"
         loading="lazy"
+        decoding="async"
+        width="600"
+        height="400"
+        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
       />
     </div>
   )}
 
-  <div class="text-center mb-6">
+  <div class="text-center mb-5">
     <h3 class="text-xl sm:text-2xl font-serif font-bold text-mv-forest mb-2 leading-tight">{title}</h3>
-    <p class="text-mv-plum text-sm sm:text-base mb-4 leading-relaxed">{subtitle}</p>
-    <div class="text-2xl sm:text-3xl font-bold text-mv-coral">
-      {price} <span class="text-base sm:text-lg font-normal text-mv-forest-70">{period}</span>
-    </div>
+    <p class="text-mv-plum text-sm sm:text-base leading-relaxed">{subtitle}</p>
   </div>
 
   {features?.length > 0 && (
-    <ul class="space-y-3 mb-6" role="list">
+    <ul class="space-y-3 mb-5" role="list">
       {features.map(feature => (
         <li class="flex items-start" role="listitem">
           <svg class="h-4 w-4 sm:h-5 sm:w-5 text-mv-leaf mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -48,16 +49,24 @@ const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = 
     </ul>
   )}
 
-  <a
-    href={ctaLink}
-    class={`mv-btn block w-full text-center text-sm sm:text-base transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 ${
-      highlight
-        ? 'mv-btn-primary'
-        : 'mv-btn-secondary'
-    }`}
-    role="button"
-    aria-label={`${ctaText} pour ${title}`}
-  >
-    {ctaText}
-  </a>
+  <div class="mt-auto pt-4">
+    <div class="text-center text-xl sm:text-2xl font-semibold text-mv-coral">
+      {price}
+      {period && (
+        <span class="ml-2 text-xs sm:text-sm font-normal text-mv-forest-70">{period}</span>
+      )}
+    </div>
+    <a
+      href={ctaLink}
+      class={`mt-4 mv-btn block w-full text-center text-sm sm:text-base transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 ${
+        highlight
+          ? 'mv-btn-primary'
+          : 'mv-btn-secondary'
+      }`}
+      role="button"
+      aria-label={`${ctaText} pour ${title}`}
+    >
+      {ctaText}
+    </a>
+  </div>
 </div>

@@ -91,6 +91,13 @@ export const home = {
       description: 'Petit bloc en bas de page avec lien vers About.'
     },
     {
+      name: 'ctaExcerpt',
+      title: 'Extrait court section À propos',
+      type: 'text',
+      initialValue: 'Introduire du plaisir et du bon sens en respectant les principes d’une nutrition équilibrée.',
+      description: 'Court extrait personnel (1 phrase).'
+    },
+    {
       name: 'ctaDescription',
       title: 'Texte section À propos',
       type: 'text',

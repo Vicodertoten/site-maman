@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import Section from '../components/Section.astro';
 import { sanityClient, queries, type ThermomixData } from '../lib/sanity';
 import { getEmbedUrl } from '../lib/utils';
 
@@ -19,6 +20,12 @@ const heroHighlights = (thermomixData?.heroHighlights && thermomixData.heroHighl
       { label: '3', title: 'Vaisselle réduite', text: 'Un seul appareil pour tout faire.', isVisible: true }
     ];
 
+const fallbackHeroLead = 'Le Thermomix pèse, hache, mixe, cuit et mijote dans un seul bol. Il guide chaque étape grâce à ses recettes intégrées : vous gardez la main, il vous simplifie la vie.';
+const pageDescription = (thermomixData?.heroLead || fallbackHeroLead).trim();
+const pageImage = thermomixData?.featuredImageUrl
+  ? `${thermomixData.featuredImageUrl}?w=1200&h=630&fit=crop&auto=format`
+  : undefined;
+
 const benefits = (thermomixData?.benefits && thermomixData.benefits.length > 0)
   ? thermomixData.benefits
   : [
@@ -36,9 +43,13 @@ const demoDetails = (thermomixData?.demoDetails && thermomixData.demoDetails.len
     ];
 ---
 
-<MainLayout title="Thermomix - Gastronomade">
+<MainLayout
+  title="Thermomix - Gastronomade"
+  description={pageDescription}
+  image={pageImage}
+>
   {showHero && (
-    <section class="relative overflow-hidden bg-gradient-to-b from-mv-cream via-white to-mv-cream/30 mv-section">
+    <Section class="relative overflow-hidden bg-gradient-to-b from-mv-cream via-white to-mv-cream/30">
       {thermomixData?.featuredImageUrl && (
         <div class="absolute inset-0 hidden lg:block">
           <div
@@ -56,7 +67,7 @@ const demoDetails = (thermomixData?.demoDetails && thermomixData.demoDetails.len
           ></div>
         </div>
       )}
-      <div class="relative mv-container">
+      <div class="relative" slot="content">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           <div class="lg:col-span-7 space-y-5 sm:space-y-6">
             <p class="mv-kicker">{thermomixData?.heroKicker || 'Thermomix'}</p>
@@ -64,12 +75,12 @@ const demoDetails = (thermomixData?.demoDetails && thermomixData.demoDetails.len
               {thermomixData?.heroTitle || 'Le robot qui cuisine avec vous, pas à votre place.'}
             </h1>
             <p class="mv-lead">
-              {thermomixData?.heroLead || 'Le Thermomix pèse, hache, mixe, cuit et mijote dans un seul bol. Il guide chaque étape grâce à ses recettes intégrées : vous gardez la main, il vous simplifie la vie.'}
+              {thermomixData?.heroLead || fallbackHeroLead}
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {heroHighlights.filter((item) => item?.isVisible !== false).map((item, index) => (
                 <div class="rounded-2xl bg-white shadow-sm border border-mv-leaf-20 p-4" key={index}>
-                  <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60 mb-2">{item.label}</p>
+                  <p class="text-xs uppercase tracking-[0.18em] text-mv-forest-60 mb-2">{item.label}</p>
                   <h3 class="text-sm font-semibold text-mv-forest">{item.title}</h3>
                   <p class="text-sm text-mv-forest-70">{item.text}</p>
                 </div>
@@ -117,94 +128,91 @@ const demoDetails = (thermomixData?.demoDetails && thermomixData.demoDetails.len
           </div>
         </div>
       </div>
-    </section>
-  )}
-
-  {(showPromo || showBenefits) && (
-    <section class="mv-section bg-white">
-      <div class="mv-container">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {showPromo && (
-            <div class="lg:col-span-5">
-              <div class="rounded-3xl border border-mv-coral-20 bg-mv-coral-20 p-6 sm:p-8 shadow-sm">
-                {thermomixData?.featuredImageUrl && (
-                  <div class="mb-5 overflow-hidden rounded-2xl border border-mv-coral-20 bg-white">
-                    <img
-                      src={`${thermomixData.featuredImageUrl}?w=900&h=600&fit=crop&auto=format`}
-                      alt="Promo Thermomix"
-                      class="h-48 w-full object-cover sm:h-56"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-                <p class="mv-kicker mb-3">{thermomixData?.promoKicker || 'Promo du mois'}</p>
-                <h2 class="mv-section-title mb-3">
-                  {thermomixData?.promoTitle || 'Offres & avantages en cours'}
-                </h2>
-                <p class="mv-lead">
-                  {thermomixData?.monthlyText
-                    ? thermomixData.monthlyText
-                    : "Chaque mois, des conditions préférentielles et des surprises pour démarrer sereinement avec votre Thermomix."}
-                </p>
-              </div>
-            </div>
-          )}
-          {showBenefits && (
-            <div class="lg:col-span-7 space-y-4 sm:space-y-5">
-              <h3 class="mv-section-title">{thermomixData?.benefitsTitle || 'Pourquoi en profiter maintenant'}</h3>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {benefits.filter((item) => item?.isVisible !== false).map((item, index) => (
-                  <div class="rounded-2xl border border-mv-leaf-20 p-4" key={index}>
-                    <p class="text-sm font-semibold text-mv-forest">{item.title}</p>
-                    <p class="text-sm text-mv-forest-70">{item.text}</p>
-                  </div>
-                ))}
-              </div>
-              <a href={thermomixData?.benefitsCtaLink || "/contact"} class="inline-flex items-center gap-2 text-mv-forest font-semibold hover:text-mv-leaf transition-colors">
-                {thermomixData?.benefitsCtaLabel || 'Recevoir le détail de la promo →'}
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
+    </Section>
   )}
 
   {showDemo && (
-    <section class="mv-section bg-gradient-to-b from-white to-mv-cream/60">
-      <div class="mv-container">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          <div class="lg:col-span-7 space-y-5">
-            <h2 class="mv-section-title">
-              {thermomixData?.demoTitle || 'Démo en direct chaque mardi soir'}
-            </h2>
-            <p class="mv-lead">
-              {thermomixData?.demoText || 'Venez découvrir le Thermomix en action, poser vos questions et goûter le résultat. Démo prévue tous les mardis soir — et si ce créneau ne vous convient pas, contactez-moi pour trouver un autre moment.'}
-            </p>
-            <div class="flex flex-wrap gap-3">
-              <a href={thermomixData?.demoPrimaryCtaLink || '/contact'} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf transition-all duration-300">
-                {thermomixData?.demoPrimaryCtaLabel || 'Réserver une démo'}
-              </a>
-              <a href={thermomixData?.demoSecondaryCtaLink || '/contact'} class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream transition-all duration-300">
-                {thermomixData?.demoSecondaryCtaLabel || 'Demander un autre créneau'}
-              </a>
-            </div>
+    <Section class="bg-gradient-to-b from-white to-mv-cream/60">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center" slot="content">
+        <div class="lg:col-span-7 space-y-5">
+          <h2 class="mv-section-title">
+            {thermomixData?.demoTitle || 'Démo en direct chaque mardi soir'}
+          </h2>
+          <p class="mv-lead">
+            {thermomixData?.demoText || 'Venez découvrir le Thermomix en action, poser vos questions et goûter le résultat. Démo prévue tous les mardis soir — et si ce créneau ne vous convient pas, contactez-moi pour trouver un autre moment.'}
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a href={thermomixData?.demoPrimaryCtaLink || '/contact'} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf transition-all duration-300">
+              {thermomixData?.demoPrimaryCtaLabel || 'Réserver une démo'}
+            </a>
           </div>
-          <div class="lg:col-span-5">
-            <div class="rounded-3xl border border-mv-leaf-20 bg-white p-6 sm:p-8 shadow-sm space-y-4">
-              {demoDetails.filter((item) => item?.isVisible !== false).map((item, index) => (
-                <>
-                  <div>
-                    <p class="mv-kicker mb-2">{item.label}</p>
-                    <p class="text-sm text-mv-forest-80">{item.text}</p>
-                  </div>
-                  {index < demoDetails.length - 1 && <div class="h-px bg-mv-leaf-20"></div>}
-                </>
-              ))}
-            </div>
+        </div>
+        <div class="lg:col-span-5">
+          <div class="rounded-3xl border border-mv-leaf-20 bg-white p-6 sm:p-8 shadow-sm space-y-4">
+            {demoDetails.filter((item) => item?.isVisible !== false).map((item, index) => (
+              <>
+                <div>
+                  <p class="mv-kicker mb-2">{item.label}</p>
+                  <p class="text-sm text-mv-forest-80">{item.text}</p>
+                </div>
+                {index < demoDetails.length - 1 && <div class="h-px bg-mv-leaf-20"></div>}
+              </>
+            ))}
           </div>
         </div>
       </div>
-    </section>
+    </Section>
+  )}
+
+  {(showPromo || showBenefits) && (
+    <Section class="bg-white">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center" slot="content">
+        {showPromo && (
+          <div class="lg:col-span-5">
+            <div class="rounded-3xl border border-mv-coral-20 bg-mv-coral-20 p-6 sm:p-8 shadow-sm">
+              {thermomixData?.featuredImageUrl && (
+                <div class="mb-5 overflow-hidden rounded-2xl border border-mv-coral-20 bg-white">
+                  <img
+                    src={`${thermomixData.featuredImageUrl}?w=900&h=600&fit=crop&auto=format`}
+                    alt="Promo Thermomix"
+                    class="h-48 w-full object-cover sm:h-56"
+                    loading="lazy"
+                    decoding="async"
+                    width="900"
+                    height="600"
+                    sizes="(min-width: 1024px) 40vw, (min-width: 640px) 60vw, 100vw"
+                  />
+                </div>
+              )}
+              <p class="mv-kicker mb-3">{thermomixData?.promoKicker || 'Promo du mois'}</p>
+              <h2 class="mv-section-title mb-3">
+                {thermomixData?.promoTitle || 'Offres & avantages en cours'}
+              </h2>
+              <p class="mv-lead">
+                {thermomixData?.monthlyText
+                  ? thermomixData.monthlyText
+                  : "Chaque mois, des offres et des surprises à l’achat de votre Thermomix."}
+              </p>
+            </div>
+          </div>
+        )}
+        {showBenefits && (
+          <div class="lg:col-span-7 space-y-4 sm:space-y-5">
+            <h2 class="mv-section-title">{thermomixData?.benefitsTitle || 'Pourquoi en profiter maintenant'}</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {benefits.filter((item) => item?.isVisible !== false).map((item, index) => (
+                <div class="rounded-2xl border border-mv-leaf-20 p-4" key={index}>
+                  <p class="text-sm font-semibold text-mv-forest">{item.title}</p>
+                  <p class="text-sm text-mv-forest-70">{item.text}</p>
+                </div>
+              ))}
+            </div>
+            <a href={thermomixData?.benefitsCtaLink || "/contact"} class="inline-flex items-center gap-2 text-mv-forest font-semibold hover:text-mv-leaf transition-colors">
+              {thermomixData?.benefitsCtaLabel || 'Recevoir le détail de la promo →'}
+            </a>
+          </div>
+        )}
+      </div>
+    </Section>
   )}
 </MainLayout>

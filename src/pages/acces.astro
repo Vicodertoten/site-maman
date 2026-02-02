@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import MainLayout from '../layouts/MainLayout.astro';
+import Section from '../components/Section.astro';
 import { ACCESS_SESSION_COOKIE, consumeAccessToken, createSession } from '../lib/server/access';
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || import.meta.env.SITE_URL || Astro.url.origin;
@@ -32,17 +33,15 @@ if (status === 'success') {
 }
 ---
 
-<MainLayout title="Accès - Gastronomade">
-  <section class="py-16 bg-white">
-    <div class="mv-container max-w-xl text-center">
-      <h1 class="text-3xl font-serif font-bold text-mv-forest mb-4">Accès premium</h1>
-      {status === 'missing' && (
-        <p class="text-mv-forest-70">Lien d'accès manquant. Vérifie le lien reçu par email.</p>
-      )}
-      {status === 'invalid' && (
-        <p class="text-mv-forest-70">Ce lien n'est plus valide. Tu peux demander un nouveau lien depuis la page recettes.</p>
-      )}
-      <a href="/recettes" class="mv-btn mt-6 inline-flex">Retour aux recettes</a>
-    </div>
-  </section>
+<MainLayout title="Accès - Gastronomade" robots="noindex, nofollow">
+  <Section class="bg-white" containerClass="max-w-xl text-center">
+    <h1 class="text-3xl font-serif font-bold text-mv-forest mb-4" slot="content">Accès premium</h1>
+    {status === 'missing' && (
+      <p class="text-mv-forest-70" slot="content">Lien d'accès manquant. Vérifie le lien reçu par email.</p>
+    )}
+    {status === 'invalid' && (
+      <p class="text-mv-forest-70" slot="content">Ce lien n'est plus valide. Tu peux demander un nouveau lien depuis la page recettes.</p>
+    )}
+    <a href="/recettes" class="mv-btn mv-btn-primary mt-6 inline-flex" slot="content">Retour aux recettes</a>
+  </Section>
 </MainLayout>

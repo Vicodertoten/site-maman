@@ -1,18 +1,20 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import Section from '../components/Section.astro';
 import RecipeFilters from '../components/RecipeFilters.astro';
 import EnhancedRecipeCard from '../components/EnhancedRecipeCard.astro';
-import MicroInteractions from '../components/MicroInteractions.astro';
 import SpacingOptimizer from '../components/SpacingOptimizer.astro';
 import ShoppingList from '../components/ShoppingList.astro';
 import FavoritesManager from '../components/FavoritesManager.astro';
 import AnimationOptimizer from '../components/AnimationOptimizer.astro';
 import { getPacksData, getRecipesData, getRecipesPageData } from '../lib/sanity';
 
-// Récupérer les recettes depuis Sanity
-const recipes = await getRecipesData();
-const packs = await getPacksData();
-const recipesPage = await getRecipesPageData();
+// Récupérer les recettes depuis Sanity (en parallèle pour réduire le TTFB)
+const [recipes, packs, recipesPage] = await Promise.all([
+  getRecipesData(),
+  getPacksData(),
+  getRecipesPageData()
+]);
 
 const showHero = recipesPage?.showHero !== false;
 const showShop = recipesPage?.showShop !== false;
@@ -22,6 +24,9 @@ const heroDescriptionTemplate = recipesPage?.heroDescription
   || 'Retrouvez ici plein de recettes gratuites. Des {{shop}} sont aussi disponibles à la vente : ils débloquent l’ebook et les recettes premium directement sur le site.';
 const heroDescriptionParts = heroDescriptionTemplate.split('{{shop}}');
 const hasShopPlaceholder = heroDescriptionTemplate.includes('{{shop}}');
+const pageDescription = heroDescriptionTemplate
+  .replace('{{shop}}', recipesPage?.heroShopLabel || 'ebooks')
+  .trim();
 
 const previewCards = (recipesPage?.previewCards && recipesPage.previewCards.length > 0)
   ? recipesPage.previewCards
@@ -198,6 +203,7 @@ const recipeCardsData = allRecipes.map(recipe => ({
   title: recipe.title,
   description: recipe.description,
   image: recipe.featuredImageUrl ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : undefined,
+  imageAlt: recipe.featuredImageAlt,
   prepTime: recipe.prepTime,
   cookTime: recipe.cookTime,
   restTime: recipe.restTime,
@@ -244,6 +250,31 @@ const packCards = (packs || []).map((pack) => ({
   recipeCount: pack.recipeCount || 0
 }));
 
+const baseUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : Astro.url.origin;
+const packJsonLd = showShop && packCards.length > 0
+  ? packCards.map((pack) => ({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": pack.title,
+      "description": pack.description,
+      "image": pack.coverImageUrl
+        ? [`${pack.coverImageUrl}?w=1200&h=630&fit=crop&auto=format`]
+        : undefined,
+      "sku": pack.id,
+      "brand": {
+        "@type": "Brand",
+        "name": "Gastronomade"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": typeof pack.price === 'number' ? pack.price : undefined,
+        "priceCurrency": pack.currency || 'EUR',
+        "availability": "https://schema.org/InStock",
+        "url": `${baseUrl}/recettes`
+      }
+    }))
+  : [];
+
 const formatPrice = (price?: number, currency?: string) => {
   if (typeof price !== 'number') return '';
   return new Intl.NumberFormat('fr-FR', {
@@ -256,17 +287,20 @@ const formatPrice = (price?: number, currency?: string) => {
 
 ---
 
-<MainLayout title={recipesPage?.pageTitle || "Recettes - Gastronomade"}>
+<MainLayout
+  title={recipesPage?.pageTitle || "Recettes - Gastronomade"}
+  description={pageDescription}
+  jsonLd={packJsonLd}
+>
   <!-- Optimisation d'espacement et micro-interactions -->
   <SpacingOptimizer enableResponsiveSpacing={true} enableDynamicSpacing={true} />
-  <MicroInteractions enableHoverEffects={true} enableClickFeedback={true} enableScrollAnimations={true} enableLoadingAnimations={true} />
   <AnimationOptimizer enablePerformanceMode={true} enableReducedMotion={true} />
   <FavoritesManager />
   <ShoppingList />
 
   <!-- Recipes Section -->
-  <section class="py-0 bg-white scroll-fade-in" id="recettes">
-    <div class="mv-container">
+  <Section class="bg-white scroll-fade-in" id="recettes" padless={true}>
+    <div slot="content">
       {showHero && (
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center mb-8">
           <div class="lg:col-span-7 space-y-5 sm:space-y-6">
@@ -402,13 +436,13 @@ const formatPrice = (price?: number, currency?: string) => {
 
       )}
     </div>
-  </section>
+  </Section>
 
   {showShop && (
     <>
       <button
         id="open-shop"
-        class="fixed bottom-6 right-6 z-[70] relative inline-flex items-center justify-center h-11 w-11 rounded-full bg-white/95 text-mv-forest shadow-lg border border-mv-leaf-30 hover:shadow-xl hover:scale-[1.03] transition-all pointer-events-auto"
+        class="fixed bottom-6 right-6 z-[70] relative inline-flex items-center justify-center h-11 w-11 rounded-full bg-white/95 text-mv-forest shadow-lg border border-mv-leaf-30 hover:shadow-xl hover:scale-[1.03] transition-all pointer-events-auto focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2"
         aria-haspopup="dialog"
         aria-controls="shop-modal"
         aria-label={recipesPage?.shopButtonAriaLabel || "Ouvrir la boutique"}
@@ -418,7 +452,7 @@ const formatPrice = (price?: number, currency?: string) => {
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7h13L17 13M9 21a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2z"/>
         </svg>
-        <span class="absolute -top-1 -right-1 text-[10px] uppercase tracking-[0.12em] bg-mv-leaf text-white px-1.5 py-0.5 rounded-full shadow">
+        <span class="absolute -top-1 -right-1 text-xs uppercase tracking-[0.12em] bg-mv-leaf text-white px-1.5 py-0.5 rounded-full shadow">
           {recipesPage?.shopBadgeLabel || 'Packs'}
         </span>
       </button>
@@ -496,7 +530,7 @@ const formatPrice = (price?: number, currency?: string) => {
                   {formatPrice(pack.price, pack.currency)}
                 </div>
                 <div class="flex items-center gap-2">
-                  <button class="mv-btn buy-pack-btn" data-pack-id={pack.id} data-default-label={recipesPage?.shopBuyLabel || 'Acheter'}>
+                  <button class="mv-btn mv-btn-primary buy-pack-btn" data-pack-id={pack.id} data-default-label={recipesPage?.shopBuyLabel || 'Acheter'}>
                     {recipesPage?.shopBuyLabel || 'Acheter'}
                   </button>
                   <button class="mv-btn mv-btn-secondary hidden download-pack-btn" data-pack-id={pack.id} style="display: none;">
@@ -529,7 +563,8 @@ const formatPrice = (price?: number, currency?: string) => {
               aria-label="Votre email d'achat"
               class="mv-input min-w-[220px]"
             />
-            <button type="submit" class="mv-btn">{recipesPage?.accessButtonLabel || 'Envoyer le lien'}</button>
+            <input type="text" name="website" autocomplete="off" tabindex="-1" class="sr-only" aria-hidden="true" />
+            <button type="submit" class="mv-btn mv-btn-primary">{recipesPage?.accessButtonLabel || 'Envoyer le lien'}</button>
           </form>
         </div>
         <p id="access-status" class="text-sm text-mv-forest-70 mt-3" role="status" aria-live="polite"></p>
@@ -556,11 +591,15 @@ const formatPrice = (price?: number, currency?: string) => {
         .replace(/'/g, '&#039;');
 
     const formatTime = (minutes) => {
-      if (!minutes && minutes !== 0) return '';
-      if (minutes < 60) return `${minutes}min`;
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
-      return mins > 0 ? `${hours}h${mins}min` : `${hours}h`;
+      const numeric = Number(minutes);
+      if (!Number.isFinite(numeric) || numeric <= 0) return '';
+      const rounded = Math.round(numeric);
+      if (rounded < 60) {
+        return `${rounded} min`;
+      }
+      const hours = Math.floor(rounded / 60);
+      const mins = rounded % 60;
+      return mins > 0 ? `${hours}h ${mins.toString().padStart(2, '0')} min` : `${hours}h`;
     };
 
     const getTotalTime = (prep, cook, rest) => {
@@ -596,8 +635,9 @@ const formatPrice = (price?: number, currency?: string) => {
 
     const renderRecipeCard = (recipe) => {
       const totalTime = getTotalTime(recipe.prepTime, recipe.cookTime, recipe.restTime);
+      const imageAlt = recipe.imageAlt || recipe.title;
       const imageHtml = recipe.image
-        ? `<img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(recipe.title)}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />`
+        ? `<img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(imageAlt)}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" width="400" height="300" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" />`
         : `<div class="w-full h-48 bg-gradient-to-br from-mv-cream to-mv-leaf flex items-center justify-center">
             <svg class="w-12 h-12 text-mv-forest opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -606,10 +646,10 @@ const formatPrice = (price?: number, currency?: string) => {
 
       const badges = [
         recipe.isNew
-          ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-mv-coral text-white animate-pulse">Nouveau</span>`
+          ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-mv-coral text-mv-cream animate-pulse">Nouveau</span>`
           : '',
         recipe.isPopular
-          ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-mv-plum text-white">
+          ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-mv-plum text-mv-cream">
               <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
               </svg>
@@ -655,7 +695,10 @@ const formatPrice = (price?: number, currency?: string) => {
 
       return `
         <article
-          class="enhanced-recipe-card group relative mv-card hover:border-mv-leaf transition-all duration-300 overflow-hidden p-6"
+          class="enhanced-recipe-card group relative mv-card hover:border-mv-leaf transition-all duration-300 overflow-hidden p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mv-leaf focus-visible:ring-offset-2"
+          role="link"
+          tabindex="0"
+          aria-label="Voir la recette ${escapeHtml(recipe.title)}"
           data-recipe-id="${escapeHtml(recipe.id)}"
           data-recipe-slug="${escapeHtml(recipe.slug || recipe.id)}"
           data-recipe-title="${escapeHtml(recipe.title)}"
@@ -834,7 +877,7 @@ const formatPrice = (price?: number, currency?: string) => {
         document.body.style.overflow = 'hidden';
         const focusTarget = modalFocus || modalPanel || modal;
         try {
-          releaseTrap = trapFocus(modalPanel || modal, { initialFocus: (modalFocus || modalPanel) ?? null, returnFocusTo: lastFocusedElement, onClose: closeModal });
+          releaseTrap = trapFocus(modal, { initialFocus: (modalFocus || modalPanel) ?? null, returnFocusTo: lastFocusedElement, onClose: closeModal });
         } catch (e) {
           // fallback: ensure panel is focused
           if (focusTarget && typeof focusTarget.focus === 'function') focusTarget.focus();
@@ -924,6 +967,7 @@ const formatPrice = (price?: number, currency?: string) => {
           const emailInput = accessForm.querySelector('input[name=\"email\"]');
           const submitButton = accessForm.querySelector('button[type=\"submit\"]');
           const email = emailInput?.value?.trim();
+          const honeypot = accessForm.querySelector('input[name="website"]')?.value?.trim();
           if (!email) return;
           if (accessStatus) accessStatus.textContent = 'Envoi du lien en cours...';
           if (submitButton) submitButton.setAttribute('disabled', 'true');
@@ -931,13 +975,16 @@ const formatPrice = (price?: number, currency?: string) => {
             const response = await fetch('/api/access/start', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email })
+              body: JSON.stringify({ email, website: honeypot })
             });
-            const data = await response.json();
-            if (accessStatus) {
-              accessStatus.textContent = data.hasAccess
-                ? 'Lien envoyé ! Vérifie ta boîte mail.'
-                : 'Si un achat existe, un lien sera envoyé rapidement.';
+            if (response.ok) {
+              if (accessStatus) {
+                accessStatus.textContent = 'Si un achat existe, un lien sera envoyé rapidement.';
+              }
+            } else {
+              if (accessStatus) {
+                accessStatus.textContent = 'Erreur lors de l’envoi. Réessaie plus tard.';
+              }
             }
             if (submitButton) submitButton.removeAttribute('disabled');
           } catch (error) {
@@ -960,7 +1007,7 @@ const formatPrice = (price?: number, currency?: string) => {
       if (payment === 'ok') {
         status.textContent = 'Paiement confirmé. Vérifiez votre email pour activer l’accès permanent.';
         status.classList.remove('hidden');
-      } else if (payment === 'cancel') {
+      } else if (payment === 'cancel' || payment === 'annule') {
         status.textContent = 'Paiement annulé. Vous pouvez réessayer à tout moment.';
         status.classList.remove('hidden');
       }

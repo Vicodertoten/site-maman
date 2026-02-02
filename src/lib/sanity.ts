@@ -4,7 +4,7 @@ import { createClient } from '@sanity/client'
 export const sanityClient = createClient({
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
   dataset: import.meta.env.PUBLIC_SANITY_DATASET || 'production',
-  useCdn: false, // Changez à false pour bypass le cache
+  useCdn: true, // CDN pour les lectures publiques
   apiVersion: '2024-01-01',
 })
 
@@ -111,6 +111,7 @@ export interface CompanyAgendaSlot {
 
 export interface RecipeData {
   _id: string
+  _updatedAt?: string
   title: string
   slug: { current: string }
   category: string
@@ -118,7 +119,8 @@ export interface RecipeData {
   description?: string
   featuredImage: any
   featuredImageUrl?: string
-  gallery?: Array<{ url?: string }>
+  featuredImageAlt?: string
+  gallery?: Array<{ url?: string; alt?: string }>
   prepTime?: number
   cookTime?: number
   restTime?: number
@@ -195,11 +197,18 @@ export interface AboutData {
     isVisible?: boolean
   }>
   aboutTitle: string
+  aboutLead?: string
   bio: string
+  aboutParagraphs?: string[]
   photo: any
   achievements: string[]
   aboutCtaLabel?: string
   aboutCtaLink?: string
+  journeyTitle?: string
+  journeyIntro?: string
+  journeyItems?: string[]
+  signatureTitle?: string
+  signatureParagraphs?: string[]
   servicesTitle?: string
   servicesSubtitle?: string
   servicesCtaText?: string
@@ -215,6 +224,8 @@ export interface AboutData {
   showAboutSection?: boolean
   showAchievements?: boolean
   showServices?: boolean
+  showJourney?: boolean
+  showSignature?: boolean
 }
 
 export interface HomeData {
@@ -236,6 +247,7 @@ export interface HomeData {
   }>
   restaurantSectionTitle: string
   restaurantSectionDescription: string
+  ctaExcerpt?: string
   ctaTitle: string
   ctaDescription: string
   ctaPrimaryButton: string
@@ -491,7 +503,8 @@ export const queries = {
     description,
     featuredImage,
     "featuredImageUrl": featuredImage.asset->url,
-    gallery[]{ ..., "url": asset->url },
+    "featuredImageAlt": featuredImage.alt,
+    gallery[]{ "url": asset->url, alt },
     prepTime,
     cookTime,
     restTime,
@@ -520,6 +533,7 @@ export const queries = {
   // Recette spécifique par slug
   recipeBySlug: `*[_type == "recipe" && slug.current == $slug][0] {
     _id,
+    _updatedAt,
     title,
     slug,
     category,
@@ -527,7 +541,8 @@ export const queries = {
     description,
     featuredImage,
     "featuredImageUrl": featuredImage.asset->url,
-    gallery[]{ ..., "url": asset->url },
+    "featuredImageAlt": featuredImage.alt,
+    gallery[]{ "url": asset->url, alt },
     prepTime,
     cookTime,
     restTime,
@@ -562,6 +577,7 @@ export const queries = {
     description,
     featuredImage,
     "featuredImageUrl": featuredImage.asset->url,
+    "featuredImageAlt": featuredImage.alt,
     prepTime,
     cookTime,
     restTime,
@@ -615,7 +631,8 @@ export const queries = {
     description,
     featuredImage,
     "featuredImageUrl": featuredImage.asset->url,
-    gallery[]{ ..., "url": asset->url },
+    "featuredImageAlt": featuredImage.alt,
+    gallery[]{ "url": asset->url, alt },
     prepTime,
     cookTime,
     restTime,
@@ -654,7 +671,9 @@ export const queries = {
     visionText,
     visionCards,
     aboutTitle,
+    aboutLead,
     bio,
+    aboutParagraphs,
     photo {
       asset->{
         url
@@ -663,6 +682,11 @@ export const queries = {
     achievements,
     aboutCtaLabel,
     aboutCtaLink,
+    journeyTitle,
+    journeyIntro,
+    journeyItems,
+    signatureTitle,
+    signatureParagraphs,
     servicesTitle,
     servicesSubtitle,
     servicesCtaText,
@@ -672,7 +696,9 @@ export const queries = {
     showVision,
     showAboutSection,
     showAchievements,
-    showServices
+    showServices,
+    showJourney,
+    showSignature
   }`,
 
   // Contact - Informations de contact
@@ -818,6 +844,7 @@ export const queries = {
     },
     restaurantSectionTitle,
     restaurantSectionDescription,
+    ctaExcerpt,
     ctaTitle,
     ctaDescription,
     ctaPrimaryButton

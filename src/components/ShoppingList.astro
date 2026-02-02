@@ -326,31 +326,44 @@
           </div>
         `;
       } else {
-        this.itemsContainer.innerHTML = items.map(item => {
+        this.itemsContainer.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+
+        items.forEach((item) => {
           const quantityText = item.quantity ? `${item.quantity}${item.unit ? ` ${item.unit}` : ''}` : (item.unit || '');
-          return `
-            <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-mv-cream-50 transition-colors">
-              <input
-                type="checkbox"
-                ${item.checked ? 'checked' : ''}
-                class="shopping-item-checkbox h-4 w-4 text-mv-forest focus:ring-mv-leaf border-mv-leaf-30 rounded"
-                data-item-key="${item.key}"
-              />
-              <span class="flex-1 text-sm ${item.checked ? 'line-through text-mv-forest-60' : 'text-mv-forest'}">
-                ${quantityText ? `${quantityText} ` : ''}${item.name}
-              </span>
-              <button
-                class="shopping-item-remove text-mv-coral hover:text-mv-coral-80 p-1 rounded transition-colors"
-                data-item-key="${item.key}"
-                aria-label="Retirer ${item.name}"
-              >
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
-          `;
-        }).join('');
+          const row = document.createElement('div');
+          row.className = 'flex items-center space-x-3 p-2 rounded-lg hover:bg-mv-cream-50 transition-colors';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'shopping-item-checkbox h-4 w-4 text-mv-forest focus:ring-mv-leaf border-mv-leaf-30 rounded';
+          checkbox.dataset.itemKey = item.key;
+          if (item.checked) checkbox.checked = true;
+
+          const label = document.createElement('span');
+          label.className = `flex-1 text-sm ${item.checked ? 'line-through text-mv-forest-60' : 'text-mv-forest'}`;
+          label.textContent = `${quantityText ? `${quantityText} ` : ''}${item.name}`;
+
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'shopping-item-remove text-mv-coral hover:text-mv-coral-80 p-1 rounded transition-colors';
+          removeBtn.dataset.itemKey = item.key;
+          removeBtn.setAttribute('aria-label', `Retirer ${item.name}`);
+
+          const icon = document.createElement('svg');
+          icon.className = 'h-4 w-4';
+          icon.setAttribute('fill', 'none');
+          icon.setAttribute('stroke', 'currentColor');
+          icon.setAttribute('viewBox', '0 0 24 24');
+          icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>';
+          removeBtn.appendChild(icon);
+
+          row.appendChild(checkbox);
+          row.appendChild(label);
+          row.appendChild(removeBtn);
+          fragment.appendChild(row);
+        });
+
+        this.itemsContainer.appendChild(fragment);
 
         // Attacher les événements aux nouveaux éléments
         this.attachItemEvents();

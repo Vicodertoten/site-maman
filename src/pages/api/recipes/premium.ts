@@ -52,6 +52,7 @@ function mapCardData(recipe: RecipeData) {
     image: recipe.featuredImageUrl
       ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format`
       : undefined,
+    imageAlt: recipe.featuredImageAlt,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,
     restTime: recipe.restTime,

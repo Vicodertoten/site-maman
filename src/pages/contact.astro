@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import Section from '../components/Section.astro';
 import { sanityClient, queries, type ContactData } from '../lib/sanity';
 
 // Récupérer les données depuis Sanity
@@ -12,6 +13,9 @@ const showInstagramCard = contactData?.showInstagramCard !== false;
 const showBookingInfo = contactData?.showBookingInfo !== false;
 const showMap = contactData?.showMap !== false;
 
+const fallbackHeroSubtitle = "Entrons en contact pour votre projet gastronomique";
+const pageDescription = (contactData?.heroSubtitle || fallbackHeroSubtitle).trim();
+
 const instagramUrl = contactData?.instagramUrl
   || contactData?.socialLinks?.find((link) => link.platform === 'Instagram')?.url
   || 'https://www.instagram.com/manger_vrai';
@@ -20,23 +24,27 @@ const instagramHandle = contactData?.instagramHandle
   || '@manger_vrai';
 ---
 
-<MainLayout title={contactData?.title || "Contact - Gastronomade"}>
+<MainLayout
+  title={contactData?.title || "Contact - Gastronomade"}
+  description={pageDescription}
+>
   <!-- Hero Section -->
-  <section class="bg-gradient-to-b from-mv-cream to-white mv-section">
-    <div class="mv-container text-center">
-      <h1 class="mv-hero-title mb-3 sm:mb-4">
-        {contactData?.heroTitle || "Contact"}
-      </h1>
-      <p class="mv-hero-subtitle mb-4 sm:mb-6 max-w-3xl mx-auto text-mv-forest-80">
-        {contactData?.heroSubtitle || "Entrons en contact pour votre projet gastronomique"}
-      </p>
-    </div>
-  </section>
+  <Section class="bg-gradient-to-b from-mv-cream to-white" containerClass="text-center">
+    <h1 class="mv-hero-title mb-3 sm:mb-4" slot="content">
+      {contactData?.heroTitle || "Contact"}
+    </h1>
+    <p class="mv-hero-subtitle mb-4 sm:mb-6 max-w-3xl mx-auto text-mv-forest-80" slot="content">
+      {contactData?.heroSubtitle || "Entrons en contact pour votre projet gastronomique"}
+    </p>
+  </Section>
 
   <!-- Contact Methods Section -->
   {showContactCards && (
-    <section class="mv-section bg-white">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+    <Section class="bg-white">
+      <h2 class="mv-section-title mb-6" slot="content">
+        {contactData?.contactSectionTitle || 'Moyens de contact'}
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" slot="content">
         {showPhoneCard && (
           <div class="mv-card p-5 sm:p-6 text-center hover:shadow-lg transition-all duration-300 hover:scale-105">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-mv-leaf rounded-full mb-4">
@@ -54,98 +62,94 @@ const instagramHandle = contactData?.instagramHandle
 
         {showEmailCard && (
           <div class="mv-card p-5 sm:p-6 text-center hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-mv-leaf rounded-full mb-4">
-              <svg class="h-8 w-8 text-mv-cream" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-              </svg>
+              <div class="inline-flex items-center justify-center w-16 h-16 bg-mv-leaf rounded-full mb-4">
+                <svg class="h-8 w-8 text-mv-cream" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-mv-forest mb-2">{contactData?.emailLabel || 'Email'}</h3>
+              <p class="text-mv-forest-80 mb-4">{contactData?.contactInfo?.email || "muriel.cruysmans@gmail.com"}</p>
+              <a href={`mailto:${contactData?.contactInfo?.email || 'muriel.cruysmans@gmail.com'}`} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf hover:shadow-md transition-all duration-300 hover:scale-105">
+                {contactData?.emailButtonLabel || 'Envoyer un email'}
+              </a>
             </div>
-            <h3 class="font-semibold text-mv-forest mb-2">{contactData?.emailLabel || 'Email'}</h3>
-            <p class="text-mv-forest-80 mb-4">{contactData?.contactInfo?.email || "muriel.cruysmans@gmail.com"}</p>
-            <a href={`mailto:${contactData?.contactInfo?.email || 'muriel.cruysmans@gmail.com'}`} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf hover:shadow-md transition-all duration-300 hover:scale-105">
-              {contactData?.emailButtonLabel || 'Envoyer un email'}
-            </a>
-          </div>
-        )}
+          )}
 
         {showInstagramCard && (
           <div class="mv-card p-5 sm:p-6 text-center hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-mv-leaf rounded-full mb-4">
-              <svg class="h-8 w-8 text-mv-cream" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-              </svg>
+              <div class="inline-flex items-center justify-center w-16 h-16 bg-mv-leaf rounded-full mb-4">
+                <svg class="h-8 w-8 text-mv-cream" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-mv-forest mb-2">{contactData?.instagramLabel || 'Instagram'}</h3>
+              <p class="text-mv-forest-80 mb-4">{instagramHandle}</p>
+              <a href={instagramUrl} target="_blank" rel="noopener noreferrer" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf hover:shadow-md transition-all duration-300 hover:scale-105">
+                {contactData?.instagramButtonLabel || 'Suivez-moi'}
+              </a>
             </div>
-            <h3 class="font-semibold text-mv-forest mb-2">{contactData?.instagramLabel || 'Instagram'}</h3>
-            <p class="text-mv-forest-80 mb-4">{instagramHandle}</p>
-            <a href={instagramUrl} target="_blank" rel="noopener noreferrer" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf hover:shadow-md transition-all duration-300 hover:scale-105">
-              {contactData?.instagramButtonLabel || 'Suivez-moi'}
-            </a>
-          </div>
         )}
       </div>
-    </section>
+    </Section>
   )}
 
   {showBookingInfo && contactData?.bookingInfo && (
-    <section class="mv-section bg-white">
-      <div class="mv-container">
-        <div class="mv-card p-6 sm:p-8">
-          <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
-            {contactData.bookingInfo.title || 'Réservation'}
-          </h3>
-          <p class="text-mv-forest-80 mb-3">
-            {contactData.bookingInfo.text || 'Pour réserver un cours, un atelier ou un coaching, contactez Muriel par téléphone ou email. Je reviens vers vous rapidement pour fixer une date.'}
+    <Section class="bg-white">
+      <div class="mv-card p-6 sm:p-8" slot="content">
+        <h2 class="text-xl font-serif font-bold text-mv-forest mb-2">
+          {contactData.bookingInfo.title || 'Réservation'}
+        </h2>
+        <p class="text-mv-forest-80 mb-3">
+          {contactData.bookingInfo.text || 'Pour réserver un cours, un atelier ou un coaching, contactez Muriel par téléphone ou email. Je reviens vers vous rapidement pour fixer une date.'}
+        </p>
+        {contactData.bookingInfo.depositInfo && (
+          <p class="text-sm text-mv-forest-70">
+            {contactData.bookingInfo.depositInfo}
           </p>
-          {contactData.bookingInfo.depositInfo && (
-            <p class="text-sm text-mv-forest-70">
-              {contactData.bookingInfo.depositInfo}
-            </p>
-          )}
-        </div>
+        )}
       </div>
-    </section>
+    </Section>
   )}
 
   <!-- Map Section -->
   {showMap && (
-    <section class="mv-section bg-mv-cream">
-      <div class="mv-container">
-        <div class="mv-card p-6 sm:p-8">
-          <div class="grid grid-cols-1 lg:grid-cols-[0.9fr,1.1fr] gap-6 lg:gap-8 items-center">
-            <div class="space-y-4">
-              <h3 class="mv-section-title">
-                {contactData?.mapTitle || 'Localisation'}
-              </h3>
-              <p class="text-mv-forest-80">
-                {(contactData?.contactInfo?.address || '190 chemin de Vieusart\n1300 Wavre, Belgique').split('\n').map((line, index, arr) => (
-                  <>
-                    {line}
-                    {index < arr.length - 1 && <br/>}
-                  </>
-                ))}
-              </p>
-              <a
-                href={contactData?.mapCtaUrl || 'https://www.google.com/maps/dir/?api=1&destination=190+chemin+de+Vieusart+1300+Wavre'}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf transition-colors"
-              >
-                {contactData?.mapCtaLabel || "Obtenir l'itinéraire"}
-              </a>
-            </div>
-            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden">
-              <iframe
-                src={contactData?.mapEmbedUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2538.123456789012!2d4.6075!3d50.7172!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c17d1b1b1b1b1b%3A0x1234567890abcdef!2s190%20chemin%20de%20Vieusart%2C%201300%20Wavre!5e0!3m2!1sfr!2sbe!4v1703123456789!5m2!1sfr!2sbe'}
-                width="100%"
-                height="100%"
-                style="border:0;"
-                allowfullscreen=""
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-                title="Carte de localisation - Muriel Cruysmans">
-              </iframe>
-            </div>
+    <Section class="bg-mv-cream">
+      <div class="mv-card p-6 sm:p-8" slot="content">
+        <div class="grid grid-cols-1 lg:grid-cols-[0.9fr,1.1fr] gap-6 lg:gap-8 items-center">
+          <div class="space-y-4">
+            <h2 class="mv-section-title">
+              {contactData?.mapTitle || 'Localisation'}
+            </h2>
+            <p class="text-mv-forest-80">
+              {(contactData?.contactInfo?.address || '190 chemin de Vieusart\n1300 Wavre, Belgique').split('\n').map((line, index, arr) => (
+                <>
+                  {line}
+                  {index < arr.length - 1 && <br/>}
+                </>
+              ))}
+            </p>
+            <a
+              href={contactData?.mapCtaUrl || 'https://www.google.com/maps/dir/?api=1&destination=190+chemin+de+Vieusart+1300+Wavre'}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf transition-colors"
+            >
+              {contactData?.mapCtaLabel || "Obtenir l'itinéraire"}
+            </a>
+          </div>
+          <div class="aspect-video bg-mv-cream-80 border border-mv-leaf-20 rounded-lg overflow-hidden">
+            <iframe
+              src={contactData?.mapEmbedUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2538.123456789012!2d4.6075!3d50.7172!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c17d1b1b1b1b1b%3A0x1234567890abcdef!2s190%20chemin%20de%20Vieusart%2C%201300%20Wavre!5e0!3m2!1sfr!2sbe!4v1703123456789!5m2!1sfr!2sbe'}
+              width="100%"
+              height="100%"
+              style="border:0;"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Carte de localisation - Muriel Cruysmans">
+            </iframe>
           </div>
         </div>
       </div>
-    </section>
+    </Section>
   )}

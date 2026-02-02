@@ -144,14 +144,14 @@ const {
     .progress-bar {
       position: relative;
       height: 4px;
-      background: #e5e7eb;
+      background: rgba(74, 124, 89, 0.15);
       border-radius: 2px;
       overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #16a34a, #22c55e);
+      background: linear-gradient(90deg, var(--mv-leaf), var(--mv-forest));
       border-radius: 2px;
       transition: width 0.3s ease;
     }
@@ -166,7 +166,7 @@ const {
       bottom: 100%;
       left: 50%;
       transform: translateX(-50%) translateY(10px);
-      background: #1f2937;
+      background: var(--mv-forest);
       color: white;
       padding: 0.5rem 0.75rem;
       border-radius: 0.375rem;
@@ -185,7 +185,7 @@ const {
       left: 50%;
       transform: translateX(-50%);
       border: 5px solid transparent;
-      border-top-color: #1f2937;
+      border-top-color: var(--mv-forest);
     }
 
     .tooltip:hover .tooltip-content {
@@ -331,18 +331,51 @@ const {
     }
 
     initScrollAnimations() {
-      // Simplest, most robust behavior: make all scroll-animated elements visible immediately.
-      // This removes IntersectionObserver/MutationObserver complexity and prevents flicker.
-      document
-        .querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right')
-        .forEach((el) => {
-          el.classList.add('visible');
-          el.style.transition = 'none';
-          el.style.animation = 'none';
-          // Ensure any inline styles don't keep elements hidden
-          el.style.opacity = '';
-          el.style.transform = '';
+      const elements = document.querySelectorAll(
+        '.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right'
+      );
+      if (!elements.length) return;
+
+      const prefersReducedMotion =
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+        elements.forEach((el) => el.classList.add('visible'));
+        return;
+      }
+
+      document.documentElement.classList.add('scroll-reveal');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      elements.forEach((el) => observer.observe(el));
+
+      // Reveal anything already in view (or if observer misses it) to prevent invisible UI.
+      const revealInView = () => {
+        elements.forEach((el) => {
+          if (el.classList.contains('visible')) return;
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
+            el.classList.add('visible');
+          }
         });
+      };
+
+      requestAnimationFrame(revealInView);
+      setTimeout(revealInView, 800);
+      setTimeout(() => {
+        elements.forEach((el) => el.classList.add('visible'));
+      }, 2000);
     }
 
     initClickFeedback() {

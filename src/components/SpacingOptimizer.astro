@@ -213,7 +213,7 @@ const {
       display: block;
       margin-bottom: var(--spacing-sm);
       font-weight: 500;
-      color: #374151;
+      color: var(--mv-forest);
     }
 
     .form-optimized input,
@@ -221,7 +221,7 @@ const {
     .form-optimized select {
       width: 100%;
       padding: calc(var(--base-unit) * 2);
-      border: 1px solid #d1d5db;
+      border: 1px solid rgba(74, 124, 89, 0.3);
       border-radius: calc(var(--base-unit) * 1.5);
       font-size: 0.875rem;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -231,8 +231,8 @@ const {
     .form-optimized textarea:focus,
     .form-optimized select:focus {
       outline: none;
-      border-color: #16a34a;
-      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+      border-color: var(--mv-leaf);
+      box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.15);
     }
 
     /* Navigation avec espacement optimisé */
@@ -259,13 +259,13 @@ const {
     }
 
     .nav-optimized .nav-link:hover {
-      background-color: rgba(0, 0, 0, 0.05);
+      background-color: rgba(74, 124, 89, 0.08);
     }
 
     /* Pied de page avec espacement optimisé */
     .footer-optimized {
       padding: var(--section-spacing) var(--container-padding);
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid rgba(74, 124, 89, 0.2);
     }
 
     .footer-optimized .footer-grid {
@@ -295,28 +295,28 @@ const {
     /* Mode sombre */
     @media (prefers-color-scheme: dark) {
       .card-optimized {
-        background-color: #1f2937;
-        border-color: #374151;
+        background-color: var(--mv-forest);
+        border-color: rgba(251, 248, 241, 0.4);
       }
 
       .form-optimized label {
-        color: #e5e7eb;
+        color: var(--mv-cream);
       }
 
       .form-optimized input,
       .form-optimized textarea,
       .form-optimized select {
-        background-color: #1f2937;
-        border-color: #374151;
-        color: #e5e7eb;
+        background-color: var(--mv-forest);
+        border-color: rgba(251, 248, 241, 0.4);
+        color: var(--mv-cream);
       }
 
       .nav-optimized .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(251, 248, 241, 0.12);
       }
 
       .footer-optimized {
-        border-color: #374151;
+        border-color: rgba(251, 248, 241, 0.4);
       }
     }
   </style>

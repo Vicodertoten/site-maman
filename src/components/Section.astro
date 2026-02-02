@@ -1,0 +1,35 @@
+---
+export interface Props {
+  as?: string;
+  class?: string;
+  containerClass?: string;
+  container?: boolean;
+  tight?: boolean;
+  padless?: boolean;
+}
+
+const {
+  as: Tag = 'section',
+  class: className = '',
+  containerClass = '',
+  container = true,
+  tight = false,
+  padless = false,
+  ...rest
+} = Astro.props;
+
+const paddingClass = padless ? '' : (tight ? 'mv-section-tight' : 'mv-section');
+const sectionClass = `${paddingClass} ${className}`.trim();
+const containerClasses = `mv-container ${containerClass}`.trim();
+---
+
+<Tag class={sectionClass} {...rest}>
+  <slot />
+  {container ? (
+    <div class={containerClasses}>
+      <slot name="content" />
+    </div>
+  ) : (
+    <slot name="content" />
+  )}
+</Tag>

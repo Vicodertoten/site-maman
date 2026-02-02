@@ -2,6 +2,27 @@
 import { createClient } from '@sanity/client';
 
 let sanityClient: any = null;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX = 5;
+const rateBucket = new Map<string, { count: number; resetAt: number }>();
+
+function getClientIp(req: Request): string {
+  const forwarded = req.headers.get('x-forwarded-for') || '';
+  const ip = forwarded.split(',')[0]?.trim();
+  return ip || req.headers.get('x-nf-client-connection-ip') || req.headers.get('x-real-ip') || 'unknown';
+}
+
+function isRateLimited(key: string): boolean {
+  const now = Date.now();
+  const existing = rateBucket.get(key);
+  if (!existing || existing.resetAt <= now) {
+    rateBucket.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  existing.count += 1;
+  rateBucket.set(key, existing);
+  return existing.count > RATE_LIMIT_MAX;
+}
 
 // Initialiser le client Sanity de manière sécurisée
 try {
@@ -42,6 +63,14 @@ export default async (req: Request, context: any) => {
   }
 
   try {
+    const ipKey = getClientIp(req);
+    if (isRateLimited(ipKey)) {
+      return new Response(JSON.stringify({ error: 'Trop de requêtes' }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Vérifier que le client Sanity est disponible
     if (!sanityClient) {
       console.error('Sanity client not available');
@@ -58,7 +87,21 @@ export default async (req: Request, context: any) => {
 
     // Récupérer les données du formulaire
     const formData = await req.formData();
-    const email = formData.get('email') as string;
+    const email = ((formData.get('email') as string | null) || '').trim();
+    const honeypot = (formData.get('website') as string | null) || '';
+
+    if (honeypot.trim()) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Inscription prise en compte.',
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
 
     if (!email) {
       return new Response(JSON.stringify({ error: 'Email requis' }), {
@@ -87,10 +130,11 @@ export default async (req: Request, context: any) => {
     if (existingSubscription) {
       return new Response(
         JSON.stringify({
-          error: 'Cet email est déjà inscrit à la newsletter',
+          success: true,
+          message: 'Inscription prise en compte.',
         }),
         {
-          status: 409,
+          status: 200,
           headers: { 'Content-Type': 'application/json' },
         }
       );

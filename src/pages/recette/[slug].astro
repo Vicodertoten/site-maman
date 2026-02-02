@@ -3,7 +3,9 @@ import MainLayout from '../../layouts/MainLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import ShoppingList from '../../components/ShoppingList.astro';
 import FavoritesManager from '../../components/FavoritesManager.astro';
+import Section from '../../components/Section.astro';
 import { getRecipeBySlug } from '../../lib/sanity';
+import { renderPortableText } from '../../lib/portableText';
 import { getEntitledPackIds, getSessionEmail, getSessionTokenFromRequest } from '../../lib/server/access';
 
 export const prerender = false;
@@ -11,28 +13,28 @@ export const prerender = false;
 const slug = Astro.params.slug;
 const recipe = slug ? await getRecipeBySlug(slug) : null;
 
-// Si la recette n'existe pas, afficher une page 404
-if (!recipe) {
-  return new Response(null, { status: 404 });
-}
-
-const packIds = recipe.packIds || [];
-if (packIds.length > 0) {
+let isNotFound = !recipe;
+const packIds = recipe?.packIds || [];
+if (!isNotFound && packIds.length > 0) {
   const sessionToken = getSessionTokenFromRequest(Astro.request);
   if (!sessionToken) {
-    return new Response(null, { status: 404 });
+    isNotFound = true;
+  } else {
+    const email = await getSessionEmail(sessionToken);
+    if (!email) {
+      isNotFound = true;
+    } else {
+      const entitledPackIds = await getEntitledPackIds(email);
+      const hasAccess = packIds.some((packId) => entitledPackIds.includes(packId));
+      if (!hasAccess) {
+        isNotFound = true;
+      }
+    }
   }
+}
 
-  const email = await getSessionEmail(sessionToken);
-  if (!email) {
-    return new Response(null, { status: 404 });
-  }
-
-  const entitledPackIds = await getEntitledPackIds(email);
-  const hasAccess = packIds.some((packId) => entitledPackIds.includes(packId));
-  if (!hasAccess) {
-    return new Response(null, { status: 404 });
-  }
+if (isNotFound) {
+  Astro.response.status = 404;
 }
 
 // Fonction pour obtenir le nom de la catégorie
@@ -57,14 +59,41 @@ function getDifficultyColor(difficulty: string): string {
 }
 
 function formatTime(minutes?: number): string {
-  if (!minutes) return '';
-  if (minutes < 60) return `${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return mins > 0 ? `${hours}h${mins}` : `${hours}h`;
+  if (!minutes || minutes <= 0) return '';
+  const rounded = Math.round(minutes);
+  if (rounded < 60) {
+    return `${rounded} min`;
+  }
+  const hours = Math.floor(rounded / 60);
+  const mins = rounded % 60;
+  return mins > 0 ? `${hours}h ${mins.toString().padStart(2, '0')} min` : `${hours}h`;
 }
 
-const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0) + (recipe.restTime || 0);
+function normalizeText(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function portableTextToPlainText(blocks?: any[]): string[] {
+  if (!Array.isArray(blocks)) return [];
+  return blocks
+    .map((block) => {
+      if (!block) return '';
+      if (typeof block === 'string') return block;
+      if (Array.isArray(block.children)) {
+        return block.children.map((child) => child?.text || '').join(' ');
+      }
+      if (typeof block.text === 'string') return block.text;
+      return '';
+    })
+    .map((text) => normalizeText(text))
+    .filter(Boolean);
+}
+
+const totalTime = (recipe?.prepTime || 0) + (recipe?.cookTime || 0) + (recipe?.restTime || 0);
+const pageDescription = (recipe?.description || recipe?.subtitle || 'Recette Gastronomade').trim();
+const pageImage = recipe?.featuredImageUrl
+  ? `${recipe.featuredImageUrl}?w=1200&h=630&fit=crop&auto=format`
+  : undefined;
 
 const budgetLabels: { [key: string]: string } = {
   'economique': 'Économique',
@@ -89,7 +118,7 @@ const seasonLabels: { [key: string]: string } = {
   'hiver': 'Hiver'
 };
 
-const ingredientsWithIndex = (recipe.ingredients || []).map((ingredient, index) => ({
+const ingredientsWithIndex = (recipe?.ingredients || []).map((ingredient, index) => ({
   ...ingredient,
   _index: index
 }));
@@ -101,21 +130,113 @@ const ingredientGroups = ingredientsWithIndex.reduce((groups: Record<string, typ
   return groups;
 }, {} as Record<string, typeof ingredientsWithIndex>);
 
-const galleryImages = (recipe.gallery || []).filter((image) => image?.url);
+const galleryImages = (recipe?.gallery || []).filter((image) => image?.url);
+const hasInstructionLists = (recipe?.instructions || []).some((block) => block?.listItem);
 
 const breadcrumbs = [
   { label: 'Accueil', href: '/' },
   { label: 'Recettes', href: '/recettes' },
-  { label: recipe.title, current: true }
+  { label: recipe?.title || 'Recette', current: true }
 ];
+
+const instructionSteps = portableTextToPlainText(recipe?.instructions);
+const recipeIngredients = (recipe?.ingredients || [])
+  .map((ingredient) => [ingredient?.quantity, ingredient?.unit, ingredient?.name].filter(Boolean).join(' '))
+  .map((text) => normalizeText(text))
+  .filter(Boolean);
+
+const keywordSet = new Set<string>();
+if (recipe?.category) keywordSet.add(recipe.category);
+if (recipe?.difficulty) keywordSet.add(recipe.difficulty);
+(recipe?.tags || []).forEach((tag) => keywordSet.add(tag));
+(recipe?.diet || []).forEach((diet) => keywordSet.add(diet));
+(recipe?.season || []).forEach((season) => keywordSet.add(season));
+
+const keywords = keywordSet.size > 0 ? Array.from(keywordSet).join(', ') : undefined;
+const nutrition = recipe?.nutrition || {};
+const hasNutrition = Object.values(nutrition).some((value) => typeof value === 'number');
+const nutritionJsonLd = hasNutrition
+  ? {
+      "@type": "NutritionInformation",
+      "calories": typeof nutrition.calories === 'number' ? `${nutrition.calories} kcal` : undefined,
+      "proteinContent": typeof nutrition.protein === 'number' ? `${nutrition.protein} g` : undefined,
+      "carbohydrateContent": typeof nutrition.carbs === 'number' ? `${nutrition.carbs} g` : undefined,
+      "fatContent": typeof nutrition.fat === 'number' ? `${nutrition.fat} g` : undefined,
+      "fiberContent": typeof nutrition.fiber === 'number' ? `${nutrition.fiber} g` : undefined
+    }
+  : undefined;
+
+const pageUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
+
+const recipeJsonLd = (!isNotFound && recipe) ? {
+  "@context": "https://schema.org",
+  "@type": "Recipe",
+  name: recipe.title,
+  description: recipe.description,
+  image: recipe.featuredImageUrl
+    ? [`${recipe.featuredImageUrl}?w=1200&h=630&fit=crop&auto=format`]
+    : undefined,
+  datePublished: recipe.publishedAt,
+  dateModified: recipe._updatedAt || recipe.publishedAt,
+  author: {
+    "@type": "Person",
+    "name": "Muriel Cruysmans"
+  },
+  mainEntityOfPage: {
+    "@type": "WebPage",
+    "@id": pageUrl
+  },
+  recipeCategory: recipe.category,
+  recipeYield: recipe.servings ? `${recipe.servings} personnes` : undefined,
+  prepTime: recipe.prepTime ? `PT${recipe.prepTime}M` : undefined,
+  cookTime: recipe.cookTime ? `PT${recipe.cookTime}M` : undefined,
+  totalTime: totalTime ? `PT${totalTime}M` : undefined,
+  recipeIngredient: recipeIngredients.length > 0 ? recipeIngredients : undefined,
+  recipeInstructions: instructionSteps.length > 0
+    ? instructionSteps.map((step) => ({ "@type": "HowToStep", "text": step }))
+    : undefined,
+  nutrition: nutritionJsonLd,
+  keywords
+} : null;
+
+const breadcrumbJsonLd = (!isNotFound && recipe) ? {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": breadcrumbs.map((item, index) => ({
+    "@type": "ListItem",
+    "position": index + 1,
+    "name": item.label,
+    "item": item.href ? new URL(item.href, Astro.url.origin).toString() : pageUrl
+  }))
+} : null;
+
+const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
 ---
 
-<MainLayout title={`${recipe.title} - Recettes | Gastronomade`}>
-  <FavoritesManager />
-  <ShoppingList />
+<MainLayout
+  title={`${recipe?.title || 'Recette'} - Recettes | Gastronomade`}
+  description={pageDescription}
+  image={pageImage}
+  jsonLd={jsonLd}
+>
+  {isNotFound ? (
+    <Section class="bg-white" containerClass="max-w-xl text-center">
+      <h1 class="text-3xl font-serif font-bold text-mv-forest mb-4" slot="content">Recette introuvable</h1>
+      <p class="text-mv-forest-70" slot="content">
+        Cette recette n'est pas disponible ou l'accès n'est pas autorisé.
+      </p>
+      <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center" slot="content">
+        <a href="/recettes" class="mv-btn mv-btn-primary">Retour aux recettes</a>
+        <a href="/" class="mv-btn mv-btn-secondary">Retour à l'accueil</a>
+      </div>
+    </Section>
+  ) : (
+    <>
+      <FavoritesManager />
+      <ShoppingList />
 
-  <article class="mv-container max-w-6xl pb-12 sm:pb-16 lg:pb-20">
-    <Breadcrumbs items={breadcrumbs} />
+      <article class="mv-container max-w-6xl pb-12 sm:pb-16 lg:pb-20">
+        <Breadcrumbs items={breadcrumbs} />
 
     <header class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 mb-10">
       <div class="lg:col-span-7">
@@ -123,9 +244,14 @@ const breadcrumbs = [
           <div class="overflow-hidden rounded-2xl shadow-lg">
             <img
               src={`${recipe.featuredImageUrl}?w=1000&h=700&fit=crop&auto=format`}
-              alt={`Photo de ${recipe.title}`}
+              alt={recipe.featuredImageAlt || `Photo de ${recipe.title}`}
               class="w-full h-full object-cover"
-              loading="lazy"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+              width="1000"
+              height="700"
+              sizes="(min-width: 1024px) 60vw, 100vw"
             />
           </div>
         )}
@@ -136,9 +262,13 @@ const breadcrumbs = [
               <div class="overflow-hidden rounded-lg border border-mv-leaf-20" key={index}>
                 <img
                   src={`${image.url}?w=300&h=240&fit=crop&auto=format`}
-                  alt={`Aperçu ${recipe.title} ${index + 1}`}
+                  alt={image.alt || `Aperçu ${recipe.title} ${index + 1}`}
                   class="w-full h-full object-cover"
                   loading="lazy"
+                  decoding="async"
+                  width="300"
+                  height="240"
+                  sizes="(min-width: 1024px) 12vw, (min-width: 640px) 20vw, 33vw"
                 />
               </div>
             ))}
@@ -316,24 +446,21 @@ const breadcrumbs = [
                   <div class="space-y-2">
                     {items.map((ingredient) => (
                       <div key={ingredient._index} class="flex items-start justify-between gap-3">
-                        <label class="flex items-start gap-3 text-sm text-mv-forest-80">
-                          <input type="checkbox" class="ingredient-check mt-1 h-4 w-4 text-mv-leaf rounded border-mv-leaf-30 focus:ring-mv-leaf" />
-                          <span>
-                            <span class="font-medium text-mv-forest">{ingredient.name}</span>
-                            {(ingredient.quantity || ingredient.unit) && (
-                              <span
-                                class="ingredient-quantity block text-xs text-mv-forest-60"
-                                data-base-quantity={ingredient.quantity}
-                                data-base-unit={ingredient.unit}
-                              >
-                                {ingredient.quantity} {ingredient.unit}
-                              </span>
-                            )}
-                            {ingredient.notes && (
-                              <span class="block text-xs text-mv-forest-50">{ingredient.notes}</span>
-                            )}
-                          </span>
-                        </label>
+                        <div class="text-sm text-mv-forest-80 space-y-1">
+                          <p class="font-medium text-mv-forest">{ingredient.name}</p>
+                          {(ingredient.quantity || ingredient.unit) && (
+                            <span
+                              class="ingredient-quantity block text-xs text-mv-forest-60"
+                              data-base-quantity={ingredient.quantity}
+                              data-base-unit={ingredient.unit}
+                            >
+                              {ingredient.quantity} {ingredient.unit}
+                            </span>
+                          )}
+                          {ingredient.notes && (
+                            <span class="block text-xs text-mv-forest-50">{ingredient.notes}</span>
+                          )}
+                        </div>
                         <button
                           class="ingredient-add w-8 h-8 rounded-full border border-mv-leaf-30 text-mv-forest hover:bg-mv-leaf hover:text-mv-cream transition-colors"
                           data-ingredient-index={ingredient._index}
@@ -357,21 +484,24 @@ const breadcrumbs = [
         <div class="bg-white rounded-2xl shadow-lg p-6">
           <h2 class="text-xl font-serif font-bold text-mv-forest mb-4">Instructions</h2>
           {recipe.instructions && recipe.instructions.length > 0 ? (
-            <div class="space-y-4">
-              {recipe.instructions.map((block, index) => (
-                <div key={index} class="flex items-start gap-3">
-                  <span class="mt-1 h-4 w-4 rounded-full border border-mv-leaf-30 bg-mv-cream" aria-hidden="true"></span>
-                  <div class="flex-1">
-                    <p class="text-xs uppercase tracking-wide text-mv-forest-50 mb-1">Étape {index + 1}</p>
-                    <p class="text-sm sm:text-base text-mv-forest-80 leading-relaxed">
-                      {block.children?.map((child, childIndex) => (
-                        <span key={childIndex}>{child.text}</span>
-                      ))}
-                    </p>
+            hasInstructionLists ? (
+              <div class="space-y-4 mv-richtext" set:html={renderPortableText(recipe.instructions)} />
+            ) : (
+              <div class="space-y-4 mv-richtext">
+                {recipe.instructions.map((block, index) => (
+                  <div key={index} class="flex items-start gap-3">
+                    <span class="mt-1 h-4 w-4 rounded-full border border-mv-leaf-30 bg-mv-cream" aria-hidden="true"></span>
+                    <div class="flex-1">
+                      <p class="text-xs uppercase tracking-wide text-mv-forest-50 mb-1">Étape {index + 1}</p>
+                      <div
+                        class="text-sm sm:text-base text-mv-forest-80 leading-relaxed"
+                        set:html={renderPortableText([block])}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )
           ) : (
             <p class="text-mv-forest-60 text-sm">Instructions à venir...</p>
           )}
@@ -648,4 +778,6 @@ const breadcrumbs = [
       }
     });
   </script>
+    </>
+  )}
 </MainLayout>
