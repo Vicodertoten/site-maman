@@ -340,7 +340,9 @@ const {
     const diet = Array.isArray(recipe.diet) ? recipe.diet : [];
     const season = Array.isArray(recipe.season) ? recipe.season : [];
     const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
-    const ingredientNames = ingredients.map((ing) => (typeof ing === 'string' ? ing : ing.name)).join(' ');
+    const ingredientNames = typeof recipe.ingredientText === 'string'
+      ? recipe.ingredientText
+      : ingredients.map((ing) => (typeof ing === 'string' ? ing : ing.name)).join(' ');
 
     return {
       ...recipe,
@@ -592,14 +594,91 @@ const {
   let cardsById = new Map();
   let grid = null;
   let emptyState = null;
+  let loadMoreButton = null;
+  let autoLoadSentinel = null;
+  let autoLoadObserver = null;
+  let autoLoadedSteps = 0;
+  let lastTotalRecipes = 0;
+  let lastDisplayedRecipes = 0;
+  let autoLoadInProgress = false;
+  const DEFAULT_PAGE_SIZE = 10;
+  const MAX_AUTO_LOAD_STEPS = 9;
+  let visibleRecipesLimit = DEFAULT_PAGE_SIZE;
+
+  const mergeById = (base = [], incoming = []) => {
+    const map = new Map();
+    base.forEach((recipe) => {
+      if (recipe?.id) map.set(recipe.id, recipe);
+    });
+    incoming.forEach((recipe) => {
+      if (recipe?.id) map.set(recipe.id, recipe);
+    });
+    return Array.from(map.values());
+  };
+
+  const hasActiveFilters = () => Boolean(
+    filterState.search ||
+    filterState.category.length ||
+    filterState.difficulty.length ||
+    filterState.time.length ||
+    filterState.budget.length ||
+    filterState.tags.length ||
+    filterState.diet.length ||
+    filterState.season.length
+  );
+
+  const ensureCardForRecipe = (recipe, index = 0) => {
+    const existing = cardsById.get(recipe.id);
+    if (existing) return existing;
+    if (!grid || typeof window.renderRecipeCard !== 'function') return null;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = `scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`;
+    wrapper.style.animationDelay = `${Math.min(index, 18) * 0.05}s`;
+    wrapper.dataset.recipeCard = '';
+    wrapper.dataset.recipeId = recipe.id;
+    wrapper.innerHTML = window.renderRecipeCard(recipe);
+    grid.appendChild(wrapper);
+    cardsById.set(recipe.id, wrapper);
+    return wrapper;
+  };
+
+  const updateLoadMoreButton = (totalRecipes, displayedRecipes) => {
+    lastTotalRecipes = totalRecipes;
+    lastDisplayedRecipes = displayedRecipes;
+    if (!loadMoreButton) return;
+    const showPagination = !hasActiveFilters();
+    const hasMore = displayedRecipes < totalRecipes;
+
+    loadMoreButton.classList.toggle('hidden', !hasMore);
+    loadMoreButton.disabled = !hasMore;
+    loadMoreButton.textContent = hasMore
+      ? `Charger plus (${displayedRecipes}/${totalRecipes})`
+      : 'Tout est chargé';
+
+    if (autoLoadSentinel) {
+      const canAutoLoad = showPagination && hasMore && autoLoadedSteps < MAX_AUTO_LOAD_STEPS;
+      autoLoadSentinel.classList.toggle('hidden', !canAutoLoad);
+    }
+  };
+
+  const loadMorePage = (source = 'manual') => {
+    visibleRecipesLimit += DEFAULT_PAGE_SIZE;
+    if (source === 'auto') {
+      autoLoadedSteps += 1;
+    }
+    applyFilters();
+  };
 
   const renderCards = (recipes) => {
     if (!grid) return;
+    const shouldPaginate = !hasActiveFilters();
+    const displayedRecipes = shouldPaginate ? recipes.slice(0, visibleRecipesLimit) : recipes;
     const fragment = document.createDocumentFragment();
     const visibleIds = new Set();
 
-    recipes.forEach((recipe) => {
-      const card = cardsById.get(recipe.id);
+    displayedRecipes.forEach((recipe, index) => {
+      const card = ensureCardForRecipe(recipe, index);
       if (!card) return;
       visibleIds.add(recipe.id);
       card.classList.remove('hidden');
@@ -615,8 +694,10 @@ const {
     grid.appendChild(fragment);
 
     if (emptyState) {
-      emptyState.classList.toggle('hidden', recipes.length !== 0);
+      emptyState.classList.toggle('hidden', displayedRecipes.length !== 0);
     }
+
+    updateLoadMoreButton(recipes.length, displayedRecipes.length);
   };
 
   const updateResultsCount = (count) => {
@@ -646,6 +727,12 @@ const {
     const filtersPanel = document.getElementById('filters-panel');
     const filtersAdvanced = document.getElementById('filters-advanced');
     const filtersToggle = document.getElementById('filters-toggle');
+    loadMoreButton = document.getElementById('recipes-load-more');
+    autoLoadSentinel = document.getElementById('recipes-auto-load-sentinel');
+    const resetPagination = () => {
+      visibleRecipesLimit = DEFAULT_PAGE_SIZE;
+      autoLoadedSteps = 0;
+    };
     const closeAllMenus = () => {
       document.querySelectorAll('.filter-menu').forEach((panel) => panel.classList.add('hidden'));
       document.querySelectorAll('.filter-trigger').forEach((button) => button.setAttribute('aria-expanded', 'false'));
@@ -674,6 +761,7 @@ const {
     searchInput.addEventListener('input', debounce(() => {
       filterState.search = searchInput.value.trim();
       clearSearchBtn.classList.toggle('hidden', !filterState.search);
+      resetPagination();
       applyFilters();
     }));
 
@@ -681,11 +769,13 @@ const {
       searchInput.value = '';
       filterState.search = '';
       clearSearchBtn.classList.add('hidden');
+      resetPagination();
       applyFilters();
     });
 
     sortSelect.addEventListener('change', () => {
       filterState.sort = sortSelect.value;
+      resetPagination();
       applyFilters();
     });
 
@@ -697,6 +787,7 @@ const {
           .filter((input) => input.checked)
           .map((input) => input.value);
         filterState[key] = checkedValues;
+        resetPagination();
         applyFilters();
       });
     });
@@ -782,6 +873,7 @@ const {
       filterState.diet = [];
       filterState.season = [];
       filterState.sort = 'recent';
+      resetPagination();
 
       searchInput.value = '';
       clearSearchBtn.classList.add('hidden');
@@ -792,6 +884,35 @@ const {
 
       applyFilters();
     });
+
+    if (loadMoreButton) {
+      loadMoreButton.addEventListener('click', () => {
+        loadMorePage('manual');
+      });
+    }
+
+    if (autoLoadSentinel && typeof IntersectionObserver !== 'undefined') {
+      autoLoadObserver = new IntersectionObserver((entries) => {
+        const [entry] = entries;
+        if (!entry?.isIntersecting) return;
+        if (autoLoadInProgress) return;
+        const hasMore = lastDisplayedRecipes < lastTotalRecipes;
+        const canAutoLoad = !hasActiveFilters() && hasMore && autoLoadedSteps < MAX_AUTO_LOAD_STEPS;
+        if (!canAutoLoad) return;
+
+        autoLoadInProgress = true;
+        loadMorePage('auto');
+        window.requestAnimationFrame(() => {
+          autoLoadInProgress = false;
+        });
+      }, {
+        root: null,
+        rootMargin: '240px 0px',
+        threshold: 0
+      });
+
+      autoLoadObserver.observe(autoLoadSentinel);
+    }
   };
 
   const syncUI = () => {
@@ -805,11 +926,26 @@ const {
     });
   };
 
+  const fetchPublicIndex = async () => {
+    try {
+      const response = await fetch('/api/recipes');
+      if (!response.ok) return;
+      const payload = await response.json();
+      if (!Array.isArray(payload?.recipes)) return;
+
+      window.recipeIndex = mergeById(window.recipeIndex || [], payload.recipes);
+      recipeIndex = buildRecipeIndex(window.recipeIndex);
+      applyFilters();
+    } catch (error) {
+      console.error("Impossible de charger l'index recettes", error);
+    }
+  };
+
   window.addEventListener('recipesIndexUpdated', (event) => {
     const updated = event?.detail?.recipes;
     if (!Array.isArray(updated)) return;
-    window.recipeIndex = updated;
-    recipeIndex = buildRecipeIndex(updated);
+    window.recipeIndex = mergeById(window.recipeIndex || [], updated);
+    recipeIndex = buildRecipeIndex(window.recipeIndex);
     const cards = document.querySelectorAll('[data-recipe-card]');
     cardsById = new Map(Array.from(cards).map((card) => [card.dataset.recipeId, card]));
     applyFilters();
@@ -818,7 +954,8 @@ const {
   document.addEventListener('DOMContentLoaded', () => {
     applyURLFilters();
 
-    recipeIndex = buildRecipeIndex(readJSONData());
+    window.recipeIndex = Array.isArray(window.recipeIndex) ? window.recipeIndex : readJSONData();
+    recipeIndex = buildRecipeIndex(window.recipeIndex || []);
     grid = document.getElementById('recipes-grid');
     emptyState = document.getElementById('recipes-empty');
 
@@ -952,6 +1089,7 @@ const {
     syncUI();
     bindEvents();
     applyFilters();
+    fetchPublicIndex();
   });
 </script>
 

@@ -77,8 +77,6 @@ const getDifficultyIcon = (difficulty: string) => {
   data-recipe-title={recipe.title}
   data-recipe-category={recipe.categoryValue || recipe.category}
   data-recipe-difficulty={recipe.difficulty}
-  data-recipe-tags={recipe.tags?.join(',')}
-  data-recipe-ingredients={recipe.ingredients?.join(',')}
 >
   <a
     href={`/recette/${encodeURIComponent(recipe.slug || recipe.id)}`}

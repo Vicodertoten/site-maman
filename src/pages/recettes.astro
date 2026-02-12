@@ -216,17 +216,22 @@ const recipeCardsData = allRecipes.map(recipe => ({
   ingredients: recipe.ingredients ? recipe.ingredients.map(ing => ing.name) : []
 }));
 
-const recipesIndex = allRecipes.map(recipe => ({
+const INITIAL_RECIPES_LIMIT = 10;
+const initialRecipeCardsData = recipeCardsData.slice(0, INITIAL_RECIPES_LIMIT);
+const initialRecipesIndex = allRecipes.slice(0, INITIAL_RECIPES_LIMIT).map(recipe => ({
   id: recipe._id,
   slug: recipe.slug?.current || recipe._id,
   title: recipe.title,
-  description: recipe.description,
-  category: normalizeCategoryValue(recipe.category),
-  difficulty: recipe.difficulty,
+  description: recipe.description || '',
+  image: recipe.featuredImageUrl ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : '',
+  imageAlt: recipe.featuredImageAlt || '',
   prepTime: recipe.prepTime || 0,
   cookTime: recipe.cookTime || 0,
   restTime: recipe.restTime || 0,
-  servings: recipe.servings,
+  servings: recipe.servings || null,
+  difficulty: recipe.difficulty || '',
+  category: getCategoryName(normalizeCategoryValue(recipe.category)),
+  categoryValue: normalizeCategoryValue(recipe.category),
   rating: recipe.rating || 0,
   isNew: recipe.isNew || false,
   isPopular: recipe.isPopular || false,
@@ -235,7 +240,7 @@ const recipesIndex = allRecipes.map(recipe => ({
   diet: recipe.diet || [],
   season: recipe.season || [],
   budget: recipe.budget || '',
-  ingredients: recipe.ingredients || []
+  ingredientText: (recipe.ingredients || []).map((ing) => ing?.name || '').filter(Boolean).join(' ')
 }));
 
 const packCards = (packs || []).map((pack) => ({
@@ -346,7 +351,7 @@ const formatPrice = (price?: number, currency?: string) => {
       {allRecipes && allRecipes.length > 0 ? (
         <!-- Enhanced Recipes Grid -->
         <div id="recipes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-7" role="grid">
-          {recipeCardsData.map((recipe, index) => (
+          {initialRecipeCardsData.map((recipe, index) => (
             <div
               class={`scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`}
               style={`animation-delay: ${index * 0.1}s`}
@@ -373,6 +378,18 @@ const formatPrice = (price?: number, currency?: string) => {
             </p>
           </div>
         </div>
+
+        <div class="mt-8 text-center">
+          <button
+            id="recipes-load-more"
+            type="button"
+            class="mv-btn mv-btn-secondary hidden"
+            aria-controls="recipes-grid"
+          >
+            Charger plus
+          </button>
+        </div>
+        <div id="recipes-auto-load-sentinel" class="h-1 w-full" aria-hidden="true"></div>
       ) : (
         <!-- Recipes Coming Soon -->
         <div class="text-center py-16 scroll-fade-in">
@@ -570,8 +587,8 @@ const formatPrice = (price?: number, currency?: string) => {
     </>
   )}
 
-  <script define:vars={{ recipesIndex }}>
-    window.recipeIndex = recipesIndex;
+  <script define:vars={{ initialRecipesIndex }}>
+    window.recipeIndex = initialRecipesIndex;
   </script>
 
   <script type="module">
@@ -697,8 +714,6 @@ const formatPrice = (price?: number, currency?: string) => {
           data-recipe-title="${escapeHtml(recipe.title)}"
           data-recipe-category="${escapeHtml(recipe.categoryValue || recipe.category || '')}"
           data-recipe-difficulty="${escapeHtml(recipe.difficulty || '')}"
-          data-recipe-tags="${escapeHtml((recipe.tags || []).join(','))}"
-          data-recipe-ingredients="${escapeHtml((recipe.ingredients || []).join(','))}"
         >
           <a href="/recette/${encodeURIComponent(recipe.slug || recipe.id)}" class="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mv-leaf focus-visible:ring-offset-2" aria-label="Voir la recette ${escapeHtml(recipe.title)}">
             <span class="sr-only">Voir la recette ${escapeHtml(recipe.title)}</span>
@@ -751,6 +766,8 @@ const formatPrice = (price?: number, currency?: string) => {
         </article>
       `;
     };
+
+    window.renderRecipeCard = renderRecipeCard;
 
     const mergeRecipes = (base = [], incoming = []) => {
       const map = new Map();
