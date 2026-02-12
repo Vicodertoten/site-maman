@@ -228,6 +228,49 @@ export interface AboutData {
   showSignature?: boolean
 }
 
+export interface AuthorData {
+  _id: string
+  name?: string
+  title?: string
+  tagline?: string
+  shortBio?: string
+  longBio?: string
+  photo?: any
+  photoUrl?: string
+  journeyIntro?: string
+  journeyItems?: string[]
+  visionTitle?: string
+  visionParagraphs?: string[]
+  signatureTitle?: string
+  signatureParagraphs?: string[]
+  publications?: Array<{
+    title?: string
+    type?: string
+    year?: string
+    publisher?: string
+    url?: string
+    description?: string
+    coverImageUrl?: string
+    logoUrl?: string
+  }>
+  proofs?: Array<{
+    label?: string
+    value?: string
+    description?: string
+  }>
+  testimonials?: Array<{
+    name?: string
+    role?: string
+    quote?: string
+  }>
+  faqs?: Array<{
+    question?: string
+    answer?: string
+  }>
+  ctaLabel?: string
+  ctaLink?: string
+}
+
 export interface HomeData {
   _id: string
   title: string
@@ -824,6 +867,49 @@ export const queries = {
     showFooter,
     showNewsletter
   }`,
+  // Auteur
+  authorProfile: `*[_type == "authorProfile"][0] {
+    _id,
+    name,
+    title,
+    tagline,
+    shortBio,
+    longBio,
+    photo,
+    "photoUrl": photo.asset->url,
+    journeyIntro,
+    journeyItems,
+    visionTitle,
+    visionParagraphs,
+    signatureTitle,
+    signatureParagraphs,
+    publications[]{
+      title,
+      type,
+      year,
+      publisher,
+      url,
+      description,
+      "coverImageUrl": coverImage.asset->url,
+      "logoUrl": logo.asset->url
+    },
+    proofs[]{
+      label,
+      value,
+      description
+    },
+    testimonials[]{
+      name,
+      role,
+      quote
+    },
+    faqs[]{
+      question,
+      answer
+    },
+    ctaLabel,
+    ctaLink
+  }`,
   // Home - Page d'accueil
   home: `*[_type == "home"] | order(_updatedAt desc)[0] {
     _id,
@@ -921,6 +1007,15 @@ export async function getAboutData(): Promise<AboutData | null> {
     return await sanityClient.fetch(queries.about)
   } catch (error) {
     console.error('Erreur lors de la récupération des données about:', error)
+    return null
+  }
+}
+
+export async function getAuthorData(): Promise<AuthorData | null> {
+  try {
+    return await sanityClient.fetch(queries.authorProfile)
+  } catch (error) {
+    console.error('Erreur lors de la récupération du profil auteur:', error)
     return null
   }
 }

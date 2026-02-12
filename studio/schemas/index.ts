@@ -12,12 +12,14 @@ import { pack } from './pack'
 import { siteSettings } from './siteSettings'
 import { newsletterSettings } from './newsletterSettings'
 import { recipesPage } from './recipesPage'
+import { authorProfile } from './authorProfile'
 
 export const schemaTypes = [
   restaurant,
   thermomix,
   location,
   recipe,
+  authorProfile,
   about,
   contact,
   home,

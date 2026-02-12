@@ -36,15 +36,8 @@ const instagramHandle = contactData?.instagramHandle
     <p class="mv-hero-subtitle mb-4 sm:mb-6 max-w-3xl mx-auto text-mv-forest-80" slot="content">
       {contactData?.heroSubtitle || "Entrons en contact pour votre projet gastronomique"}
     </p>
-  </Section>
-
-  <!-- Contact Methods Section -->
-  {showContactCards && (
-    <Section class="bg-white">
-      <h2 class="mv-section-title mb-6" slot="content">
-        {contactData?.contactSectionTitle || 'Moyens de contact'}
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" slot="content">
+    {showContactCards && (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-6 sm:mt-8" slot="content">
         {showPhoneCard && (
           <div class="mv-card p-5 sm:p-6 text-center hover:shadow-lg transition-all duration-300 hover:scale-105">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-mv-leaf rounded-full mb-4">
@@ -90,11 +83,11 @@ const instagramHandle = contactData?.instagramHandle
             </div>
         )}
       </div>
-    </Section>
-  )}
+    )}
+  </Section>
 
   {showBookingInfo && contactData?.bookingInfo && (
-    <Section class="bg-white">
+    <Section class="bg-white pt-3 sm:pt-4 pb-8 sm:pb-10" padless={true}>
       <div class="mv-card p-6 sm:p-8" slot="content">
         <h2 class="text-xl font-serif font-bold text-mv-forest mb-2">
           {contactData.bookingInfo.title || 'Réservation'}

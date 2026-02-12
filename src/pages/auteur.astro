@@ -1,0 +1,297 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Section from '../components/Section.astro';
+import { sanityClient, queries, type AuthorData } from '../lib/sanity';
+
+function getImageUrl(image: any): string | null {
+  if (!image) return null;
+  if (typeof image === 'string') return image;
+  if (image.asset?.url) return image.asset.url;
+  if (image.url) return image.url;
+  return null;
+}
+
+const authorData = await sanityClient.fetch<AuthorData>(queries.authorProfile);
+
+const fallbackTagline = 'Introduire du plaisir et du bon sens en respectant les principes d’une nutrition équilibrée.';
+const fallbackShortBio = [
+  'Introduire du plaisir et du bon sens en respectant les principes d’une nutrition équilibrée.',
+  'Je suis passionnée par l’alimentation depuis une vingtaine d’années et convaincue que c’est un des piliers de notre bonne santé.',
+  'J’accompagne celles et ceux qui veulent cuisiner simplement, retrouver de l’énergie et mieux comprendre ce qui leur fait du bien.',
+  'Ma cuisine est locale, de saison, chaleureuse et sans culpabilité : on avance par petits pas, avec des repères clairs et concrets.'
+].join(' ');
+
+const fallbackJourneyIntro = 'Après une licence en Affaires Publiques et Internationales (UCL), c’est la passion pour l’alimentation qui m’a guidé pour la suite.';
+const fallbackJourneyItems = [
+  'Ma curiosité, ma gourmandise et mon envie de comprendre m’ont menée à travers de nombreuses conférences, formations et cours de cuisine (CERDEN, Taty Lauwers, Pol Grégoire, Coaching, pleine conscience, Formation potager, Cuisine sauvage et l’accès à la profession de traiteur-restaurateur).',
+  'J’ai mis en pratique tout ce savoir à travers des cours de cuisine (notamment à la Vie-Là à Ottignies), des animations au goût dans les écoles, des créations de recettes pour une nutritionniste, la publication de mon livre de recettes « Et si on mangeait vrai ? », la livraison de plats ressourçant et Gastronomade (notre restaurant et lieu mis en location).'
+];
+
+const fallbackLongBio = [
+  'Je crois à une alimentation vivante, simple et joyeuse. Manger mieux n’est pas une question de contraintes, mais de repères clairs, de plaisir retrouvé et d’habitudes qui tiennent dans la durée.',
+  'Mon rôle est de transmettre des gestes concrets et une manière de cuisiner qui respecte le corps, le temps et la planète — sans rigidité, avec beaucoup de bon sens.'
+].join(' ');
+
+const fallbackVisionParagraphs = [
+  'Bien s’alimenter oui, mais dans le respect du travail et de la planète. Je privilégie les produits locaux, de saison, de culture biologique.',
+  'Ma cuisine se veut simple, savoureuse, fraîche, nourrissante et conviviale. Rien n’est interdit, c’est en prenant conscience de notre manière de nous alimenter et en découvrant de délicieuses nouvelles alternatives que petit à petit les aliments indésirables sortent de nos assiettes.'
+];
+
+const fallbackSignatureParagraphs = [
+  'L’important est de trouver l’équilibre. Chacun a le sien et il est toujours à moduler.',
+  'Je ne suis « anti » rien. C’est juste le bon sens qui a fait sortir de mon assiette tous les produits industriels, chémiqués, ....qui ne sont plus des aliments mais de la « bouffe ».',
+  'Quel plaisir d’offrir un festival de goûts, de textures et de saveurs à nos papilles à partir de produits simples, frais et naturels.'
+];
+
+const fallbackPublications = [
+  {
+    title: 'Et si on mangeait vrai ?',
+    type: 'Livre de recettes',
+    year: '2024',
+    publisher: 'Auto‑édition',
+    description: 'Recettes et principes simples pour une cuisine saine au quotidien.'
+  },
+  {
+    title: 'Cours & ateliers de cuisine santé',
+    type: 'Ateliers',
+    year: '2012–2026',
+    publisher: 'Gastronomade',
+    description: 'Ateliers pratiques et coaching pour transmettre des gestes simples et durables.'
+  }
+];
+
+const fallbackFaqs = [
+  {
+    question: 'À qui s’adressent vos accompagnements ?',
+    answer: 'À celles et ceux qui veulent cuisiner plus simplement, retrouver de l’énergie et construire des habitudes durables, sans rigidité.'
+  },
+  {
+    question: 'Faut‑il déjà savoir cuisiner ?',
+    answer: 'Pas du tout. J’adapte chaque accompagnement à votre niveau, avec des gestes faciles et des recettes accessibles.'
+  },
+  {
+    question: 'Votre approche est‑elle restrictive ?',
+    answer: 'Non. Je privilégie le bon sens, l’équilibre et le plaisir. Rien n’est interdit : on avance par étapes et par compréhension.'
+  },
+  {
+    question: 'Proposez‑vous des formats en entreprise ?',
+    answer: 'Oui, conférences, ateliers et animations sur mesure pour les équipes et événements professionnels.'
+  },
+  {
+    question: 'Comment choisir le bon format ?',
+    answer: 'Un échange rapide suffit pour clarifier vos objectifs et vous orienter vers le format le plus adapté.'
+  }
+];
+
+const authorName = authorData?.name || 'Muriel Cruysmans';
+const authorTitle = authorData?.title || 'Cuisine santé & transmission';
+const tagline = authorData?.tagline || fallbackTagline;
+const shortBio = authorData?.shortBio || fallbackShortBio;
+const longBio = authorData?.longBio || fallbackLongBio;
+const journeyIntro = authorData?.journeyIntro || fallbackJourneyIntro;
+const journeyItems = (authorData?.journeyItems && authorData.journeyItems.length > 0)
+  ? authorData.journeyItems
+  : fallbackJourneyItems;
+const visionTitle = authorData?.visionTitle || 'Vision & méthode';
+const visionParagraphs = (authorData?.visionParagraphs && authorData.visionParagraphs.length > 0)
+  ? authorData.visionParagraphs
+  : fallbackVisionParagraphs;
+const signatureTitle = authorData?.signatureTitle || 'Fil rouge de mes recettes';
+const signatureParagraphs = (authorData?.signatureParagraphs && authorData.signatureParagraphs.length > 0)
+  ? authorData.signatureParagraphs
+  : fallbackSignatureParagraphs;
+const publications = (authorData?.publications && authorData.publications.length > 0)
+  ? authorData.publications
+  : fallbackPublications;
+const faqs = (authorData?.faqs && authorData.faqs.length > 0)
+  ? authorData.faqs.filter((item) => item?.question && item?.answer)
+  : fallbackFaqs;
+const authorPhoto = authorData?.photoUrl || getImageUrl(authorData?.photo);
+const authorPhotoUrl = authorPhoto
+  ? `${authorPhoto}?w=900&h=1100&fit=crop&auto=format`
+  : undefined;
+const ctaLabel = authorData?.ctaLabel || 'Découvrir les cours & coaching';
+const ctaLink = authorData?.ctaLink || '/about';
+const pageDescription = (shortBio || tagline).trim();
+const pageImage = authorPhoto
+  ? `${authorPhoto}?w=1200&h=630&fit=crop&auto=format`
+  : undefined;
+---
+
+<MainLayout
+  title={`Auteur - ${authorName}`}
+  description={pageDescription}
+  image={pageImage}
+>
+  <Section class="bg-mv-cream">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center" slot="content">
+      <div class="lg:col-span-7 space-y-4">
+        <p class="mv-kicker">Auteur</p>
+        <h1 class="mv-hero-title">{authorName}</h1>
+        <p class="text-base sm:text-lg text-mv-forest-70">{authorTitle}</p>
+        <p class="mv-hero-subtitle text-mv-forest-80">{tagline}</p>
+        <p class="text-base sm:text-lg text-mv-forest-80 leading-relaxed">
+          {shortBio}
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href={ctaLink} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf">
+            {ctaLabel}
+          </a>
+          <a href="/contact" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
+            Prendre contact
+          </a>
+        </div>
+      </div>
+      <div class="lg:col-span-5">
+        <div class="bg-mv-cream rounded-3xl p-4 sm:p-6 shadow-sm border border-mv-leaf-20">
+          {authorPhotoUrl ? (
+            <img
+              src={authorPhotoUrl}
+              alt={authorName}
+              class="w-full h-72 sm:h-96 object-cover rounded-2xl"
+              loading="lazy"
+              decoding="async"
+              width="900"
+              height="1100"
+              sizes="(min-width: 1024px) 40vw, (min-width: 640px) 60vw, 100vw"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            />
+          ) : null}
+          <div class="aspect-[4/5] bg-mv-cream-80 border border-mv-leaf-20 rounded-2xl flex items-center justify-center" style={authorPhotoUrl ? 'display: none;' : 'display: flex;'}>
+            <div class="text-center text-mv-forest-60">
+              <svg class="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+              <p class="text-sm sm:text-base font-medium">Photo {authorName}</p>
+              <p class="text-xs sm:text-sm mt-1 sm:mt-2">Ajoutez une photo dans le Sanity Studio</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <Section class="bg-white" containerClass="max-w-5xl">
+    <div class="max-w-3xl" slot="content">
+      <p class="mv-kicker">Parcours</p>
+      <h2 class="mv-section-title">Mon parcours</h2>
+      <p class="mv-lead text-mv-forest-70">{journeyIntro}</p>
+      {longBio && (
+        <p class="mt-4 text-base sm:text-lg text-mv-forest-80 leading-relaxed">{longBio}</p>
+      )}
+    </div>
+    <div class="mt-6 rounded-3xl border border-mv-leaf-20 bg-mv-cream-50 p-6 sm:p-8" slot="content">
+      <ol class="relative space-y-6 border-l border-mv-leaf-30 pl-6">
+        {journeyItems.map((item, index) => (
+          <li class="relative pl-4" key={index}>
+            <span class="absolute -left-[34px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-mv-leaf text-mv-cream text-xs font-semibold">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <p class="text-base sm:text-lg text-mv-forest-80 leading-relaxed">{item}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </Section>
+
+  <Section class="bg-mv-cream" containerClass="max-w-5xl">
+    <div class="max-w-3xl" slot="content">
+      <p class="mv-kicker">Vision</p>
+      <h2 class="mv-section-title">{visionTitle}</h2>
+    </div>
+    <div class="mt-5 rounded-3xl border border-mv-leaf-20 bg-mv-cream-50 p-6 sm:p-8" slot="content">
+      <div class="space-y-4 text-base sm:text-lg text-mv-forest-80 leading-relaxed">
+        {visionParagraphs.map((paragraph, index) => (
+          <p key={index}>{paragraph}</p>
+        ))}
+      </div>
+    </div>
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4" slot="content">
+      {signatureParagraphs.map((paragraph, index) => {
+        const isLast = index === signatureParagraphs.length - 1;
+        return (
+          <div class={`mv-card p-5 sm:p-6 ${isLast ? 'md:col-span-2' : ''}`} key={index}>
+            <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60">{signatureTitle}</p>
+            <p class="mt-3 text-base sm:text-lg text-mv-forest-80 leading-relaxed">{paragraph}</p>
+          </div>
+        );
+      })}
+    </div>
+  </Section>
+
+  <Section class="bg-white" containerClass="max-w-5xl">
+    <div class="max-w-3xl" slot="content">
+      <p class="mv-kicker">Publications & médias</p>
+      <h2 class="mv-section-title">Parutions et collaborations</h2>
+    </div>
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4" slot="content">
+      {publications.map((item, index) => (
+        <div class="mv-card p-5 sm:p-6 flex flex-col gap-4" key={index}>
+          {(item.coverImageUrl || item.logoUrl) && (
+            <div class="flex items-center gap-4">
+              {item.coverImageUrl && (
+                <img
+                  src={`${item.coverImageUrl}?w=240&h=320&fit=crop&auto=format`}
+                  alt={item.title || 'Publication'}
+                  class="h-28 w-20 object-cover rounded-xl border border-mv-leaf-20"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              {item.logoUrl && (
+                <img
+                  src={`${item.logoUrl}?w=160&h=160&fit=crop&auto=format`}
+                  alt={item.publisher || item.title || 'Média'}
+                  class="h-14 w-14 object-contain rounded-xl border border-mv-leaf-20 bg-white p-2"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+            </div>
+          )}
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60">{item.type || 'Publication'}</p>
+            <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">{item.title}</h3>
+            <div class="mt-1 flex flex-wrap gap-2 text-sm text-mv-forest-60">
+              {item.publisher && <span>{item.publisher}</span>}
+              {item.year && <span>{item.year}</span>}
+            </div>
+            {item.description && <p class="mt-3 text-sm text-mv-forest-70">{item.description}</p>}
+          </div>
+          {item.url && (
+            <a href={item.url} class="mt-2 inline-flex text-sm font-semibold text-mv-forest hover:text-mv-leaf">
+              Voir le détail →
+            </a>
+          )}
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <Section class="bg-white" containerClass="text-center max-w-4xl">
+    <h2 class="mv-section-title mb-3 sm:mb-4" slot="content">Envie de passer à l’action ?</h2>
+    <p class="text-base sm:text-lg text-mv-forest-70 mb-6" slot="content">
+      Choisissez un format adapté à votre rythme et avançons ensemble.
+    </p>
+    <a href={ctaLink} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf" slot="content">
+      {ctaLabel}
+    </a>
+  </Section>
+
+  {faqs.length > 0 && (
+    <Section class="bg-mv-cream" containerClass="max-w-5xl">
+      <div class="max-w-3xl" slot="content">
+        <p class="mv-kicker">FAQ</p>
+        <h2 class="mv-section-title">Questions fréquentes</h2>
+      </div>
+      <div class="mt-6 space-y-3" slot="content">
+        {faqs.map((item, index) => (
+          <details class="mv-card p-4 sm:p-5" key={index}>
+            <summary class="cursor-pointer text-sm font-semibold text-mv-forest">{item.question}</summary>
+            <p class="mt-3 text-sm text-mv-forest-70">{item.answer}</p>
+          </details>
+        ))}
+      </div>
+    </Section>
+  )}
+</MainLayout>

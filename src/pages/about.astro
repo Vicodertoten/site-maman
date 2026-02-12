@@ -2,7 +2,7 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import Section from '../components/Section.astro';
 import PricingCard from '../components/PricingCard.astro';
-import { sanityClient, queries, type AboutData } from '../lib/sanity';
+import { sanityClient, queries, type AboutData, type AuthorData } from '../lib/sanity';
 
 // Fonction helper pour obtenir l'URL d'une image Sanity
 function getImageUrl(image: any): string | null {
@@ -21,32 +21,41 @@ function getImageUrl(image: any): string | null {
 }
 
 // Récupérer les données depuis Sanity
-const aboutData = await sanityClient.fetch<AboutData>(queries.about);
+const [aboutData, authorData] = await Promise.all([
+  sanityClient.fetch<AboutData>(queries.about),
+  sanityClient.fetch<AuthorData>(queries.authorProfile)
+]);
 
 const showHero = aboutData?.showHero !== false;
 const showVision = aboutData?.showVision !== false;
 const showAboutSection = aboutData?.showAboutSection !== false;
-const showAchievements = aboutData?.showAchievements !== false;
 const showServices = aboutData?.showServices !== false;
-const showJourney = aboutData?.showJourney !== false;
-const showSignature = aboutData?.showSignature !== false;
 
-const fallbackAboutLead = 'Introduire du plaisir et du bon sens en respectant les principes d’une nutrition équilibrée.';
-const fallbackBio = 'Je suis passionnée par l’alimentation depuis une vingtaine d’années et convaincue que c’est un des piliers de notre bonne santé.';
-const legacyBio = 'Passionnée de cuisine santé et de bien‑être, Muriel Cruysmans transmet une approche simple, sensible et généreuse de l’alimentation. Elle aime cuisiner en quantité, partager et donner envie de mieux manger, sans rigidité.';
-const fallbackAboutParagraphs = [
-  'Bien s’alimenter oui, mais dans le respect du travail et de la planète. Je privilégie les produits locaux, de saison, de culture biologique. Ma cuisine se veut simple, savoureuse, fraîche, nourrissante et conviviale. Rien n’est interdit, c’est en prenant conscience de notre manière de nous alimenter et en découvrant de délicieuses nouvelles alternatives que petit à petit les aliments indésirables sortent de nos assiettes.'
+const fallbackTagline = 'Introduire du plaisir et du bon sens en respectant les principes d’une nutrition équilibrée.';
+const fallbackShortBio = [
+  'Introduire du plaisir et du bon sens en respectant les principes d’une nutrition équilibrée.',
+  'Je suis passionnée par l’alimentation depuis une vingtaine d’années et convaincue que c’est un des piliers de notre bonne santé.',
+  'J’accompagne celles et ceux qui veulent cuisiner simplement, retrouver de l’énergie et comprendre ce qui leur fait du bien.',
+  'Ma cuisine est locale, de saison, chaleureuse et sans culpabilité : on avance par petits pas, avec des repères clairs et concrets.'
+].join(' ');
+const fallbackProofs = [
+  {
+    label: 'Livre',
+    value: 'Et si on mangeait vrai ?',
+    description: 'Publication de recettes pour mieux manger au quotidien.'
+  },
+  {
+    label: 'Formations',
+    value: 'CERDEN, Taty Lauwers, Pol Grégoire',
+    description: 'Cuisine santé, pleine conscience, potager, cuisine sauvage.'
+  },
+  {
+    label: 'Expérience',
+    value: '20+ ans de pratique',
+    description: 'Cours, ateliers, animations au goût et créations de recettes.'
+  }
 ];
 const fallbackHeroSubtitle = "Une cuisine saine, vivante et joyeuse, pour apprendre à cuisiner simplement et mieux manger au quotidien.";
-const fallbackJourneyItems = [
-  'Ma curiosité, ma gourmandise et mon envie de comprendre m’ont mené à travers de nombreuses conférences, formations et cours de cuisine (CERDEN, Taty Lauwers, Pol Grégoire, Coaching, pleine conscience, Formation potager, Cuisine sauvage et l’accès à la profession de traiteur-restaurateur).',
-  'J’ai mis en pratique tout ce savoir à travers des cours de cuisine (notamment à la Vie-Là à Ottignies), des animations au goût dans les écoles, des créations de recettes pour une nutritionniste, la publication de mon livre de recettes « Et si on mangeait vrai ? », la livraison de plats ressourçant et Gastronomade (notre restaurant et lieu mis en location).'
-];
-const fallbackSignatureParagraphs = [
-  'L’important est de trouver l’équilibre. Chacun a le sien et il est toujours à moduler.',
-  'Je ne suis « anti » rien. C’est juste le bon sens qui a fait sortir de mon assiette tous les produits industriels, chémiqués, ....qui ne sont plus des aliments mais de la « bouffe ».',
-  'Quel plaisir d’offrir un festival de goûts, de textures et de saveurs à nos papilles à partir de produits simples, frais et naturels.'
-];
 
 const visionCards = (aboutData?.visionCards && aboutData.visionCards.length > 0)
   ? aboutData.visionCards
@@ -71,15 +80,77 @@ const visionCards = (aboutData?.visionCards && aboutData.visionCards.length > 0)
       }
     ];
 
-const aboutLead = aboutData?.aboutLead ?? fallbackAboutLead;
-const aboutParagraphs = aboutData?.aboutParagraphs ?? fallbackAboutParagraphs;
-const journeyItems = aboutData?.journeyItems ?? fallbackJourneyItems;
-const signatureParagraphs = aboutData?.signatureParagraphs ?? fallbackSignatureParagraphs;
-const rawBio = aboutData?.bio ?? fallbackBio;
-const resolvedBio = rawBio === legacyBio ? fallbackBio : rawBio;
-const aboutCtaLabel = aboutData?.aboutCtaLabel || "Voir les services";
-const aboutCtaLink = aboutData?.aboutCtaLink || "#services";
-const pageDescription = (aboutData?.heroSubtitle || aboutData?.aboutLead || fallbackHeroSubtitle).trim();
+const benefitsTitle = aboutData?.visionTitle || 'Résultats concrets, durables';
+const benefitsText = aboutData?.visionText
+  || 'Plus d’énergie, plus de clarté et une cuisine qui fait du bien sans frustration.';
+
+const servicesTitle = aboutData?.servicesTitle || 'Offres & formats';
+const servicesSubtitle = aboutData?.servicesSubtitle
+  || 'Choisissez le format qui vous convient pour retrouver plaisir, équilibre et autonomie.';
+const servicesCtaText = aboutData?.servicesCtaText || 'En savoir plus';
+const servicesCtaLink = aboutData?.servicesCtaLink || '/contact';
+
+const authorName = authorData?.name || 'Muriel Cruysmans';
+const authorTagline = authorData?.tagline || fallbackTagline;
+const authorShortBio = authorData?.shortBio || fallbackShortBio;
+const authorPhoto = authorData?.photoUrl || getImageUrl(authorData?.photo) || getImageUrl(aboutData?.photo);
+const authorPhotoUrl = authorPhoto
+  ? `${authorPhoto}?w=560&h=700&fit=crop&auto=format`
+  : undefined;
+const proofItems = (authorData?.proofs && authorData.proofs.length > 0) ? authorData.proofs : fallbackProofs;
+const fallbackTestimonials = [
+  {
+    name: 'Claire D.',
+    role: 'Atelier cuisine',
+    quote: 'Des recettes simples, un cadre bienveillant et surtout des repères qui restent. Je cuisine autrement depuis.'
+  },
+  {
+    name: 'Nicolas P.',
+    role: 'Coaching',
+    quote: 'J’ai retrouvé de l’énergie et une vraie clarté dans mes repas. Les conseils sont concrets et faciles à appliquer.'
+  },
+  {
+    name: 'Sophie R.',
+    role: 'Conférence entreprise',
+    quote: 'Une approche humaine, accessible et inspirante. L’équipe a adoré.'
+  }
+];
+
+const fallbackFaqs = [
+  {
+    question: 'À qui s’adressent vos accompagnements ?',
+    answer: 'À celles et ceux qui veulent cuisiner plus simplement, retrouver de l’énergie et construire des habitudes durables, sans rigidité.'
+  },
+  {
+    question: 'Faut‑il déjà savoir cuisiner ?',
+    answer: 'Pas du tout. J’adapte chaque accompagnement à votre niveau, avec des gestes faciles et des recettes accessibles.'
+  },
+  {
+    question: 'Votre approche est‑elle restrictive ?',
+    answer: 'Non. Je privilégie le bon sens, l’équilibre et le plaisir. Rien n’est interdit : on avance par étapes et par compréhension.'
+  },
+  {
+    question: 'Proposez‑vous des formats en entreprise ?',
+    answer: 'Oui, conférences, ateliers et animations sur mesure pour les équipes et événements professionnels.'
+  },
+  {
+    question: 'Comment choisir le bon format ?',
+    answer: 'Un échange rapide suffit pour clarifier vos objectifs et vous orienter vers le format le plus adapté.'
+  }
+];
+
+const testimonials = (authorData?.testimonials && authorData.testimonials.length > 0)
+  ? authorData.testimonials.filter((item) => item?.quote)
+  : fallbackTestimonials;
+const faqs = (authorData?.faqs && authorData.faqs.length > 0)
+  ? authorData.faqs.filter((item) => item?.question && item?.answer)
+  : fallbackFaqs;
+
+const finalCtaTitle = 'Prête à avancer avec une méthode simple et joyeuse ?';
+const finalCtaText = 'Parlons de votre contexte pour choisir le format le plus adapté.';
+const finalCtaLabel = aboutData?.heroCtaLabel || 'Réserver un échange';
+const finalCtaLink = aboutData?.heroCtaLink || '/contact';
+const pageDescription = (aboutData?.heroSubtitle || authorShortBio || fallbackHeroSubtitle).trim();
 const pageImage = getImageUrl(aboutData?.photo)
   ? `${getImageUrl(aboutData?.photo)}?w=1200&h=630&fit=crop&auto=format`
   : undefined;
@@ -95,32 +166,27 @@ const pageImage = getImageUrl(aboutData?.photo)
     <Section class="relative z-0 overflow-visible bg-mv-cream" containerClass="relative z-0">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center" slot="content">
         <div class="lg:col-span-7 space-y-4 relative z-10">
+          <p class="mv-kicker">{aboutData?.heroKicker || 'Cours & coaching'}</p>
           <h1 class="mv-hero-title">
             {aboutData?.heroTitle || "Cours & coaching personnalisés"}
           </h1>
           <p class="mv-hero-subtitle text-mv-forest-80">
             {aboutData?.heroSubtitle || "Une cuisine saine, vivante et joyeuse, pour apprendre à cuisiner simplement et mieux manger au quotidien."}
           </p>
-          <div class="flex flex-wrap gap-3 pt-2">
-            <a href={aboutData?.heroCtaLink || "/contact"} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf">
-              {aboutData?.heroCtaLabel || "Mes services"}
-            </a>
-          </div>
         </div>
       </div>
     </Section>
   )}
 
-  <!-- Vision Section -->
+  <!-- Bénéfices Section -->
   {showVision && (
-    <Section id="vision" class="bg-white" containerClass="max-w-5xl">
+    <Section id="benefices" class="bg-white" containerClass="max-w-5xl">
       <div class="max-w-3xl" slot="content">
-        <p class="mv-kicker">{aboutData?.visionKicker || "Vision"}</p>
         <h2 class="mv-section-title">
-          {aboutData?.visionTitle || "Ma vision de la cuisine"}
+          {benefitsTitle}
         </h2>
         <p class="mv-lead text-mv-forest-70">
-          {aboutData?.visionText || "Je crois à une cuisine simple, locale et profondément humaine — une cuisine qui nourrit le corps, apaise l’esprit et crée du lien."}
+          {benefitsText}
         </p>
       </div>
 
@@ -138,142 +204,65 @@ const pageImage = getImageUrl(aboutData?.photo)
     </Section>
   )}
 
-  <!-- About Muriel Section -->
+  <!-- Bio courte + preuves -->
   {showAboutSection && (
-    <Section class="bg-mv-cream relative z-20" containerClass="max-w-6xl">
-      <div class="text-center mb-6 sm:mb-8 lg:mb-10" slot="content">
-        <h2 class="mv-section-title mb-3 sm:mb-4">
-          {aboutData?.aboutTitle || "Muriel, cuisine & transmission"}
-        </h2>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-start" slot="content">
-        <div class="lg:col-span-7 space-y-6">
-          {aboutLead && (
-            <div class="rounded-3xl border border-mv-leaf-30 bg-mv-cream-50 px-5 py-5 sm:px-6 sm:py-6">
-              <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60">Ma boussole</p>
-              <p class="mt-3 text-xl sm:text-2xl font-serif font-semibold text-mv-forest leading-snug">
-                {aboutLead}
-              </p>
-            </div>
-          )}
-          <div class="mv-card p-6 sm:p-8">
-            <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60">Qui je suis</p>
-            <p class="mt-3 text-base sm:text-lg text-mv-forest-80 leading-relaxed">
-              {resolvedBio}
-            </p>
-          </div>
-          {!showAchievements && (
-            <a href={aboutCtaLink} class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
-              {aboutCtaLabel}
+    <Section class="bg-white" containerClass="max-w-6xl">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start" slot="content">
+        <div class="lg:col-span-7 space-y-5">
+          <p class="mv-kicker">À propos</p>
+          <h2 class="mv-section-title">
+            {aboutData?.aboutTitle || `Muriel, cuisine & transmission`}
+          </h2>
+          <p class="text-sm uppercase tracking-[0.18em] text-mv-forest-60">{authorTagline}</p>
+          <p class="text-base sm:text-lg text-mv-forest-80 leading-relaxed">
+            {authorShortBio}
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a href="/auteur" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
+              Voir la bio complète
             </a>
-          )}
+            <a href={finalCtaLink} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf">
+              {finalCtaLabel}
+            </a>
+          </div>
         </div>
-        <div class="lg:col-span-5 space-y-6">
+        <div class="lg:col-span-5">
           <div class="bg-mv-cream rounded-3xl p-4 sm:p-6 shadow-sm border border-mv-leaf-20">
-            {getImageUrl(aboutData?.photo) ? (
+            {authorPhotoUrl ? (
               <img
-                src={`${getImageUrl(aboutData?.photo)}?w=500&h=600&fit=crop&auto=format`}
-                alt="Muriel Cruysmans"
+                src={authorPhotoUrl}
+                alt={authorName}
                 class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-2xl"
                 loading="lazy"
                 decoding="async"
-                width="500"
-                height="600"
+                width="560"
+                height="700"
                 sizes="(min-width: 1024px) 40vw, (min-width: 640px) 60vw, 100vw"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
               />
             ) : null}
-            <div class="aspect-[4/5] bg-mv-cream-80 border border-mv-leaf-20 rounded-2xl flex items-center justify-center" style={getImageUrl(aboutData?.photo) ? 'display: none;' : 'display: flex;'}>
+            <div class="aspect-[4/5] bg-mv-cream-80 border border-mv-leaf-20 rounded-2xl flex items-center justify-center" style={authorPhotoUrl ? 'display: none;' : 'display: flex;'}>
               <div class="text-center text-mv-forest-60">
                 <svg class="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
-                <p class="text-sm sm:text-base font-medium">Photo Muriel Cruysmans</p>
+                <p class="text-sm sm:text-base font-medium">Photo {authorName}</p>
                 <p class="text-xs sm:text-sm mt-1 sm:mt-2">Ajoutez une photo dans le Sanity Studio</p>
               </div>
             </div>
           </div>
-          {showAchievements && (
-            <div class="mv-card p-6 sm:p-8">
-              <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60">Repères</p>
-              <div class="mt-4 space-y-3">
-                {(aboutData?.achievements ?? [
-                  'Diplômée restaurateur-traiteur (mai 2024)',
-                  "Auteur d'un livre de recettes",
-                  'Spécialiste cuisine santé et bien-être'
-                ]).map((achievement, index) => (
-                  <div class="flex items-start gap-3" key={index}>
-                    <span class="mt-1 inline-flex h-2.5 w-2.5 rounded-full bg-mv-leaf"></span>
-                    <p class="text-sm sm:text-base text-mv-forest-80 leading-snug">{achievement}</p>
-                  </div>
-                ))}
-              </div>
-              <a href={aboutCtaLink} class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream mt-6 inline-flex">
-                {aboutCtaLabel}
-              </a>
-            </div>
-          )}
         </div>
       </div>
-    </Section>
-  )}
-
-  {showJourney && (
-    <Section class="bg-white" containerClass="max-w-5xl">
-      <div class="max-w-3xl" slot="content">
-        <p class="mv-kicker">Parcours</p>
-        <h2 class="mv-section-title">
-          {aboutData?.journeyTitle ?? 'Mon parcours'}
-        </h2>
-        <p class="mv-lead text-mv-forest-70">
-          {aboutData?.journeyIntro ?? 'Après une licence en Affaires Publiques et Internationales (UCL), c’est la passion pour l’alimentation qui m’a guidé pour la suite.'}
-        </p>
-      </div>
-
-      <div class="mt-6 rounded-3xl border border-mv-leaf-20 bg-mv-cream-50 p-6 sm:p-8" slot="content">
-        <ol class="relative space-y-6 border-l border-mv-leaf-30 pl-6">
-          {journeyItems.map((item, index) => (
-            <li class="relative pl-4" key={index}>
-              <span class="absolute -left-[34px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-mv-leaf text-mv-cream text-xs font-semibold">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <p class="text-base sm:text-lg text-mv-forest-80 leading-relaxed">{item}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </Section>
-  )}
-
-  {showSignature && (
-    <Section class="bg-mv-cream" containerClass="max-w-5xl">
-      <div class="max-w-3xl" slot="content">
-        <p class="mv-kicker">Fil rouge</p>
-        <h2 class="mv-section-title">
-          {aboutData?.signatureTitle ?? 'Fil rouge de mes recettes'}
-        </h2>
-      </div>
-      {aboutParagraphs.length > 0 && (
-        <div class="mt-5 rounded-3xl border border-mv-leaf-20 bg-mv-cream-50 p-6 sm:p-8" slot="content">
-          <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60">Ma cuisine au quotidien</p>
-          <div class="mt-4 space-y-4 text-base sm:text-lg text-mv-forest-80 leading-relaxed">
-            {aboutParagraphs.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4" slot="content">
+        {proofItems.slice(0, 3).map((proof, index) => (
+          <div class="mv-card p-4 sm:p-5" key={index}>
+            <p class="text-xs uppercase tracking-[0.18em] text-mv-forest-60">{proof.label || 'Preuve'}</p>
+            <p class="mt-2 text-sm font-semibold text-mv-forest">{proof.value}</p>
+            {proof.description && (
+              <p class="mt-2 text-xs text-mv-forest-70">{proof.description}</p>
+            )}
           </div>
-        </div>
-      )}
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4" slot="content">
-        {signatureParagraphs.map((paragraph, index) => {
-          const isLast = index === signatureParagraphs.length - 1;
-          return (
-            <div class={`mv-card p-5 sm:p-6 ${isLast ? 'md:col-span-2' : ''}`} key={index}>
-              <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60">Essentiel {String(index + 1).padStart(2, '0')}</p>
-              <p class="mt-3 text-base sm:text-lg text-mv-forest-80 leading-relaxed">{paragraph}</p>
-            </div>
-          );
-        })}
+        ))}
       </div>
     </Section>
   )}
@@ -283,10 +272,10 @@ const pageImage = getImageUrl(aboutData?.photo)
     <Section id="services" class="bg-mv-cream">
       <div class="text-center mb-6 sm:mb-8 lg:mb-10" slot="content">
         <h2 class="mv-section-title mb-3 sm:mb-4">
-          {aboutData?.servicesTitle || 'Mes Services'}
+          {servicesTitle}
         </h2>
         <p class="text-base sm:text-lg text-mv-forest-70 max-w-2xl mx-auto leading-relaxed">
-          {aboutData?.servicesSubtitle || 'Cours de cuisine à la carte et coaching personnalisé pour votre bien-être alimentaire'}
+          {servicesSubtitle}
         </p>
       </div>
 
@@ -299,8 +288,8 @@ const pageImage = getImageUrl(aboutData?.photo)
             period=""
             features={service.features}
             priority={String(index + 1)}
-            ctaText={aboutData?.servicesCtaText || "En savoir plus"}
-            ctaLink={aboutData?.servicesCtaLink || "/contact"}
+            ctaText={servicesCtaText}
+            ctaLink={servicesCtaLink}
           />
         )) : (
           <>
@@ -309,55 +298,103 @@ const pageImage = getImageUrl(aboutData?.photo)
               subtitle="Découverte culinaire"
               price="125€"
               period=""
-            features={[
-              "Balade gourmande dans la nature",
-              "Découverte des produits locaux",
-              "Atelier de cueillette",
-              "Préparation d'un pique-nique sain",
-              "Moment de partage et de convivialité"
-            ]}
-            priority="1"
-            ctaText="Réserver une balade"
-            ctaLink="/contact"
-          />
+              features={[
+                "Balade gourmande dans la nature",
+                "Découverte des produits locaux",
+                "Atelier de cueillette",
+                "Préparation d'un pique-nique sain",
+                "Moment de partage et de convivialité"
+              ]}
+              priority="1"
+              ctaText={servicesCtaText}
+              ctaLink={servicesCtaLink}
+            />
 
-          <PricingCard
-            title="Conférence"
-            subtitle="Nutrition & Bien-être"
-            price="250€"
-            period=""
-            features={[
-              "Conférence sur l'alimentation santé",
-              "Conseils nutritionnels personnalisés",
-              "Échanges avec le public",
-              "Support pédagogique",
-              "Durée: 1h30"
-            ]}
-            priority="2"
-            ctaText="Organiser une conférence"
-            ctaLink="/contact"
-          />
+            <PricingCard
+              title="Conférence"
+              subtitle="Nutrition & Bien-être"
+              price="250€"
+              period=""
+              features={[
+                "Conférence sur l'alimentation santé",
+                "Conseils nutritionnels personnalisés",
+                "Échanges avec le public",
+                "Support pédagogique",
+                "Durée: 1h30"
+              ]}
+              priority="2"
+              ctaText={servicesCtaText}
+              ctaLink={servicesCtaLink}
+            />
 
-          <PricingCard
-            title="Ateliers"
-            subtitle="Cuisine interactive"
-            price="65€"
-            period="/pers."
-            features={[
-              "Atelier cuisine pratique",
-              "Préparation de recettes saines",
-              "Apprentissage des techniques",
-              "Dégustation des préparations",
-              "Groupe de 4 à 8 personnes"
-            ]}
-            priority="3"
-            ctaText="S'inscrire à un atelier"
-            ctaLink="/contact"
-          />
-        </>
-      )}
-    </div>
-  </Section>
+            <PricingCard
+              title="Ateliers"
+              subtitle="Cuisine interactive"
+              price="65€"
+              period="/pers."
+              features={[
+                "Atelier cuisine pratique",
+                "Préparation de recettes saines",
+                "Apprentissage des techniques",
+                "Dégustation des préparations",
+                "Groupe de 4 à 8 personnes"
+              ]}
+              priority="3"
+              ctaText={servicesCtaText}
+              ctaLink={servicesCtaLink}
+            />
+          </>
+        )}
+      </div>
+    </Section>
   )}
+
+  {testimonials.length > 0 && (
+    <Section class="bg-mv-cream" containerClass="max-w-6xl">
+      <div class="max-w-3xl" slot="content">
+        <p class="mv-kicker">Témoignages</p>
+        <h2 class="mv-section-title">Ils en parlent mieux que nous</h2>
+      </div>
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" slot="content">
+        {testimonials.map((item, index) => (
+          <div class="mv-card p-5 sm:p-6" key={index}>
+            <p class="text-sm text-mv-forest-80 leading-relaxed">“{item.quote}”</p>
+            <div class="mt-4 text-xs uppercase tracking-[0.18em] text-mv-forest-60">
+              {item.name}{item.role ? ` · ${item.role}` : ''}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+  )}
+
+  {faqs.length > 0 && (
+    <Section class="bg-white" containerClass="max-w-5xl">
+      <div class="max-w-3xl" slot="content">
+        <p class="mv-kicker">FAQ</p>
+        <h2 class="mv-section-title">Réponses rapides avant de vous lancer</h2>
+      </div>
+      <div class="mt-6 space-y-3" slot="content">
+        {faqs.map((item, index) => (
+          <details class="mv-card p-4 sm:p-5" key={index}>
+            <summary class="cursor-pointer text-sm font-semibold text-mv-forest">{item.question}</summary>
+            <p class="mt-3 text-sm text-mv-forest-70">{item.answer}</p>
+          </details>
+        ))}
+      </div>
+    </Section>
+  )}
+
+  <Section class="bg-mv-cream" containerClass="text-center max-w-4xl">
+    <h2 class="mv-section-title mb-3 sm:mb-4" slot="content">
+      {finalCtaTitle}
+    </h2>
+    <p class="text-base sm:text-lg text-mv-forest-70 mb-6" slot="content">
+      {finalCtaText}
+    </p>
+    <a href={finalCtaLink} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf" slot="content">
+      {finalCtaLabel}
+    </a>
+  </Section>
 
 </MainLayout>

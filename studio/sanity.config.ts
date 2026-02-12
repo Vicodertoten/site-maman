@@ -43,6 +43,7 @@ export default defineConfig({
                   .items([
                     S.listItem().title('Accueil — Gastronomade').child(S.document().schemaType('home').documentId('home')),
                     S.listItem().title('À propos — Cours & coaching').child(S.document().schemaType('about').documentId('about')),
+                    S.listItem().title('Auteur — Profil').child(S.document().schemaType('authorProfile').documentId('authorProfile')),
                     S.listItem().title('Thermomix').child(S.document().schemaType('thermomix').documentId('thermomix')),
                     S.listItem().title('Recettes').child(S.document().schemaType('recipesPage').documentId('recipesPage')),
                     S.listItem().title('Contact').child(S.document().schemaType('contact').documentId('contact')),
