@@ -13,11 +13,12 @@ const errorMessage = newsletterSettings?.errorMessage || "Une erreur est survenu
       {newsletterSettings?.title || 'Restez informé(e)'}
     </h3>
     <p class="text-mv-forest-80 mb-4">
-      {newsletterSettings?.description || 'Abbonnez-vous à ma newsletter et recevez une recette par mois et les dernères nouvelles de mes activités.'}
+      {newsletterSettings?.description || 'Abonnez-vous à ma newsletter et recevez une recette par mois et les dernières nouvelles de mes activités.'}
     </p>
 
     <form id="newsletter-form" class="max-w-md mx-auto">
       <div class="flex gap-2">
+        <label for="newsletter-email" class="sr-only">Adresse email</label>
         <input
           type="email"
           name="email"

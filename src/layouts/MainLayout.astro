@@ -229,6 +229,7 @@ const jsonLdObjects = [
             class="text-mv-forest hover:text-mv-leaf hover:bg-mv-leaf-10 p-2 transition-all duration-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2"
             aria-label="Ouvrir le menu"
             aria-expanded="false"
+            aria-controls="mobile-menu"
           >
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -359,9 +360,18 @@ const jsonLdObjects = [
       const mobileMenu = document.getElementById('mobile-menu');
 
       if (mobileMenuButton && mobileMenu) {
+        const closeMobileMenu = () => {
+          mobileMenu.classList.add('hidden');
+          mobileMenuButton.setAttribute('aria-expanded', 'false');
+          const icon = mobileMenuButton.querySelector('svg');
+          if (icon) {
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';
+          }
+        };
+
         mobileMenuButton.addEventListener('click', () => {
           const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
-          mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+          mobileMenuButton.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
           mobileMenu.classList.toggle('hidden');
 
           // Change icon
@@ -378,12 +388,19 @@ const jsonLdObjects = [
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
           if (!mobileMenuButton.contains(e.target) && !mobileMenu.contains(e.target)) {
-            mobileMenu.classList.add('hidden');
-            mobileMenuButton.setAttribute('aria-expanded', 'false');
-            const icon = mobileMenuButton.querySelector('svg');
-            if (icon) {
-              icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';
-            }
+            closeMobileMenu();
+          }
+        });
+
+        // Close mobile menu on link click
+        mobileMenu.querySelectorAll('a').forEach((link) => {
+          link.addEventListener('click', () => closeMobileMenu());
+        });
+
+        // Close with Escape for keyboard users
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && mobileMenuButton.getAttribute('aria-expanded') === 'true') {
+            closeMobileMenu();
           }
         });
       }

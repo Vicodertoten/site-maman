@@ -791,7 +791,7 @@ const {
         article.className = 'mv-card group relative p-6';
 
         const imageWrapper = document.createElement('div');
-        imageWrapper.className = 'relative overflow-hidden rounded-lg mb-4';
+        imageWrapper.className = 'relative z-20 overflow-hidden rounded-lg mb-4 pointer-events-none';
 
         const imageUrl = safeUrl(recipe.image);
         if (imageUrl) {
@@ -813,7 +813,7 @@ const {
         }
 
         const body = document.createElement('div');
-        body.className = 'space-y-3';
+        body.className = 'relative z-20 space-y-3 pointer-events-none';
 
         const textBlock = document.createElement('div');
         const title = document.createElement('h3');
@@ -841,6 +841,15 @@ const {
 
         article.appendChild(imageWrapper);
         article.appendChild(body);
+        const anchor = document.createElement('a');
+        anchor.href = `/recette/${encodeURIComponent(recipe.slug || recipe.id)}`;
+        anchor.className = 'absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mv-leaf focus-visible:ring-offset-2';
+        anchor.setAttribute('aria-label', `Voir la recette ${safeText(recipe.title)}`);
+        const anchorText = document.createElement('span');
+        anchorText.className = 'sr-only';
+        anchorText.textContent = `Voir la recette ${safeText(recipe.title)}`;
+        anchor.appendChild(anchorText);
+        article.appendChild(anchor);
         wrapper.appendChild(article);
         return wrapper;
       };

@@ -338,13 +338,32 @@ const buildLocationFeatures = (location?: LocationData) => {
           <p class="mv-hero-subtitle max-w-3xl text-mv-forest-80">
             {homeData?.heroDescription || fallbackHeroDescription}
           </p>
+          {showCtaExcerpt && (
+            <p class="max-w-2xl text-sm sm:text-base text-mv-forest-70">
+              {ctaExcerpt}
+            </p>
+          )}
+          <div class="flex flex-wrap gap-3 pt-1">
+            <a
+              href="/contact"
+              class="mv-btn mv-btn-primary bg-mv-forest text-white shadow-lg hover:bg-mv-plum transition"
+            >
+              Réserver une date
+            </a>
+            <a
+              href="#location-section"
+              class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream"
+            >
+              Découvrir les offres
+            </a>
+          </div>
         </div>
       </div>
     </div>
   </Section>
 
   <!-- Gastronomade Section -->
-  <Section class="bg-white fade-in-up scroll-fade-in" id="location-section">
+  <Section class="bg-white fade-in-up scroll-fade-in" id="location-section" tight={true}>
     <div class="max-w-3xl" slot="content">
       <p class="mv-kicker">Deux expériences</p>
       <h2 class="mv-section-title">

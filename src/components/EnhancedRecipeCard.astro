@@ -71,10 +71,7 @@ const getDifficultyIcon = (difficulty: string) => {
 ---
 
 <article
-  class={`enhanced-recipe-card group relative mv-card hover:border-mv-leaf transition-all duration-300 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mv-leaf focus-visible:ring-offset-2 ${compact ? 'p-4' : 'p-6'}`}
-  role="link"
-  tabindex="0"
-  aria-label={`Voir la recette ${recipe.title}`}
+  class={`enhanced-recipe-card group relative mv-card hover:border-mv-leaf transition-all duration-300 overflow-hidden ${compact ? 'p-4' : 'p-6'}`}
   data-recipe-id={recipe.id}
   data-recipe-slug={recipe.slug}
   data-recipe-title={recipe.title}
@@ -83,8 +80,16 @@ const getDifficultyIcon = (difficulty: string) => {
   data-recipe-tags={recipe.tags?.join(',')}
   data-recipe-ingredients={recipe.ingredients?.join(',')}
 >
+  <a
+    href={`/recette/${encodeURIComponent(recipe.slug || recipe.id)}`}
+    class="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mv-leaf focus-visible:ring-offset-2"
+    aria-label={`Voir la recette ${recipe.title}`}
+  >
+    <span class="sr-only">Voir la recette {recipe.title}</span>
+  </a>
+
   <!-- Badge Nouveau/Populaire -->
-  <div class="absolute top-3 left-3 z-10 flex gap-2">
+  <div class="absolute top-3 left-3 z-20 flex gap-2 pointer-events-none">
     {recipe.isNew && (
       <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-mv-coral text-mv-cream animate-pulse">
         Nouveau
@@ -101,7 +106,7 @@ const getDifficultyIcon = (difficulty: string) => {
   </div>
 
   <!-- Boutons d'action -->
-  <div class="absolute top-3 right-3 z-10 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
+  <div class="absolute top-3 right-3 z-20 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
     {showFavoriteButton && (
       <button
         class="favorite-btn w-8 h-8 bg-white rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center hover:scale-110"
@@ -131,7 +136,7 @@ const getDifficultyIcon = (difficulty: string) => {
   </div>
 
   <!-- Image -->
-  <div class={`relative overflow-hidden rounded-lg ${compact ? 'mb-3' : 'mb-4'}`}>
+  <div class={`relative z-20 overflow-hidden rounded-lg pointer-events-none ${compact ? 'mb-3' : 'mb-4'}`}>
     {recipe.image ? (
       <img
         src={recipe.image}
@@ -158,7 +163,7 @@ const getDifficultyIcon = (difficulty: string) => {
   </div>
 
   <!-- Contenu -->
-  <div class="space-y-3">
+  <div class="relative z-20 space-y-3 pointer-events-none">
     <!-- Titre et catégorie -->
     <div>
       <div class="flex items-start justify-between mb-1">
@@ -291,7 +296,6 @@ const getDifficultyIcon = (difficulty: string) => {
     constructor(cardElement) {
       this.card = cardElement;
       this.recipeId = this.card.dataset.recipeId || this.card.querySelector('[data-recipe-id]')?.dataset.recipeId;
-      this.recipeSlug = this.card.dataset.recipeSlug || this.recipeId; // Utiliser le slug ou l'ID comme fallback
       this.card.enhancedRecipeCard = this;
       this.init();
     }
@@ -319,20 +323,6 @@ const getDifficultyIcon = (difficulty: string) => {
           this.addToShoppingList();
         });
       }
-
-      // Clic sur la carte
-      this.card.addEventListener('click', () => {
-        this.navigateToRecipe();
-      });
-
-      // Navigation clavier sur la carte
-      this.card.addEventListener('keydown', (e) => {
-        if (e.target !== this.card) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.navigateToRecipe();
-        }
-      });
 
       // Gestion du chargement d'image
       const img = this.card.querySelector('img');
@@ -364,11 +354,6 @@ const getDifficultyIcon = (difficulty: string) => {
       setTimeout(() => {
         btn.style.transform = '';
       }, 150);
-    }
-
-    navigateToRecipe() {
-      // Navigation vers la page de la recette en utilisant le slug
-      window.location.href = `/recette/${this.recipeSlug}`;
     }
 
   }

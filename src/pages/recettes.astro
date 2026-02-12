@@ -696,9 +696,6 @@ const formatPrice = (price?: number, currency?: string) => {
       return `
         <article
           class="enhanced-recipe-card group relative mv-card hover:border-mv-leaf transition-all duration-300 overflow-hidden p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mv-leaf focus-visible:ring-offset-2"
-          role="link"
-          tabindex="0"
-          aria-label="Voir la recette ${escapeHtml(recipe.title)}"
           data-recipe-id="${escapeHtml(recipe.id)}"
           data-recipe-slug="${escapeHtml(recipe.slug || recipe.id)}"
           data-recipe-title="${escapeHtml(recipe.title)}"
@@ -707,11 +704,15 @@ const formatPrice = (price?: number, currency?: string) => {
           data-recipe-tags="${escapeHtml((recipe.tags || []).join(','))}"
           data-recipe-ingredients="${escapeHtml((recipe.ingredients || []).join(','))}"
         >
-          <div class="absolute top-3 left-3 z-10 flex gap-2">
+          <a href="/recette/${encodeURIComponent(recipe.slug || recipe.id)}" class="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mv-leaf focus-visible:ring-offset-2" aria-label="Voir la recette ${escapeHtml(recipe.title)}">
+            <span class="sr-only">Voir la recette ${escapeHtml(recipe.title)}</span>
+          </a>
+
+          <div class="absolute top-3 left-3 z-20 flex gap-2 pointer-events-none">
             ${badges}
           </div>
 
-          <div class="absolute top-3 right-3 z-10 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute top-3 right-3 z-20 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
             <button class="favorite-btn w-8 h-8 bg-white rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center hover:scale-110" data-recipe-id="${escapeHtml(recipe.id)}" data-recipe-title="${escapeHtml(recipe.title)}" aria-label="Ajouter aux favoris">
               <svg class="favorite-icon w-4 h-4 text-mv-forest-60 hover:text-mv-coral transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -725,14 +726,14 @@ const formatPrice = (price?: number, currency?: string) => {
             </button>
           </div>
 
-          <div class="relative overflow-hidden rounded-lg mb-4">
+          <div class="relative z-20 overflow-hidden rounded-lg mb-4 pointer-events-none">
             ${imageHtml}
             <div class="image-loading-overlay absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center opacity-0 transition-opacity duration-300">
               <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-mv-leaf"></div>
             </div>
           </div>
 
-          <div class="space-y-3">
+          <div class="relative z-20 space-y-3 pointer-events-none">
             <div>
               <div class="flex items-start justify-between mb-1">
                 <h3 class="text-lg font-semibold text-mv-forest group-hover:text-mv-leaf transition-colors duration-200 line-clamp-2">${escapeHtml(recipe.title)}</h3>
@@ -793,6 +794,14 @@ const formatPrice = (price?: number, currency?: string) => {
     };
 
     const premiumRecipeIds = new Set();
+    let premiumLoaded = false;
+
+    const ensurePremiumRecipesLoaded = async () => {
+      if (premiumLoaded) return;
+      await loadPremiumRecipes();
+      premiumLoaded = true;
+    };
+
     const loadPremiumRecipes = async () => {
       const grid = document.getElementById('recipes-grid');
       if (!grid) return;
@@ -882,7 +891,7 @@ const formatPrice = (price?: number, currency?: string) => {
           // fallback: ensure panel is focused
           if (focusTarget && typeof focusTarget.focus === 'function') focusTarget.focus();
         }
-        loadPremiumRecipes();
+        ensurePremiumRecipesLoaded();
       };
       openShopLinks.forEach((link) => {
         link.addEventListener('click', (event) => {
@@ -1018,7 +1027,7 @@ const formatPrice = (price?: number, currency?: string) => {
     const initPremiumShop = () => {
       setupShopActions();
       initPurchaseStatus();
-      loadPremiumRecipes();
+      ensurePremiumRecipesLoaded();
     };
 
     if (document.readyState === 'loading') {
