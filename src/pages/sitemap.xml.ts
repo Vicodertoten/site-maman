@@ -3,7 +3,16 @@ import { sanityClient } from '../lib/sanity';
 
 export const prerender = false;
 
-const staticPaths = ['/', '/about', '/auteur', '/contact', '/recettes', '/thermomix'];
+const staticPaths = [
+  '/',
+  '/about',
+  '/auteur',
+  '/contact',
+  '/recettes',
+  '/thermomix',
+  '/cours-cuisine-wavre',
+  '/privatisation-entreprise-wavre'
+];
 
 type RecipeSitemapEntry = {
   slug: string;

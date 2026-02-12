@@ -3,13 +3,12 @@ import MainLayout from '../layouts/MainLayout.astro';
 import Section from '../components/Section.astro';
 import PricingCard from '../components/PricingCard.astro';
 import {
-  sanityClient,
-  queries,
-  type CompanyAgendaData,
+  getCompanyAgendaData,
+  getHomeData,
+  getLocationsData,
+  getRestaurantData,
   type CompanyAgendaSlot,
-  type HomeData,
   type LocationData,
-  type RestaurantData
 } from '../lib/sanity';
 
 const fallbackAgendaSlots: CompanyAgendaSlot[] = [
@@ -29,10 +28,10 @@ const fallbackAgendaSlots: CompanyAgendaSlot[] = [
 
 // Récupérer les données depuis Sanity (en parallèle pour réduire le TTFB)
 const [locations, restaurantData, homeData, companyAgenda] = await Promise.all([
-  sanityClient.fetch<LocationData[]>(queries.locations),
-  sanityClient.fetch<RestaurantData>(queries.restaurant),
-  sanityClient.fetch<HomeData>(queries.home),
-  sanityClient.fetch<CompanyAgendaData>(queries.companyAgenda)
+  getLocationsData(),
+  getRestaurantData(),
+  getHomeData(),
+  getCompanyAgendaData()
 ]);
 
 const fallbackHeroDescription = "À Wavre, à 1 km de la E411, Gastronomade accueille réunions, événements privés et dîners. Un cadre naturel, chaleureux et simple d’accès.";
@@ -731,6 +730,13 @@ const buildLocationFeatures = (location?: LocationData) => {
       >
         {homeData?.ctaPrimaryButton || 'Découvrir notre histoire'}
       </a>
+      <p class="mt-4 text-sm text-mv-forest-70">
+        Vous cherchez une offre précise ? Consultez aussi
+        {' '}
+        <a href="/cours-cuisine-wavre" class="underline hover:text-mv-leaf">nos cours de cuisine à Wavre</a>
+        {' '}et{' '}
+        <a href="/privatisation-entreprise-wavre" class="underline hover:text-mv-leaf">la privatisation entreprise à Wavre</a>.
+      </p>
     </div>
   </Section>
 </MainLayout>

@@ -23,7 +23,8 @@ const {
   image = defaultImage,
   url = Astro.url.pathname,
   robots = 'index,follow',
-  jsonLd = []
+  jsonLd = [],
+  enableMicroInteractions = true
 } = Astro.props;
 
 const canonicalUrl = `${siteUrl}${url}`;
@@ -346,12 +347,14 @@ const jsonLdObjects = [
   </footer>
   )}
 
-  <MicroInteractions
-    enableHoverEffects={true}
-    enableClickFeedback={true}
-    enableScrollAnimations={true}
-    enableLoadingAnimations={true}
-  />
+  {enableMicroInteractions && (
+    <MicroInteractions
+      enableHoverEffects={true}
+      enableClickFeedback={true}
+      enableScrollAnimations={true}
+      enableLoadingAnimations={true}
+    />
+  )}
 
   <script>
     // Menu mobile functionality

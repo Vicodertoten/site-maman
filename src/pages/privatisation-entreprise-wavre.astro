@@ -1,0 +1,76 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Section from '../components/Section.astro';
+
+const faqs = [
+  {
+    question: 'Quelle capacité pour un événement entreprise ?',
+    answer: 'Le lieu accueille des groupes jusqu’à 14 personnes dans un cadre naturel à Wavre.'
+  },
+  {
+    question: 'Peut-on privatiser pour une réunion et un dîner ?',
+    answer: 'Oui, le format est modulable selon vos objectifs: réunion, team building, dîner ou journée complète.'
+  },
+  {
+    question: 'Comment connaître les disponibilités ?',
+    answer: 'Consultez les créneaux puis envoyez une demande via le formulaire contact.'
+  }
+];
+
+const pageDescription = 'Privatisation de lieu pour entreprise à Wavre: réunions, team building et événements dans un cadre chaleureux proche de la E411.';
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((item) => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer
+    }
+  }))
+};
+---
+
+<MainLayout
+  title="Privatisation entreprise à Wavre | Gastronomade"
+  description={pageDescription}
+  jsonLd={[faqJsonLd]}
+>
+  <Section class="bg-gradient-to-b from-mv-cream to-white">
+    <div class="max-w-3xl" slot="content">
+      <p class="mv-kicker">Entreprise</p>
+      <h1 class="mv-hero-title">Privatisation d’un lieu d’entreprise à Wavre</h1>
+      <p class="mv-hero-subtitle text-mv-forest-80 mt-3">
+        Un espace chaleureux pour vos réunions, team buildings et événements privés d’entreprise.
+      </p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="/contact?need=entreprise" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream">Demander un devis</a>
+        <a href="/#entreprise-agenda" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">Voir les disponibilités</a>
+      </div>
+    </div>
+  </Section>
+
+  <Section class="bg-white" containerClass="max-w-4xl">
+    <div class="space-y-5" slot="content">
+      <h2 class="mv-section-title">Pourquoi choisir Gastronomade</h2>
+      <ul class="space-y-3 text-mv-forest-80">
+        <li>À 1 km de la E411, accès simple et parking</li>
+        <li>Cadre nature propice à la concentration et aux échanges</li>
+        <li>Formats sur mesure selon votre équipe</li>
+      </ul>
+    </div>
+  </Section>
+
+  <Section class="bg-mv-cream" containerClass="max-w-4xl">
+    <div class="space-y-4" slot="content">
+      <h2 class="mv-section-title">FAQ</h2>
+      {faqs.map((faq) => (
+        <article class="mv-card p-5">
+          <h3 class="text-lg font-semibold text-mv-forest">{faq.question}</h3>
+          <p class="mt-2 text-mv-forest-80">{faq.answer}</p>
+        </article>
+      ))}
+    </div>
+  </Section>
+</MainLayout>

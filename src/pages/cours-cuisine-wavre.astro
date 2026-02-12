@@ -1,0 +1,76 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Section from '../components/Section.astro';
+
+const faqs = [
+  {
+    question: 'À qui s’adressent les cours de cuisine à Wavre ?',
+    answer: 'Aux débutants comme aux personnes qui veulent améliorer leur organisation et cuisiner plus sainement.'
+  },
+  {
+    question: 'Les ateliers sont-ils adaptés à des objectifs santé ?',
+    answer: 'Oui, les recettes sont pensées pour être équilibrées, de saison et simples à reproduire au quotidien.'
+  },
+  {
+    question: 'Comment réserver un cours ?',
+    answer: 'Utilisez le formulaire de contact pour préciser votre besoin et une date souhaitée.'
+  }
+];
+
+const pageDescription = 'Cours de cuisine santé à Wavre avec Muriel Cruysmans: ateliers pratiques, recettes de saison et accompagnement personnalisé.';
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((item) => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer
+    }
+  }))
+};
+---
+
+<MainLayout
+  title="Cours de cuisine à Wavre | Gastronomade"
+  description={pageDescription}
+  jsonLd={[faqJsonLd]}
+>
+  <Section class="bg-gradient-to-b from-mv-cream to-white">
+    <div class="max-w-3xl" slot="content">
+      <p class="mv-kicker">Wavre</p>
+      <h1 class="mv-hero-title">Cours de cuisine santé à Wavre</h1>
+      <p class="mv-hero-subtitle text-mv-forest-80 mt-3">
+        Des ateliers concrets pour cuisiner simplement, avec des produits de saison et des repères durables.
+      </p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="/contact?need=prive" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream">Réserver un cours</a>
+        <a href="/about" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">Voir les accompagnements</a>
+      </div>
+    </div>
+  </Section>
+
+  <Section class="bg-white" containerClass="max-w-4xl">
+    <div class="space-y-5" slot="content">
+      <h2 class="mv-section-title">Ce que vous allez apprendre</h2>
+      <ul class="space-y-3 text-mv-forest-80">
+        <li>Organiser vos repas de la semaine sans complexité</li>
+        <li>Composer des assiettes équilibrées et gourmandes</li>
+        <li>Adopter des habitudes adaptées à votre rythme</li>
+      </ul>
+    </div>
+  </Section>
+
+  <Section class="bg-mv-cream" containerClass="max-w-4xl">
+    <div class="space-y-4" slot="content">
+      <h2 class="mv-section-title">FAQ</h2>
+      {faqs.map((faq) => (
+        <article class="mv-card p-5">
+          <h3 class="text-lg font-semibold text-mv-forest">{faq.question}</h3>
+          <p class="mt-2 text-mv-forest-80">{faq.answer}</p>
+        </article>
+      ))}
+    </div>
+  </Section>
+</MainLayout>

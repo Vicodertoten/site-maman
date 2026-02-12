@@ -937,130 +937,192 @@ export const queries = {
   }`}
 
 // Fonctions utilitaires pour récupérer les données
-export async function getThermomixData(): Promise<ThermomixData | null> {
-  try {
-    return await sanityClient.fetch(queries.thermomix)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données thermomix:', error)
-    return null
+const SANITY_CACHE_TTL_MS = 30_000
+const sanityCache = new Map<string, { expiresAt: number; value: unknown }>()
+
+function makeCacheKey(key: string, params?: Record<string, unknown>) {
+  if (!params) return key
+  return `${key}:${JSON.stringify(params)}`
+}
+
+async function fetchSanityWithCache<T>(options: {
+  cacheKey: string
+  query: string
+  params?: Record<string, unknown>
+  fallback: T
+  errorLabel: string
+}): Promise<T> {
+  const key = makeCacheKey(options.cacheKey, options.params)
+  const now = Date.now()
+  const cached = sanityCache.get(key)
+  if (cached && cached.expiresAt > now) {
+    return cached.value as T
   }
+
+  try {
+    const data = await sanityClient.fetch<T>(options.query, options.params)
+    sanityCache.set(key, { expiresAt: now + SANITY_CACHE_TTL_MS, value: data })
+    return data
+  } catch (error) {
+    console.error(options.errorLabel, error)
+    return options.fallback
+  }
+}
+
+export async function getThermomixData(): Promise<ThermomixData | null> {
+  return fetchSanityWithCache({
+    cacheKey: 'thermomix',
+    query: queries.thermomix,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération des données thermomix:'
+  })
+}
+
+export async function getRestaurantData(): Promise<RestaurantData | null> {
+  return fetchSanityWithCache({
+    cacheKey: 'restaurant',
+    query: queries.restaurant,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération des données restaurant:'
+  })
+}
+
+export async function getLocationsData(): Promise<LocationData[]> {
+  return fetchSanityWithCache({
+    cacheKey: 'locations',
+    query: queries.locations,
+    fallback: [],
+    errorLabel: 'Erreur lors de la récupération des données locations:'
+  })
+}
+
+export async function getCompanyAgendaData(): Promise<CompanyAgendaData | null> {
+  return fetchSanityWithCache({
+    cacheKey: 'companyAgenda',
+    query: queries.companyAgenda,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération des données agenda entreprises:'
+  })
 }
 
 export async function getRecipesData(): Promise<RecipeData[]> {
-  try {
-    return await sanityClient.fetch(queries.recipes)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données recettes:', error)
-    return []
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'recipes',
+    query: queries.recipes,
+    fallback: [],
+    errorLabel: 'Erreur lors de la récupération des données recettes:'
+  })
 }
 
 export async function getRecipeBySlug(slug: string): Promise<RecipeData | null> {
-  try {
-    return await sanityClient.fetch(queries.recipeBySlug, { slug })
-  } catch (error) {
-    console.error('Erreur lors de la récupération de la recette:', error)
-    return null
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'recipeBySlug',
+    query: queries.recipeBySlug,
+    params: { slug },
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération de la recette:'
+  })
 }
 
 export async function getRecipesByCategory(category: string): Promise<RecipeData[]> {
-  try {
-    return await sanityClient.fetch(queries.recipesByCategory, { category })
-  } catch (error) {
-    console.error('Erreur lors de la récupération des recettes par catégorie:', error)
-    return []
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'recipesByCategory',
+    query: queries.recipesByCategory,
+    params: { category },
+    fallback: [],
+    errorLabel: 'Erreur lors de la récupération des recettes par catégorie:'
+  })
 }
 
-
 export async function getPacksData(): Promise<PackData[]> {
-  try {
-    return await sanityClient.fetch(queries.packs)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des packs:', error)
-    return []
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'packs',
+    query: queries.packs,
+    fallback: [],
+    errorLabel: 'Erreur lors de la récupération des packs:'
+  })
 }
 
 export async function getPackById(id: string): Promise<PackData | null> {
-  try {
-    return await sanityClient.fetch(queries.packById, { id })
-  } catch (error) {
-    console.error('Erreur lors de la récupération du pack:', error)
-    return null
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'packById',
+    query: queries.packById,
+    params: { id },
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération du pack:'
+  })
 }
 
 export async function getRecipesByPackIds(packIds: string[]): Promise<RecipeData[]> {
   if (!packIds.length) return []
-  try {
-    return await sanityClient.fetch(queries.recipesByPackIds, { packIds })
-  } catch (error) {
-    console.error('Erreur lors de la récupération des recettes premium:', error)
-    return []
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'recipesByPackIds',
+    query: queries.recipesByPackIds,
+    params: { packIds },
+    fallback: [],
+    errorLabel: 'Erreur lors de la récupération des recettes premium:'
+  })
 }
 
 export async function getAboutData(): Promise<AboutData | null> {
-  try {
-    return await sanityClient.fetch(queries.about)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données about:', error)
-    return null
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'about',
+    query: queries.about,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération des données about:'
+  })
 }
 
 export async function getAuthorData(): Promise<AuthorData | null> {
-  try {
-    return await sanityClient.fetch(queries.authorProfile)
-  } catch (error) {
-    console.error('Erreur lors de la récupération du profil auteur:', error)
-    return null
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'authorProfile',
+    query: queries.authorProfile,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération du profil auteur:'
+  })
 }
 
 export async function getContactData(): Promise<ContactData | null> {
-  try {
-    return await sanityClient.fetch(queries.contact)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données contact:', error)
-    return null
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'contact',
+    query: queries.contact,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération des données contact:'
+  })
 }
 
 export async function getHomeData(): Promise<HomeData | null> {
-  try {
-    return await sanityClient.fetch(queries.home)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données home:', error)
-    return null
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'home',
+    query: queries.home,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération des données home:'
+  })
 }
 
 export async function getSiteSettingsData(): Promise<SiteSettingsData | null> {
-  try {
-    return await sanityClient.fetch(queries.siteSettings)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des réglages du site:', error)
-    return null
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'siteSettings',
+    query: queries.siteSettings,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération des réglages du site:'
+  })
 }
 
 export async function getRecipesPageData(): Promise<RecipesPageData | null> {
-  try {
-    return await sanityClient.fetch(queries.recipesPage)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données recettes:', error)
-    return null
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'recipesPage',
+    query: queries.recipesPage,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération des données recettes:'
+  })
 }
 
 export async function getNewsletterSettingsData(): Promise<NewsletterSettingsData | null> {
-  try {
-    return await sanityClient.fetch(queries.newsletterSettings)
-  } catch (error) {
-    console.error('Erreur lors de la récupération des réglages newsletter:', error)
-    return null
-  }
+  return fetchSanityWithCache({
+    cacheKey: 'newsletterSettings',
+    query: queries.newsletterSettings,
+    fallback: null,
+    errorLabel: 'Erreur lors de la récupération des réglages newsletter:'
+  })
 }

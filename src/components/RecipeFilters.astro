@@ -93,11 +93,11 @@ const {
   <div id="filters-panel" class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 hidden">
     <div class="filter-dropdown" data-filter="category">
       <label class="block text-sm font-medium text-mv-forest mb-2">Catégorie</label>
-      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-category">
         <span>Choisir</span>
         <span id="category-count" class="text-xs text-mv-forest-60">Tous</span>
       </button>
-      <div class="filter-menu hidden">
+      <div id="filter-menu-category" class="filter-menu hidden" role="group" aria-label="Filtrer par catégorie">
         {categories.map((category) => (
           <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
             <input
@@ -116,11 +116,11 @@ const {
 
     <div class="filter-dropdown" data-filter="difficulty">
       <label class="block text-sm font-medium text-mv-forest mb-2">Difficulté</label>
-      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-difficulty">
         <span>Choisir</span>
         <span id="difficulty-count" class="text-xs text-mv-forest-60">Tous</span>
       </button>
-      <div class="filter-menu hidden">
+      <div id="filter-menu-difficulty" class="filter-menu hidden" role="group" aria-label="Filtrer par difficulté">
         {['facile','moyen','difficile'].map((value) => (
           <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
             <input
@@ -139,11 +139,11 @@ const {
 
     <div class="filter-dropdown" data-filter="time">
       <label class="block text-sm font-medium text-mv-forest mb-2">Temps total</label>
-      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-time">
         <span>Choisir</span>
         <span id="time-count" class="text-xs text-mv-forest-60">Tous</span>
       </button>
-      <div class="filter-menu hidden">
+      <div id="filter-menu-time" class="filter-menu hidden" role="group" aria-label="Filtrer par temps total">
         {[
           { value: '15', label: 'Moins de 15 min' },
           { value: '30', label: '15-30 min' },
@@ -167,11 +167,11 @@ const {
 
     <div class="filter-dropdown" data-filter="budget">
       <label class="block text-sm font-medium text-mv-forest mb-2">Budget</label>
-      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-budget">
         <span>Choisir</span>
         <span id="budget-count" class="text-xs text-mv-forest-60">Tous</span>
       </button>
-      <div class="filter-menu hidden">
+      <div id="filter-menu-budget" class="filter-menu hidden" role="group" aria-label="Filtrer par budget">
         {budgets.map((budget) => (
           <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
             <input
@@ -193,11 +193,11 @@ const {
     {availableTags.length > 0 && (
       <div class="filter-dropdown" data-filter="tags">
         <label class="block text-sm font-medium text-mv-forest mb-2">Tags</label>
-        <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+        <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-tags">
           <span>Choisir</span>
           <span id="tags-count" class="text-xs text-mv-forest-60">Tous</span>
         </button>
-        <div class="filter-menu hidden">
+        <div id="filter-menu-tags" class="filter-menu hidden" role="group" aria-label="Filtrer par tags">
           {availableTags.map(tag => (
             <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
               <input
@@ -217,11 +217,11 @@ const {
     {availableDiets.length > 0 && (
       <div class="filter-dropdown" data-filter="diet">
         <label class="block text-sm font-medium text-mv-forest mb-2">Régimes</label>
-        <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+        <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-diet">
           <span>Choisir</span>
           <span id="diet-count" class="text-xs text-mv-forest-60">Tous</span>
         </button>
-        <div class="filter-menu hidden">
+        <div id="filter-menu-diet" class="filter-menu hidden" role="group" aria-label="Filtrer par régimes">
           {availableDiets.map(diet => (
             <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
               <input
@@ -242,11 +242,11 @@ const {
     {availableSeasons.length > 0 && (
       <div class="filter-dropdown" data-filter="season">
         <label class="block text-sm font-medium text-mv-forest mb-2">Saisons</label>
-        <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+        <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-season">
           <span>Choisir</span>
           <span id="season-count" class="text-xs text-mv-forest-60">Tous</span>
         </button>
-        <div class="filter-menu hidden">
+        <div id="filter-menu-season" class="filter-menu hidden" role="group" aria-label="Filtrer par saisons">
           {availableSeasons.map(season => (
             <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
               <input
@@ -646,6 +646,22 @@ const {
     const filtersPanel = document.getElementById('filters-panel');
     const filtersAdvanced = document.getElementById('filters-advanced');
     const filtersToggle = document.getElementById('filters-toggle');
+    const closeAllMenus = () => {
+      document.querySelectorAll('.filter-menu').forEach((panel) => panel.classList.add('hidden'));
+      document.querySelectorAll('.filter-trigger').forEach((button) => button.setAttribute('aria-expanded', 'false'));
+    };
+
+    const openMenu = (dropdown) => {
+      if (!dropdown) return;
+      const trigger = dropdown.querySelector('.filter-trigger');
+      const menu = dropdown.querySelector('.filter-menu');
+      if (!trigger || !menu) return;
+      closeAllMenus();
+      menu.classList.remove('hidden');
+      trigger.setAttribute('aria-expanded', 'true');
+      const firstInput = menu.querySelector('input');
+      if (firstInput && typeof firstInput.focus === 'function') firstInput.focus();
+    };
 
     const debounce = (fn, delay = 300) => {
       let timeout;
@@ -693,15 +709,58 @@ const {
         const menu = dropdown.querySelector('.filter-menu');
         if (!menu) return;
         const isOpen = !menu.classList.contains('hidden');
-        document.querySelectorAll('.filter-menu').forEach((panel) => panel.classList.add('hidden'));
-        if (!isOpen) menu.classList.remove('hidden');
+        if (isOpen) {
+          closeAllMenus();
+        } else {
+          openMenu(dropdown);
+        }
+      });
+
+      trigger.addEventListener('keydown', (event) => {
+        const dropdown = trigger.closest('.filter-dropdown');
+        if (!dropdown) return;
+        if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openMenu(dropdown);
+        } else if (event.key === 'Escape') {
+          event.preventDefault();
+          closeAllMenus();
+          trigger.focus();
+        }
+      });
+    });
+
+    document.querySelectorAll('.filter-menu').forEach((menu) => {
+      menu.addEventListener('keydown', (event) => {
+        const inputs = Array.from(menu.querySelectorAll('input'));
+        if (!inputs.length) return;
+        const activeIndex = inputs.indexOf(document.activeElement);
+
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeAllMenus();
+          const dropdown = menu.closest('.filter-dropdown');
+          const trigger = dropdown?.querySelector('.filter-trigger');
+          if (trigger && typeof trigger.focus === 'function') trigger.focus();
+          return;
+        }
+
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          const next = inputs[(activeIndex + 1) % inputs.length];
+          if (next) next.focus();
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          const prev = inputs[(activeIndex - 1 + inputs.length) % inputs.length];
+          if (prev) prev.focus();
+        }
       });
     });
 
     document.addEventListener('click', (event) => {
       const target = event.target;
       if (target.closest('.filter-dropdown')) return;
-      document.querySelectorAll('.filter-menu').forEach((panel) => panel.classList.add('hidden'));
+      closeAllMenus();
     });
 
     if (filtersToggle) {

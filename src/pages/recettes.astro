@@ -3,10 +3,8 @@ import MainLayout from '../layouts/MainLayout.astro';
 import Section from '../components/Section.astro';
 import RecipeFilters from '../components/RecipeFilters.astro';
 import EnhancedRecipeCard from '../components/EnhancedRecipeCard.astro';
-import SpacingOptimizer from '../components/SpacingOptimizer.astro';
 import ShoppingList from '../components/ShoppingList.astro';
 import FavoritesManager from '../components/FavoritesManager.astro';
-import AnimationOptimizer from '../components/AnimationOptimizer.astro';
 import { getPacksData, getRecipesData, getRecipesPageData } from '../lib/sanity';
 
 // Récupérer les recettes depuis Sanity (en parallèle pour réduire le TTFB)
@@ -291,10 +289,8 @@ const formatPrice = (price?: number, currency?: string) => {
   title={recipesPage?.pageTitle || "Recettes - Gastronomade"}
   description={pageDescription}
   jsonLd={packJsonLd}
+  enableMicroInteractions={false}
 >
-  <!-- Optimisation d'espacement et micro-interactions -->
-  <SpacingOptimizer enableResponsiveSpacing={true} enableDynamicSpacing={true} />
-  <AnimationOptimizer enablePerformanceMode={true} enableReducedMotion={true} />
   <FavoritesManager />
   <ShoppingList />
 
