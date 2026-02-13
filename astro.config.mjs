@@ -2,9 +2,11 @@
 import { defineConfig } from 'astro/config';
 import netlify from '@astrojs/netlify';
 
+const CANONICAL_SITE_URL = 'https://murielcruysmans.com';
+
 // https://astro.build/config
 export default defineConfig({
-  site: process.env.PUBLIC_SITE_URL || 'https://gastronomade.netlify.app',
+  site: CANONICAL_SITE_URL,
   adapter: netlify(),
   integrations: [],
   image: {

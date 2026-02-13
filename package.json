@@ -8,6 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "seo:qa:sitemap": "node scripts/qa-sitemap.mjs --strict --report ./.reports/seo-sitemap-qa.json",
+    "seo:qa:sitemap:local": "node scripts/qa-sitemap.mjs --skip-http --sitemap-file ./dist/sitemap.xml --report ./.reports/seo-sitemap-qa.local.json",
     "studio": "cd studio && npm run dev",
     "studio:build": "cd studio && npm run build",
     "lint": "eslint . --ext .js,.ts,.astro",

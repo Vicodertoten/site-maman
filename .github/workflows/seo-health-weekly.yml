@@ -1,0 +1,29 @@
+name: SEO Health Weekly
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+jobs:
+  sitemap-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: SEO sitemap QA
+        run: npm run seo:qa:sitemap
+
+      - name: Upload SEO report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-sitemap-qa-report
+          path: ./.reports/seo-sitemap-qa.json
+          if-no-files-found: warn

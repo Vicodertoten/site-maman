@@ -10,8 +10,8 @@ const [contactData, siteSettings] = await Promise.all([
   getSiteSettingsData()
 ]);
 
-const defaultSiteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://gastronomade.netlify.app';
-const siteUrl = siteSettings?.seo?.siteUrl || defaultSiteUrl;
+const canonicalSiteUrl = 'https://murielcruysmans.com';
+const siteUrl = canonicalSiteUrl;
 
 const defaultTitle = siteSettings?.seo?.defaultTitle || 'Gastronomade - Manger Vrai';
 const defaultDescription = siteSettings?.seo?.defaultDescription || "Gastronomade - Manger Vrai - Muriel Cruysmans à Wavre";
@@ -27,8 +27,17 @@ const {
   enableMicroInteractions = true
 } = Astro.props;
 
-const canonicalUrl = `${siteUrl}${url}`;
-const resolvedImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
+const canonicalPath = (() => {
+  if (url instanceof URL) return `${url.pathname}${url.search}`;
+  if (typeof url !== 'string') return '/';
+  if (/^https?:\/\//i.test(url)) {
+    const parsed = new URL(url);
+    return `${parsed.pathname}${parsed.search}`;
+  }
+  return url;
+})();
+const canonicalUrl = new URL(canonicalPath, `${siteUrl}/`).toString();
+const resolvedImage = image.startsWith('http') ? image : new URL(image, `${siteUrl}/`).toString();
 
 const fallbackNavItems = [
   { label: 'Gastronomade', href: '/' },
@@ -167,7 +176,7 @@ const jsonLdObjects = [
       if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
         document.documentElement.classList.add('has-js');
       }
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

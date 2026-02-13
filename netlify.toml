@@ -5,6 +5,46 @@
 [build.environment]
   NODE_VERSION = "22.14.0"
 
+# Canonical host + HTTPS (P0 SEO)
+[[redirects]]
+  from = "http://www.murielcruysmans.com/*"
+  to = "https://murielcruysmans.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.murielcruysmans.com/*"
+  to = "https://murielcruysmans.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://murielcruysmans.com/*"
+  to = "https://murielcruysmans.com/:splat"
+  status = 301
+  force = true
+
+# Legacy Wix URLs -> pages actuelles (P0 SEO)
+[[redirects]]
+  from = "/a-propos"
+  to = "/about/"
+  status = 301
+
+[[redirects]]
+  from = "/a-propos/"
+  to = "/about/"
+  status = 301
+
+[[redirects]]
+  from = "/thermomix-old"
+  to = "/thermomix/"
+  status = 301
+
+[[redirects]]
+  from = "/thermomix-old/"
+  to = "/thermomix/"
+  status = 301
+
 # Configuration des formulaires Netlify
 [dev]
   # Activer les formulaires en mode développement

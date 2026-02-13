@@ -6,5 +6,5 @@ Disallow: /admin/
 Disallow: /.netlify/
 Disallow: /.env
 
-# Sitemap (utiliser un chemin relatif pour être portable)
-Sitemap: /sitemap.xml
+# Sitemap canonique
+Sitemap: https://murielcruysmans.com/sitemap.xml

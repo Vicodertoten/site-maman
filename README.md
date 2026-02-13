@@ -14,6 +14,9 @@ npm run dev
 # Build pour production
 npm run build
 
+# QA SEO sitemap (pré-déploiement)
+npm run seo:qa:sitemap
+
 # Aperçu production
 npm run preview
 
