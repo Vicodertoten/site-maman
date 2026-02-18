@@ -40,6 +40,11 @@ export const about = {
       name: 'services_section',
       title: '💼 Tes Services & Offres',
       options: { collapsible: true, collapsed: false }
+    },
+    {
+      name: 'faqs_section',
+      title: '❓ Questions Fréquentes',
+      options: { collapsible: true, collapsed: false }
     }
   ],
 
@@ -437,6 +442,44 @@ export const about = {
       initialValue: '/contact',
       description: 'Où le bouton mène.',
       fieldset: 'services_section'
+    },
+
+    {
+      name: 'faqs',
+      title: 'Questions Fréquentes',
+      type: 'array',
+      of: [{
+        type: 'object',
+        fields: [
+          {
+            name: 'question',
+            title: '❓ Question',
+            type: 'string',
+            validation: (Rule: any) => Rule.required().min(10).max(200)
+          },
+          {
+            name: 'answer',
+            title: '✅ Réponse',
+            type: 'text',
+            rows: 3,
+            validation: (Rule: any) => Rule.required().min(20).max(1000)
+          },
+          {
+            name: 'isVisible',
+            title: '👁️ Afficher cette FAQ',
+            type: 'boolean',
+            initialValue: true
+          },
+          {
+            name: 'order',
+            title: '🔢 Ordre',
+            type: 'number',
+            initialValue: 0
+          }
+        ]
+      }],
+      fieldset: 'faqs_section',
+      description: 'Ajoute tes questions les plus posées sur cette page. Triable par drag-drop.'
     }
   ],
 

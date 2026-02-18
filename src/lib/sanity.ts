@@ -55,6 +55,12 @@ export interface RestaurantData {
   minGuests: number
   depositAmount: number
   isVisible?: boolean
+  faqs?: Array<{
+    question?: string
+    answer?: string
+    isVisible?: boolean
+    order?: number
+  }>
 }
 
 export interface ThermomixData {
@@ -104,6 +110,12 @@ export interface ThermomixData {
   showPromo?: boolean
   showBenefits?: boolean
   showDemo?: boolean
+  faqs?: Array<{
+    question?: string
+    answer?: string
+    isVisible?: boolean
+    order?: number
+  }>
 }
 
 export interface LocationData {
@@ -123,6 +135,12 @@ export interface LocationData {
   image: any
   imageUrl?: string
   isVisible?: boolean
+  faqs?: Array<{
+    question?: string
+    answer?: string
+    isVisible?: boolean
+    order?: number
+  }>
 }
 
 export interface RecipeData {
@@ -244,6 +262,12 @@ export interface AboutData {
   showServices?: boolean
   showJourney?: boolean
   showSignature?: boolean
+  faqs?: Array<{
+    question?: string
+    answer?: string
+    isVisible?: boolean
+    order?: number
+  }>
 }
 
 export interface AuthorData {
@@ -494,7 +518,13 @@ export const queries = {
     highlights,
     minGuests,
     depositAmount,
-    isVisible
+    isVisible,
+    faqs[isVisible == true] | order(order asc){
+      question,
+      answer,
+      isVisible,
+      order
+    }
   }`,
 
   // Thermomix - Document unique
@@ -544,7 +574,13 @@ export const queries = {
     showHero,
     showPromo,
     showBenefits,
-    showDemo
+    showDemo,
+    faqs[isVisible == true] | order(order asc){
+      question,
+      answer,
+      isVisible,
+      order
+    }
   }`,
 
   // Locations - Tous les types
@@ -577,7 +613,13 @@ export const queries = {
     maxCapacity,
     image,
     "imageUrl": image.asset->url,
-    isVisible
+    isVisible,
+    faqs[isVisible == true] | order(order asc){
+      question,
+      answer,
+      isVisible,
+      order
+    }
   }`,
 
   // Recettes - Toutes les recettes gratuites (hors packs)
@@ -800,7 +842,13 @@ export const queries = {
     showAchievements,
     showServices,
     showJourney,
-    showSignature
+    showSignature,
+    faqs[isVisible == true] | order(order asc){
+      question,
+      answer,
+      isVisible,
+      order
+    }
   }`,
 
   // Contact - Informations de contact
@@ -1038,7 +1086,8 @@ export const queries = {
     ctaTitle,
     ctaDescription,
     ctaPrimaryButton
-  }`}
+  }`
+}
 
 // Fonctions utilitaires pour récupérer les données
 const SANITY_CACHE_TTL_MS = 30_000

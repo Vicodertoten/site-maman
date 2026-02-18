@@ -8,6 +8,11 @@ export const location = {
       name: 'visibility',
       title: 'Affichage (avancé)',
       options: { collapsible: true, collapsed: true }
+    },
+    {
+      name: 'faqs_section',
+      title: '❓ Questions Fréquentes',
+      options: { collapsible: true, collapsed: false }
     }
   ],
   fields: [
@@ -107,6 +112,44 @@ export const location = {
       type: 'boolean',
       initialValue: true,
       fieldset: 'visibility'
+    },
+
+    {
+      name: 'faqs',
+      title: 'Questions Fréquentes',
+      type: 'array',
+      of: [{
+        type: 'object',
+        fields: [
+          {
+            name: 'question',
+            title: '❓ Question',
+            type: 'string',
+            validation: (Rule: any) => Rule.required().min(10).max(200)
+          },
+          {
+            name: 'answer',
+            title: '✅ Réponse',
+            type: 'text',
+            rows: 3,
+            validation: (Rule: any) => Rule.required().min(20).max(1000)
+          },
+          {
+            name: 'isVisible',
+            title: '👁️ Afficher cette FAQ',
+            type: 'boolean',
+            initialValue: true
+          },
+          {
+            name: 'order',
+            title: '🔢 Ordre',
+            type: 'number',
+            initialValue: 0
+          }
+        ]
+      }],
+      fieldset: 'faqs_section',
+      description: 'Les questions les plus posées sur la privatisation.'
     }
   ],
   preview: {

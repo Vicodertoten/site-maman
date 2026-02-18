@@ -115,12 +115,6 @@ export default defineConfig({
                     S.listItem()
                       .title('📖 Les Recettes')
                       .child(S.documentTypeList('recipe').title('Toutes les recettes')),
-
-                    // FAQs section — À activer une fois le schéma créé
-                    // S.listItem()
-                    //   .title('❓ Questions Fréquentes')
-                    //   .description('Répondre aux questions récurrentes')
-                    //   .child(S.documentTypeList('faq').title('Toutes les FAQs')),
                   ])
               ),
 
