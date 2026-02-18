@@ -18,6 +18,11 @@ export const about = {
       initialValue: 'Cours & Coaching - Muriel Cruysmans'
     },
     {
+      name: 'hero',
+      title: 'Hero (commun)',
+      type: 'pageHero'
+    },
+    {
       name: 'heroTitle',
       title: 'Titre principal',
       type: 'string',

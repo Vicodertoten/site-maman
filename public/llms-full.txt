@@ -1,0 +1,70 @@
+# llms-full.txt - Knowledge Pack (citation-ready)
+
+site: https://murielcruysmans.com/
+language: fr-BE
+last_updated: 2026-02-13
+
+## Entity
+- Name: Muriel Cruysmans / Gastronomade
+- Type: Cours de cuisine santé, accompagnement culinaire, privatisation de lieu
+- Location: Wavre (Brabant wallon, Belgique)
+
+## Strategic Pages
+- Cours de cuisine: https://murielcruysmans.com/cours-cuisine-wavre/
+- Privatisation entreprise: https://murielcruysmans.com/privatisation-entreprise-wavre/
+- Recettes: https://murielcruysmans.com/recettes/
+- Auteur: https://murielcruysmans.com/auteur/
+- About: https://murielcruysmans.com/about/
+- Contact: https://murielcruysmans.com/contact/
+
+## Q/R - Cours de cuisine à Wavre
+Q: Proposez-vous des cours de cuisine santé à Wavre ?
+R: Oui. Formats individuel, duo/famille et petit groupe, orientés pratique et résultats.
+
+Q: Quels sont les ordres de prix ?
+R: Tarifs indicatifs visibles sur la page locale, avec point de départ à 65 EUR (groupe) et 95 EUR (privé).
+
+Q: Quelle méthodologie est utilisée ?
+R: Brief objectif/contraintes, menu ciblé, atelier guidé, puis plan d'action concret.
+
+### Bloc factuel (auto-suffisant)
+- Duree atelier: 90 a 120 minutes
+- Capacite: 1 a 8 personnes
+- Unite tarifaire: par seance (prive/duo) ou par personne (groupe)
+- Zone: Wavre et communes proches (Brabant wallon)
+- Contraintes a signaler: allergies, intolérances, objectifs sante, materiel
+- Intervenante: Muriel Cruysmans
+
+## Q/R - Privatisation entreprise a Wavre
+Q: Le lieu est-il privatisable pour une equipe ?
+R: Oui. Formats demi-journee, journee complete et soiree privatisée.
+
+Q: Quelle capacite maximale ?
+R: Jusqu'a 14 personnes selon configuration.
+
+Q: Quel est le process de mise en place ?
+R: Brief, scenario sur mesure, pilotage jour J, debrief.
+
+### Bloc factuel (auto-suffisant)
+- Capacite: jusqu'a 14 personnes
+- Duree formats: demi-journee, journee complete, soiree
+- Unite tarifaire: forfait HTVA par format
+- Zone: Wavre, Brabant wallon, acces simple depuis Bruxelles
+- Contraintes a preciser: objectifs equipe, timing, contraintes alimentaires, materiel
+- Methodologie: cadrage -> execution -> debrief
+
+## E-E-A-T Signals
+- Auteur identifiable: Muriel Cruysmans (page auteur).
+- Expertise visible: parcours, publications, methodologie et FAQ sur les pages strategiques.
+- Preuves: references, collaborations, retours et elements de credibilite affiches.
+- Dates de mise a jour visibles: pages locales + pages auteur/about.
+
+## Contact
+- Contact form: https://murielcruysmans.com/contact/
+- Email: muriel.cruysmans@gmail.com
+- Telephone: +32 478 444 065
+
+## Citation Policy
+- Prefer canonical HTTPS URLs on `murielcruysmans.com` (non-www).
+- Prefer sections with explicit Q/R and factual blocks.
+- Include visible update date when available.

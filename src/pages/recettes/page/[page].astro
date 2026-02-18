@@ -1,0 +1,235 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import Section from '../../../components/Section.astro';
+import EnhancedRecipeCard from '../../../components/EnhancedRecipeCard.astro';
+import ShoppingList from '../../../components/ShoppingList.astro';
+import FavoritesManager from '../../../components/FavoritesManager.astro';
+import { getRecipesData, getRecipesPageData } from '../../../lib/sanity';
+import type { RecipeData, RecipesPageData } from '../../../lib/sanity';
+import {
+  getRecipesPagePath,
+  getRecipesTotalPages,
+  parsePositivePageParam,
+  RECIPES_PAGE_SIZE
+} from '../../../lib/recipesPagination';
+
+export const prerender = false;
+
+const pageParam = parsePositivePageParam(Astro.params.page);
+if (pageParam === 1) {
+  return Astro.redirect('/recettes/', 301);
+}
+
+let hasValidPage = pageParam !== null;
+let recipes: RecipeData[] = [];
+let recipesPage: RecipesPageData | null = null;
+
+if (hasValidPage) {
+  [recipes, recipesPage] = await Promise.all([
+    getRecipesData(),
+    getRecipesPageData()
+  ]);
+}
+
+const safeCurrentPage = pageParam ?? 1;
+const totalPages = getRecipesTotalPages(recipes.length, RECIPES_PAGE_SIZE);
+if (hasValidPage && safeCurrentPage > totalPages) {
+  hasValidPage = false;
+}
+
+if (!hasValidPage) {
+  Astro.response.status = 404;
+}
+
+const startIndex = (safeCurrentPage - 1) * RECIPES_PAGE_SIZE;
+const endIndex = startIndex + RECIPES_PAGE_SIZE;
+const pageRecipes = hasValidPage ? recipes.slice(startIndex, endIndex) : [];
+
+function normalizeString(value?: string | null): string {
+  return (value ?? '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+function normalizeCategoryValue(category?: string | null): string {
+  const normalized = normalizeString(category);
+  const aliases: Record<string, string[]> = {
+    entree: ['entree', 'entrees', 'entrée', 'entrées'],
+    plat: ['plat', 'plats', 'plat principal', 'plats principaux'],
+    dessert: ['dessert', 'desserts'],
+    boisson: ['boisson', 'boissons'],
+    accompagnement: ['accompagnement', 'accompagnements']
+  };
+
+  for (const [value, variants] of Object.entries(aliases)) {
+    if (variants.some((variant) => normalizeString(variant) === normalized)) {
+      return value;
+    }
+  }
+
+  return category || '';
+}
+
+function getCategoryName(category: string): string {
+  const categories: { [key: string]: string } = {
+    entree: 'Entrée',
+    plat: 'Plat principal',
+    dessert: 'Dessert',
+    boisson: 'Boisson',
+    accompagnement: 'Accompagnement'
+  };
+  return categories[category] || category;
+}
+
+function normalizeDifficulty(value?: string): 'facile' | 'moyen' | 'difficile' | undefined {
+  if (value === 'facile' || value === 'moyen' || value === 'difficile') return value;
+  return undefined;
+}
+
+function getRecipeDescription(recipe: RecipeData): string {
+  const explicitDescription = (recipe.description || '').trim();
+  if (explicitDescription) return explicitDescription;
+
+  const subtitle = (recipe.subtitle || '').trim();
+  if (subtitle) return subtitle;
+
+  return `Recette ${getCategoryName(normalizeCategoryValue(recipe.category)).toLowerCase()} : ${recipe.title}.`;
+}
+
+function getRecipeImageAlt(recipe: RecipeData): string {
+  const explicitAlt = (recipe.featuredImageAlt || '').trim();
+  if (explicitAlt) return explicitAlt;
+  return `Photo de ${recipe.title}`;
+}
+
+const pageRecipeCards = pageRecipes.map((recipe) => ({
+  id: recipe._id,
+  slug: recipe.slug?.current || recipe._id,
+  title: recipe.title,
+  description: getRecipeDescription(recipe),
+  image: recipe.featuredImageUrl ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : undefined,
+  imageAlt: getRecipeImageAlt(recipe),
+  prepTime: recipe.prepTime,
+  cookTime: recipe.cookTime,
+  restTime: recipe.restTime,
+  servings: recipe.servings,
+  difficulty: normalizeDifficulty(recipe.difficulty),
+  category: getCategoryName(normalizeCategoryValue(recipe.category)),
+  categoryValue: normalizeCategoryValue(recipe.category),
+  rating: recipe.rating,
+  isNew: recipe.isNew || false,
+  isPopular: recipe.isPopular || false,
+  tags: recipe.tags,
+  ingredients: recipe.ingredients ? recipe.ingredients.map((ing) => ing.name) : []
+}));
+
+const pageTitle = hasValidPage
+  ? `Recettes - Page ${safeCurrentPage} | Gastronomade`
+  : 'Page introuvable | Recettes Gastronomade';
+
+const pageDescription = hasValidPage
+  ? `Archive recettes page ${safeCurrentPage} sur ${totalPages}.`
+  : "Cette page d'archives recettes n'existe pas.";
+
+const paginationPages = hasValidPage
+  ? Array.from({ length: totalPages }, (_, index) => index + 1)
+  : [];
+
+const previousPagePath = hasValidPage && safeCurrentPage > 1
+  ? getRecipesPagePath(safeCurrentPage - 1)
+  : null;
+const nextPagePath = hasValidPage && safeCurrentPage < totalPages
+  ? getRecipesPagePath(safeCurrentPage + 1)
+  : null;
+
+const introTitle = recipesPage?.heroTitle || 'Une cuisine simple, saine et généreuse.';
+---
+
+<MainLayout
+  title={pageTitle}
+  description={pageDescription}
+  robots={hasValidPage ? 'index,follow' : 'noindex,nofollow'}
+  enableMicroInteractions={false}
+>
+  {hasValidPage ? (
+    <>
+      <FavoritesManager />
+      <ShoppingList />
+
+      <Section class="bg-white" id="recettes-archive">
+        <div slot="content" class="space-y-8">
+          <header class="space-y-3">
+            <p class="mv-kicker">Archives recettes</p>
+            <h1 class="mv-hero-title">{introTitle}</h1>
+            <p class="text-sm text-mv-forest-70">
+              Page {safeCurrentPage} sur {totalPages} •
+              <a href="/recettes/" class="underline underline-offset-4 hover:text-mv-leaf ml-1">
+                Accéder à la page filtres
+              </a>
+            </p>
+          </header>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-7" role="list">
+            {pageRecipeCards.map((recipe) => (
+              <div class="scroll-fade-in" role="listitem">
+                <EnhancedRecipeCard
+                  recipe={recipe}
+                  showFavoriteButton={true}
+                  showShoppingListButton={true}
+                  compact={false}
+                />
+              </div>
+            ))}
+          </div>
+
+          <nav class="space-y-4" aria-label="Pagination des archives recettes">
+            <div class="flex flex-wrap items-center gap-2">
+              {paginationPages.map((pageNumber) => (
+                pageNumber === safeCurrentPage ? (
+                  <span
+                    class="inline-flex items-center justify-center min-w-10 h-10 px-3 rounded-lg border border-mv-leaf text-mv-forest bg-mv-leaf-10 font-semibold"
+                    aria-current="page"
+                  >
+                    {pageNumber}
+                  </span>
+                ) : (
+                  <a
+                    href={getRecipesPagePath(pageNumber)}
+                    class="inline-flex items-center justify-center min-w-10 h-10 px-3 rounded-lg border border-mv-leaf-30 text-mv-forest hover:border-mv-leaf hover:bg-mv-leaf-10 transition-colors"
+                    rel={pageNumber === safeCurrentPage + 1 ? 'next' : pageNumber === safeCurrentPage - 1 ? 'prev' : undefined}
+                  >
+                    {pageNumber}
+                  </a>
+                )
+              ))}
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 text-sm font-semibold">
+              {previousPagePath && (
+                <a href={previousPagePath} rel="prev" class="text-mv-forest hover:text-mv-leaf transition-colors">
+                  ← Page précédente
+                </a>
+              )}
+              {nextPagePath && (
+                <a href={nextPagePath} rel="next" class="text-mv-forest hover:text-mv-leaf transition-colors">
+                  Page suivante →
+                </a>
+              )}
+            </div>
+          </nav>
+        </div>
+      </Section>
+    </>
+  ) : (
+    <Section class="bg-white" containerClass="max-w-xl text-center">
+      <h1 class="text-3xl font-serif font-bold text-mv-forest mb-4" slot="content">Page d'archives introuvable</h1>
+      <p class="text-mv-forest-70" slot="content">
+        Cette page de recettes n'existe pas.
+      </p>
+      <a href="/recettes/" class="mv-btn mv-btn-primary mt-6 inline-flex" slot="content">Retour aux recettes</a>
+    </Section>
+  )}
+</MainLayout>

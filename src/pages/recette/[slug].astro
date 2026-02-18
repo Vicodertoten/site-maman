@@ -4,14 +4,36 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import ShoppingList from '../../components/ShoppingList.astro';
 import FavoritesManager from '../../components/FavoritesManager.astro';
 import Section from '../../components/Section.astro';
-import { getRecipeBySlug } from '../../lib/sanity';
+import { getRecipeBySlug, getRecipesData } from '../../lib/sanity';
 import { renderPortableText } from '../../lib/portableText';
 import { getEntitledPackIds, getSessionEmail, getSessionTokenFromRequest } from '../../lib/server/access';
+import { getRecipesPagePath, RECIPES_PAGE_SIZE } from '../../lib/recipesPagination';
 
 export const prerender = false;
 
+function toAsciiSlug(value: string): string {
+  return (value || '')
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/['’]/g, '-')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 72)
+    .replace(/-+$/g, '');
+}
+
 const slug = Astro.params.slug;
-const recipe = slug ? await getRecipeBySlug(slug) : null;
+const normalizedSlug = slug ? toAsciiSlug(slug) : '';
+let recipe = slug ? await getRecipeBySlug(slug) : null;
+if (!recipe && slug && normalizedSlug && normalizedSlug !== slug) {
+  recipe = await getRecipeBySlug(normalizedSlug);
+  if (recipe) {
+    return Astro.redirect(`/recette/${encodeURIComponent(normalizedSlug)}/`, 301);
+  }
+}
 
 let isNotFound = !recipe;
 const packIds = recipe?.packIds || [];
@@ -36,6 +58,8 @@ if (!isNotFound && packIds.length > 0) {
 if (isNotFound) {
   Astro.response.status = 404;
 }
+
+const recipesForRelated = !isNotFound ? await getRecipesData() : [];
 
 // Fonction pour obtenir le nom de la catégorie
 function getCategoryName(category: string): string {
@@ -73,6 +97,33 @@ function normalizeText(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
 }
 
+function normalizeSearchValue(value?: string | null): string {
+  return (value ?? '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buildRecipeDescription(recipeData: any): string {
+  const explicitDescription = (recipeData?.description || '').trim();
+  if (explicitDescription) return explicitDescription;
+
+  const subtitle = (recipeData?.subtitle || '').trim();
+  if (subtitle) return subtitle;
+
+  const categoryLabel = getCategoryName(recipeData?.category || 'recette');
+  return `Recette ${categoryLabel.toLowerCase()} : ${recipeData?.title || 'Gastronomade'}.`;
+}
+
+function toValidDate(value?: string | null): Date | null {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 function portableTextToPlainText(blocks?: any[]): string[] {
   if (!Array.isArray(blocks)) return [];
   return blocks
@@ -90,10 +141,26 @@ function portableTextToPlainText(blocks?: any[]): string[] {
 }
 
 const totalTime = (recipe?.prepTime || 0) + (recipe?.cookTime || 0) + (recipe?.restTime || 0);
-const pageDescription = (recipe?.description || recipe?.subtitle || 'Recette Gastronomade').trim();
+const recipeSummary = buildRecipeDescription(recipe);
+const visibleDescription = (recipe?.description || '').trim() || (!(recipe?.subtitle || '').trim() ? recipeSummary : '');
+const pageDescription = recipeSummary.trim();
 const pageImage = recipe?.featuredImageUrl
   ? `${recipe.featuredImageUrl}?w=1200&h=630&fit=crop&auto=format`
   : undefined;
+const publishedDate = toValidDate(recipe?.publishedAt);
+const modifiedDate = toValidDate(recipe?._updatedAt || recipe?.publishedAt);
+const hasUpdatedDate = Boolean(
+  publishedDate &&
+  modifiedDate &&
+  modifiedDate.getTime() - publishedDate.getTime() > 60 * 60 * 1000
+);
+const dateFormatter = new Intl.DateTimeFormat('fr-BE', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+});
+const publishedDateLabel = publishedDate ? dateFormatter.format(publishedDate) : null;
+const updatedDateLabel = hasUpdatedDate && modifiedDate ? dateFormatter.format(modifiedDate) : null;
 
 const budgetLabels: { [key: string]: string } = {
   'economique': 'Économique',
@@ -144,6 +211,58 @@ const recipeIngredients = (recipe?.ingredients || [])
   .map((ingredient) => [ingredient?.quantity, ingredient?.unit, ingredient?.name].filter(Boolean).join(' '))
   .map((text) => normalizeText(text))
   .filter(Boolean);
+
+const relatedRecipes = (!isNotFound && recipe)
+  ? (() => {
+      const allRecipes = recipesForRelated;
+      const currentCategory = normalizeSearchValue(recipe.category);
+      const currentTags = new Set((recipe.tags || []).map((tag) => normalizeSearchValue(tag)).filter(Boolean));
+
+      return allRecipes
+        .map((candidate, index) => {
+          if (!candidate?.slug?.current || candidate._id === recipe._id) return null;
+
+          const candidateCategory = normalizeSearchValue(candidate.category);
+          const candidateTags = (candidate.tags || [])
+            .map((tag) => normalizeSearchValue(tag))
+            .filter(Boolean);
+          const sharedTags = candidateTags.filter((tag) => currentTags.has(tag));
+          const sameCategory = currentCategory && candidateCategory === currentCategory;
+
+          let score = 0;
+          if (sameCategory) score += 3;
+          score += Math.min(sharedTags.length, 3);
+          if (candidate.isPopular) score += 0.5;
+          if (candidate.isNew) score += 0.25;
+
+          if (score <= 0) return null;
+
+          const archivePage = Math.floor(index / RECIPES_PAGE_SIZE) + 1;
+          const relationLabel = sameCategory
+            ? 'Même catégorie'
+            : sharedTags.length > 0
+              ? `Tag commun: ${sharedTags[0]}`
+              : 'Recette proche';
+
+          return {
+            id: candidate._id,
+            title: candidate.title,
+            slug: candidate.slug.current,
+            category: getCategoryName(candidate.category),
+            relationLabel,
+            archivePath: getRecipesPagePath(archivePage),
+            score,
+            publishedAt: candidate.publishedAt
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => Boolean(item))
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime();
+        })
+        .slice(0, 4);
+    })()
+  : [];
 
 const keywordSet = new Set<string>();
 if (recipe?.category) keywordSet.add(recipe.category);
@@ -298,9 +417,24 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
           </p>
         )}
 
-        {recipe.description && (
+        {(publishedDateLabel || updatedDateLabel) && (
+          <div class="text-sm text-mv-forest-60 mb-4 space-y-1">
+            {publishedDateLabel && publishedDate && (
+              <p>
+                Publié le <time datetime={publishedDate.toISOString()}>{publishedDateLabel}</time>
+              </p>
+            )}
+            {updatedDateLabel && modifiedDate && (
+              <p>
+                Mis à jour le <time datetime={modifiedDate.toISOString()}>{updatedDateLabel}</time>
+              </p>
+            )}
+          </div>
+        )}
+
+        {visibleDescription && (
           <p class="text-base sm:text-lg text-mv-forest-70 mb-6 leading-relaxed">
-            {recipe.description}
+            {visibleDescription}
           </p>
         )}
 
@@ -613,6 +747,38 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
       </div>
     </section>
 
+    {relatedRecipes.length > 0 && (
+      <section class="mt-10">
+        <div class="flex items-end justify-between gap-4 mb-4">
+          <h2 class="text-2xl font-serif font-bold text-mv-forest">Recettes liées</h2>
+          <a href="/recettes/" class="text-sm font-semibold text-mv-forest hover:text-mv-leaf transition-colors">
+            Voir toutes les recettes
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {relatedRecipes.map((related) => (
+            <article class="mv-card p-5">
+              <p class="text-xs uppercase tracking-[0.12em] text-mv-forest-60 mb-2">{related.relationLabel}</p>
+              <h3 class="text-lg font-semibold text-mv-forest">
+                <a href={`/recette/${encodeURIComponent(related.slug)}`} class="hover:text-mv-leaf transition-colors">
+                  {related.title}
+                </a>
+              </h3>
+              <p class="text-sm text-mv-forest-70 mt-1">{related.category}</p>
+              <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-mv-forest-70">
+                <a href={`/recette/${encodeURIComponent(related.slug)}`} class="underline underline-offset-4 hover:text-mv-leaf">
+                  Ouvrir la recette
+                </a>
+                <a href={related.archivePath} class="underline underline-offset-4 hover:text-mv-leaf">
+                  Voir sa page d'archive
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+
     <nav class="mt-12 text-center">
       <a
         href="/recettes"
@@ -764,7 +930,7 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
           try {
             await navigator.clipboard.writeText(window.location.href);
             showToast('Lien copié !');
-          } catch (error) {
+          } catch {
             showToast('Impossible de copier le lien.');
           }
         });

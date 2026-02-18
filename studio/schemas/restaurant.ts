@@ -18,6 +18,11 @@ export const restaurant = {
       description: 'Ex: "Soirée d’hiver" ou laissez vide.'
     },
     {
+      name: 'hero',
+      title: 'Hero (commun)',
+      type: 'pageHero'
+    },
+    {
       name: 'subtitle',
       title: 'Sous-titre',
       type: 'string',

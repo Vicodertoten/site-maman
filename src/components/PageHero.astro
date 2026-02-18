@@ -1,0 +1,203 @@
+---
+import Section from './Section.astro';
+import type { CommonHeroData } from '../lib/sanity';
+
+type HeroVariant = 'simple' | 'split' | 'utilitaire';
+
+interface Props {
+  hero?: CommonHeroData | null;
+  updatedAtIso?: string;
+  defaultVariant?: HeroVariant;
+  defaultKicker?: string;
+  defaultTitle: string;
+  defaultSubtitle?: string;
+  defaultCtaCount?: number;
+  defaultPrimaryCtaLabel?: string;
+  defaultPrimaryCtaUrl?: string;
+  defaultSecondaryCtaLabel?: string;
+  defaultSecondaryCtaUrl?: string;
+  sectionClass?: string;
+  mediaImageUrl?: string;
+  mediaImageAlt?: string;
+}
+
+const {
+  hero = null,
+  updatedAtIso,
+  defaultVariant = 'simple',
+  defaultKicker,
+  defaultTitle,
+  defaultSubtitle,
+  defaultCtaCount = 1,
+  defaultPrimaryCtaLabel,
+  defaultPrimaryCtaUrl,
+  defaultSecondaryCtaLabel,
+  defaultSecondaryCtaUrl,
+  sectionClass = 'bg-white',
+  mediaImageUrl,
+  mediaImageAlt
+} = Astro.props;
+
+const heroVariant: HeroVariant =
+  hero?.variant === 'split' || hero?.variant === 'utilitaire' || hero?.variant === 'simple'
+    ? hero.variant
+    : defaultVariant;
+
+const kicker = hero?.kicker || defaultKicker;
+const title = hero?.title || defaultTitle;
+const subtitle = hero?.subtitle || defaultSubtitle;
+
+const ctaCountRaw = Number(hero?.ctaCount ?? defaultCtaCount ?? 1);
+const ctaCount = ctaCountRaw >= 2 ? 2 : 1;
+
+const primaryCtaLabel = hero?.primaryCtaLabel || defaultPrimaryCtaLabel;
+const primaryCtaUrl = hero?.primaryCtaUrl || defaultPrimaryCtaUrl;
+const secondaryCtaLabel = hero?.secondaryCtaLabel || defaultSecondaryCtaLabel;
+const secondaryCtaUrl = hero?.secondaryCtaUrl || defaultSecondaryCtaUrl;
+
+const showUpdatedDate = hero?.showUpdatedDate !== false;
+const updatedLabel = updatedAtIso
+  ? new Intl.DateTimeFormat('fr-BE', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date(updatedAtIso))
+  : undefined;
+
+const hasMediaSlot = Astro.slots.has('media');
+const hasAfterSubtitleSlot = Astro.slots.has('afterSubtitle');
+
+const splitImageUrl = hero?.imageUrl || mediaImageUrl;
+const splitImageAlt = hero?.imageAlt || mediaImageAlt || title || 'Illustration';
+
+const isUtility = heroVariant === 'utilitaire';
+const shouldRenderSplit = heroVariant === 'split' && (hasMediaSlot || Boolean(splitImageUrl));
+const renderSplitWithBackgroundImage = heroVariant === 'split' && !hasMediaSlot && Boolean(splitImageUrl);
+const resolvedSectionClass = renderSplitWithBackgroundImage
+  ? `relative overflow-hidden ${sectionClass}`
+  : sectionClass;
+const splitContentClass = renderSplitWithBackgroundImage
+  ? 'relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center'
+  : 'grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center';
+const contentClass = isUtility ? 'space-y-4 max-w-3xl mx-auto text-center' : 'space-y-4 max-w-3xl';
+const ctaClass = isUtility ? 'flex flex-wrap gap-3 justify-center' : 'flex flex-wrap gap-3';
+
+const isExternalUrl = (value?: string) => typeof value === 'string' && /^https?:\/\//i.test(value);
+
+const hasPrimaryCta = Boolean(primaryCtaLabel && primaryCtaUrl);
+const hasSecondaryCta = ctaCount === 2 && Boolean(secondaryCtaLabel && secondaryCtaUrl);
+
+const primaryExternal = isExternalUrl(primaryCtaUrl);
+const secondaryExternal = isExternalUrl(secondaryCtaUrl);
+const primaryTarget = primaryExternal ? '_blank' : undefined;
+const primaryRel = primaryExternal ? 'noopener noreferrer' : undefined;
+const secondaryTarget = secondaryExternal ? '_blank' : undefined;
+const secondaryRel = secondaryExternal ? 'noopener noreferrer' : undefined;
+---
+
+<Section class={resolvedSectionClass}>
+  {renderSplitWithBackgroundImage && (
+    <div class="pointer-events-none absolute inset-0 hidden lg:block">
+      <div
+        class="absolute inset-y-0 right-0 w-2/3 bg-cover bg-center hero-image-mask"
+        style={`background-image: url(${splitImageUrl}?w=1800&auto=format);`}
+        aria-hidden="true"
+      />
+      <div
+        class="absolute inset-y-0 right-0 w-2/3 bg-[linear-gradient(to_left,transparent_0%,transparent_33%,rgba(255,255,255,0.6)_52%,rgba(255,255,255,0.92)_72%,white_100%)]"
+        aria-hidden="true"
+      />
+    </div>
+  )}
+  {shouldRenderSplit ? (
+    <div class={splitContentClass} slot="content">
+        <div class="lg:col-span-7 space-y-4">
+          {kicker ? <p class="mv-kicker">{kicker}</p> : null}
+          <h1 class="mv-hero-title">{title}</h1>
+          {subtitle ? <p class="mv-hero-subtitle text-mv-forest-80">{subtitle}</p> : null}
+          {hasAfterSubtitleSlot ? <slot name="afterSubtitle" /> : null}
+          {showUpdatedDate && updatedLabel && updatedAtIso ? (
+            <p class="text-xs uppercase tracking-[0.16em] text-mv-forest-60">
+              Dernière mise à jour : <time datetime={updatedAtIso}>{updatedLabel}</time>
+            </p>
+          ) : null}
+          {hasPrimaryCta ? (
+            <div class="flex flex-wrap gap-3">
+              <a
+                href={primaryCtaUrl}
+                target={primaryTarget}
+                rel={primaryRel}
+                class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf"
+              >
+                {primaryCtaLabel}
+              </a>
+              {hasSecondaryCta ? (
+                <a
+                  href={secondaryCtaUrl}
+                  target={secondaryTarget}
+                  rel={secondaryRel}
+                  class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream"
+                >
+                  {secondaryCtaLabel}
+                </a>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        {!renderSplitWithBackgroundImage && (
+          <div class="lg:col-span-5">
+            {hasMediaSlot ? <slot name="media" /> : null}
+            {!hasMediaSlot && splitImageUrl ? (
+              <div class="overflow-hidden rounded-3xl border border-mv-leaf-20 bg-white shadow-sm">
+                <img
+                  src={`${splitImageUrl}?w=900&h=700&fit=crop&auto=format`}
+                  alt={splitImageAlt}
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  width="900"
+                  height="700"
+                  sizes="(min-width: 1024px) 40vw, (min-width: 640px) 70vw, 100vw"
+                />
+              </div>
+            ) : null}
+          </div>
+        )}
+      </div>
+  ) : (
+    <div class={contentClass} slot="content">
+      {kicker ? <p class="mv-kicker">{kicker}</p> : null}
+      <h1 class="mv-hero-title">{title}</h1>
+      {subtitle ? <p class="mv-hero-subtitle text-mv-forest-80">{subtitle}</p> : null}
+      {hasAfterSubtitleSlot ? <slot name="afterSubtitle" /> : null}
+      {showUpdatedDate && updatedLabel && updatedAtIso ? (
+        <p class="text-xs uppercase tracking-[0.16em] text-mv-forest-60">
+          Dernière mise à jour : <time datetime={updatedAtIso}>{updatedLabel}</time>
+        </p>
+      ) : null}
+      {hasPrimaryCta ? (
+        <div class={ctaClass}>
+          <a
+            href={primaryCtaUrl}
+            target={primaryTarget}
+            rel={primaryRel}
+            class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf"
+          >
+            {primaryCtaLabel}
+          </a>
+          {hasSecondaryCta ? (
+            <a
+              href={secondaryCtaUrl}
+              target={secondaryTarget}
+              rel={secondaryRel}
+              class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream"
+            >
+              {secondaryCtaLabel}
+            </a>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  )}
+</Section>

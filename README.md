@@ -17,6 +17,9 @@ npm run build
 # QA SEO sitemap (pré-déploiement)
 npm run seo:qa:sitemap
 
+# QA qualité données recettes (description / alt / slug)
+npm run seo:qa:recipes-data
+
 # Aperçu production
 npm run preview
 

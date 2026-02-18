@@ -11,6 +11,11 @@ export const home = {
       initialValue: 'Gastronomade - Manger Vrai | Muriel Cruysmans'
     },
     {
+      name: 'hero',
+      title: 'Hero (commun)',
+      type: 'pageHero'
+    },
+    {
       name: 'heroTitle',
       title: 'Titre principal',
       type: 'string',

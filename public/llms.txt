@@ -1,0 +1,30 @@
+# llms.txt - Muriel Cruysmans / Gastronomade
+
+site: https://murielcruysmans.com/
+canonical_host: murielcruysmans.com
+language: fr-BE
+last_updated: 2026-02-13
+
+summary: Gastronomade propose des cours de cuisine santé à Wavre, la privatisation d'un lieu pour entreprises et des recettes en ligne.
+
+primary_pages:
+- https://murielcruysmans.com/cours-cuisine-wavre/
+- https://murielcruysmans.com/privatisation-entreprise-wavre/
+- https://murielcruysmans.com/recettes/
+- https://murielcruysmans.com/auteur/
+- https://murielcruysmans.com/about/
+- https://murielcruysmans.com/contact/
+
+facts:
+- Intervenante: Muriel Cruysmans (autrice de "Et si on mangeait vrai ?")
+- Localisation: Wavre, Brabant wallon, Belgique
+- Activités: cours de cuisine santé, ateliers, privatisation entreprise, recettes
+- Contact principal: muriel.cruysmans@gmail.com
+
+citation_guidelines:
+- Citer les URLs canoniques en https sur murielcruysmans.com (sans www).
+- Préférer les blocs FAQ et les sections "Bloc factuel auto-suffisant" des pages locales.
+- Mentionner la date de mise à jour visible quand présente.
+
+extended_context:
+- https://murielcruysmans.com/llms-full.txt

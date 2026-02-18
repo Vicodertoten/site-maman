@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
 import { sanityClient, queries, type ThermomixData } from '../lib/sanity';
 import { getEmbedUrl } from '../lib/utils';
 
@@ -49,82 +50,52 @@ const demoDetails = (thermomixData?.demoDetails && thermomixData.demoDetails.len
   image={pageImage}
 >
   {showHero && (
-    <Section class="relative overflow-hidden bg-gradient-to-b from-mv-cream via-white to-mv-cream/30">
-      {thermomixData?.featuredImageUrl && (
-        <div class="absolute inset-0 hidden lg:block">
-          <div
-            class="absolute inset-0 bg-cover bg-center hero-image-mask hero-image-mask--strong"
-            style={`background-image: url(${thermomixData.featuredImageUrl}?w=1800&auto=format);`}
-            aria-hidden="true"
-          ></div>
-          <div
-            class="absolute inset-0 bg-[linear-gradient(to_left,transparent_0%,transparent_33%,rgba(255,255,255,0.6)_52%,rgba(255,255,255,0.92)_72%,white_100%)]"
-            aria-hidden="true"
-          ></div>
-          <div
-            class="absolute inset-x-0 bottom-0 h-44 bg-[linear-gradient(to_bottom,rgba(251,248,241,0)_0%,rgba(251,248,241,0.7)_55%,rgba(251,248,241,0.95)_100%)]"
-            aria-hidden="true"
-          ></div>
-        </div>
-      )}
-      <div class="relative" slot="content">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          <div class="lg:col-span-7 space-y-5 sm:space-y-6">
-            <p class="mv-kicker">{thermomixData?.heroKicker || 'Thermomix'}</p>
-            <h1 class="mv-hero-title">
-              {thermomixData?.heroTitle || 'Le robot qui cuisine avec vous, pas à votre place.'}
-            </h1>
-            <p class="mv-lead">
-              {thermomixData?.heroLead || fallbackHeroLead}
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {heroHighlights.filter((item) => item?.isVisible !== false).map((item, index) => (
-                <div class="rounded-2xl bg-white shadow-sm border border-mv-leaf-20 p-4" key={index}>
-                  <p class="text-xs uppercase tracking-[0.18em] text-mv-forest-60 mb-2">{item.label}</p>
-                  <h3 class="text-sm font-semibold text-mv-forest">{item.title}</h3>
-                  <p class="text-sm text-mv-forest-70">{item.text}</p>
-                </div>
-              ))}
-            </div>
-            <div class="flex flex-wrap gap-3">
-              <a
-                href={thermomixData?.heroSecondaryCtaUrl || 'https://www.instagram.com/manger_vrai/'}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream transition-all duration-300"
-              >
-                {thermomixData?.heroSecondaryCtaLabel || 'Suivre @manger_vrai'}
-              </a>
-              <a
-                href={thermomixData?.heroPrimaryCtaUrl || 'https://www.youtube.com/@murielcruysmans5423/shorts'}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mv-btn mv-btn-primary bg-mv-leaf text-mv-cream hover:bg-mv-forest transition-all duration-300"
-              >
-                {thermomixData?.heroPrimaryCtaLabel || 'Voir les vidéos YouTube'}
-              </a>
-            </div>
+    <PageHero
+      hero={thermomixData?.hero}
+      updatedAtIso={thermomixData?._updatedAt}
+      defaultVariant="split"
+      defaultKicker={thermomixData?.heroKicker || 'Thermomix'}
+      defaultTitle={thermomixData?.heroTitle || 'Le robot qui cuisine avec vous, pas à votre place.'}
+      defaultSubtitle={thermomixData?.heroLead || fallbackHeroLead}
+      defaultCtaCount={2}
+      defaultPrimaryCtaLabel={thermomixData?.heroPrimaryCtaLabel || 'Voir les vidéos YouTube'}
+      defaultPrimaryCtaUrl={thermomixData?.heroPrimaryCtaUrl || 'https://www.youtube.com/@murielcruysmans5423/shorts'}
+      defaultSecondaryCtaLabel={thermomixData?.heroSecondaryCtaLabel || 'Suivre @manger_vrai'}
+      defaultSecondaryCtaUrl={thermomixData?.heroSecondaryCtaUrl || 'https://www.instagram.com/manger_vrai/'}
+      sectionClass="bg-white"
+      mediaImageUrl={thermomixData?.featuredImageUrl}
+      mediaImageAlt={thermomixData?.heroTitle || thermomixData?.heroKicker || 'Thermomix'}
+    >
+      <div slot="afterSubtitle" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {heroHighlights.filter((item) => item?.isVisible !== false).map((item, index) => (
+          <div class="rounded-2xl bg-white shadow-sm border border-mv-leaf-20 p-4" key={index}>
+            <p class="text-xs uppercase tracking-[0.18em] text-mv-forest-60 mb-2">{item.label}</p>
+            <h3 class="text-sm font-semibold text-mv-forest">{item.title}</h3>
+            <p class="text-sm text-mv-forest-70">{item.text}</p>
           </div>
-          <div class="lg:col-span-5">
-            {thermomixData?.videoUrl && (
-              <div class="rounded-3xl overflow-hidden shadow-lg border border-mv-leaf-20 bg-white">
-                <div class="aspect-video bg-mv-cream">
-                  <iframe
-                    src={getEmbedUrl(thermomixData.videoUrl)}
-                    class="w-full h-full"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                    title="Vidéo de présentation Thermomix"
-                  ></iframe>
-                </div>
-                <div class="p-4 sm:p-5">
-                  <p class="text-sm text-mv-forest-70">
-                    {thermomixData?.heroVideoCaption || 'Une présentation rapide pour comprendre l’essentiel avant une démo.'}
-                  </p>
-                </div>
-              </div>
-            )}
+        ))}
+      </div>
+    </PageHero>
+  )}
+
+  {thermomixData?.videoUrl && (
+    <Section class="bg-white pt-0">
+      <div class="max-w-4xl" slot="content">
+        <div class="rounded-3xl overflow-hidden shadow-lg border border-mv-leaf-20 bg-white">
+          <div class="aspect-video bg-mv-cream">
+            <iframe
+              src={getEmbedUrl(thermomixData.videoUrl)}
+              class="w-full h-full"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              title="Vidéo de présentation Thermomix"
+            ></iframe>
+          </div>
+          <div class="p-4 sm:p-5">
+            <p class="text-sm text-mv-forest-70">
+              {thermomixData?.heroVideoCaption || 'Une présentation rapide pour comprendre l’essentiel avant une démo.'}
+            </p>
           </div>
         </div>
       </div>

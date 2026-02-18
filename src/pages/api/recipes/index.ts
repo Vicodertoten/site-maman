@@ -43,6 +43,23 @@ function getCategoryLabel(category?: string | null): string {
   return labels[value] || (category || '')
 }
 
+function getRecipeDescription(recipe: { description?: string; subtitle?: string; title?: string; category?: string }): string {
+  const explicitDescription = (recipe.description || '').trim()
+  if (explicitDescription) return explicitDescription
+
+  const subtitle = (recipe.subtitle || '').trim()
+  if (subtitle) return subtitle
+
+  const category = getCategoryLabel(recipe.category).toLowerCase()
+  return `Recette ${category}: ${recipe.title || 'sans titre'}.`
+}
+
+function getRecipeAlt(recipe: { featuredImageAlt?: string; title?: string }): string {
+  const explicitAlt = (recipe.featuredImageAlt || '').trim()
+  if (explicitAlt) return explicitAlt
+  return `Photo de ${recipe.title || 'la recette'}`
+}
+
 export const GET: APIRoute = async () => {
   try {
     const recipes = await getRecipesData()
@@ -52,11 +69,11 @@ export const GET: APIRoute = async () => {
         id: recipe._id,
         slug: recipe.slug?.current || recipe._id,
         title: recipe.title,
-        description: recipe.description || '',
+        description: getRecipeDescription(recipe),
         image: recipe.featuredImageUrl
           ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format`
           : '',
-        imageAlt: recipe.featuredImageAlt || '',
+        imageAlt: getRecipeAlt(recipe),
         prepTime: recipe.prepTime || 0,
         cookTime: recipe.cookTime || 0,
         restTime: recipe.restTime || 0,

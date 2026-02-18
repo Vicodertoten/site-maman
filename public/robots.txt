@@ -8,3 +8,7 @@ Disallow: /.env
 
 # Sitemap canonique
 Sitemap: https://murielcruysmans.com/sitemap.xml
+
+# Discovery IA / GEO
+LLMS: https://murielcruysmans.com/llms.txt
+LLMS-Full: https://murielcruysmans.com/llms-full.txt

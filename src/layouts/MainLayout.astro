@@ -51,6 +51,16 @@ const navigationItems = (siteSettings?.navigation && siteSettings.navigation.len
   ? siteSettings.navigation
   : fallbackNavItems
 ).filter((item) => item?.isVisible !== false);
+const gastronomadeSubItems = [
+  { label: 'Restaurant', href: '/restaurant-wavre' },
+  { label: 'Privés', href: '/evenements-prives-wavre' },
+  { label: 'Entreprises', href: '/privatisation-entreprise-wavre' }
+];
+const isGastronomadeItem = (item?: { label?: string }) => (item?.label || '').trim().toLowerCase() === 'gastronomade';
+const hasGastronomadeNavItem = navigationItems.some((item) => isGastronomadeItem(item));
+const normalizedNavigationItems = hasGastronomadeNavItem
+  ? navigationItems
+  : [{ label: 'Gastronomade', href: '/', isVisible: true }, ...navigationItems];
 
 const showNavigation = siteSettings?.showNavigation !== false;
 const showFooter = siteSettings?.showFooter !== false;
@@ -222,10 +232,31 @@ const jsonLdObjects = [
         {showNavigation && (
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-1 lg:space-x-8">
-              {navigationItems.map((item) => (
-                <a href={item.href} class="text-mv-forest hover:text-mv-leaf hover:bg-mv-leaf-10 px-3 py-2 text-sm font-medium transition-all duration-300 rounded focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2">
-                  {item.label}
-                </a>
+              {normalizedNavigationItems.map((item) => (
+                isGastronomadeItem(item) ? (
+                  <div class="relative group">
+                    <a href="/" class="inline-flex items-center gap-1 text-mv-forest hover:text-mv-leaf hover:bg-mv-leaf-10 px-3 py-2 text-sm font-medium transition-all duration-300 rounded focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2">
+                      {item.label}
+                      <svg class="h-4 w-4 text-mv-forest-70 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </a>
+                    <div class="invisible absolute left-0 top-full z-20 mt-1 w-52 rounded-lg border border-mv-leaf-20 bg-white/95 p-2 opacity-0 shadow-xl backdrop-blur transition-all duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                      {gastronomadeSubItems.map((subItem) => (
+                        <a
+                          href={subItem.href}
+                          class="block rounded-md px-3 py-2 text-sm text-mv-forest hover:bg-mv-leaf-10 hover:text-mv-leaf focus:outline-none focus:ring-2 focus:ring-mv-leaf"
+                        >
+                          {subItem.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <a href={item.href} class="text-mv-forest hover:text-mv-leaf hover:bg-mv-leaf-10 px-3 py-2 text-sm font-medium transition-all duration-300 rounded focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2">
+                    {item.label}
+                  </a>
+                )
               ))}
             </div>
           </div>
@@ -252,10 +283,25 @@ const jsonLdObjects = [
       {showNavigation && (
         <div id="mobile-menu" class="hidden md:hidden pb-4">
           <div class="px-2 pt-2 pb-3 space-y-1 bg-mv-cream-90 backdrop-blur-lg rounded-lg border border-mv-leaf-30 mt-2 shadow-xl shadow-mv-forest-10">
-            {navigationItems.map((item) => (
-              <a href={item.href} class="text-mv-forest hover:text-mv-leaf hover:bg-mv-leaf-10 block px-3 py-2 text-base font-medium transition-all duration-300 rounded focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2">
-                {item.label}
-              </a>
+            {normalizedNavigationItems.map((item) => (
+              isGastronomadeItem(item) ? (
+                <div class="rounded border border-mv-leaf-20 bg-white/70 px-1 py-1">
+                  <a href="/" class="text-mv-forest hover:text-mv-leaf hover:bg-mv-leaf-10 block px-3 py-2 text-base font-medium transition-all duration-300 rounded focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2">
+                    {item.label}
+                  </a>
+                  <div class="mt-1 space-y-1 pl-2">
+                    {gastronomadeSubItems.map((subItem) => (
+                      <a href={subItem.href} class="text-mv-forest-90 hover:text-mv-leaf hover:bg-mv-leaf-10 block px-3 py-2 text-sm font-medium transition-all duration-300 rounded focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2">
+                        {subItem.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <a href={item.href} class="text-mv-forest hover:text-mv-leaf hover:bg-mv-leaf-10 block px-3 py-2 text-base font-medium transition-all duration-300 rounded focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2">
+                  {item.label}
+                </a>
+              )
             ))}
           </div>
         </div>

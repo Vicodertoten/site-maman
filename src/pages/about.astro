@@ -2,6 +2,7 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import Section from '../components/Section.astro';
 import PricingCard from '../components/PricingCard.astro';
+import PageHero from '../components/PageHero.astro';
 import { sanityClient, queries, type AboutData, type AuthorData } from '../lib/sanity';
 
 // Fonction helper pour obtenir l'URL d'une image Sanity
@@ -145,6 +146,20 @@ const testimonials = (authorData?.testimonials && authorData.testimonials.length
 const faqs = (authorData?.faqs && authorData.faqs.length > 0)
   ? authorData.faqs.filter((item) => item?.question && item?.answer)
   : fallbackFaqs;
+const faqJsonLd = faqs.length > 0
+  ? {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map((item) => ({
+        "@type": "Question",
+        "name": item.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": item.answer
+        }
+      }))
+    }
+  : null;
 
 const finalCtaTitle = 'Prête à avancer avec une méthode simple et joyeuse ?';
 const finalCtaText = 'Parlons de votre contexte pour choisir le format le plus adapté.';
@@ -154,28 +169,32 @@ const pageDescription = (aboutData?.heroSubtitle || authorShortBio || fallbackHe
 const pageImage = getImageUrl(aboutData?.photo)
   ? `${getImageUrl(aboutData?.photo)}?w=1200&h=630&fit=crop&auto=format`
   : undefined;
+const pageJsonLd = faqJsonLd ? [faqJsonLd] : undefined;
+const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;';
 ---
 
 <MainLayout
   title={aboutData?.title || "Cours & Coaching - Muriel Cruysmans"}
   description={pageDescription}
   image={pageImage}
+  jsonLd={pageJsonLd}
 >
   <!-- Hero Section -->
   {showHero && (
-    <Section class="relative z-0 overflow-visible bg-mv-cream" containerClass="relative z-0">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center" slot="content">
-        <div class="lg:col-span-7 space-y-4 relative z-10">
-          <p class="mv-kicker">{aboutData?.heroKicker || 'Cours & coaching'}</p>
-          <h1 class="mv-hero-title">
-            {aboutData?.heroTitle || "Cours & coaching personnalisés"}
-          </h1>
-          <p class="mv-hero-subtitle text-mv-forest-80">
-            {aboutData?.heroSubtitle || "Une cuisine saine, vivante et joyeuse, pour apprendre à cuisiner simplement et mieux manger au quotidien."}
-          </p>
-        </div>
-      </div>
-    </Section>
+    <PageHero
+      hero={aboutData?.hero}
+      updatedAtIso={aboutData?._updatedAt}
+      defaultVariant="simple"
+      defaultKicker="Cours & coaching"
+      defaultTitle={aboutData?.heroTitle || "Cours & coaching personnalisés"}
+      defaultSubtitle={aboutData?.heroSubtitle || "Une cuisine saine, vivante et joyeuse, pour apprendre à cuisiner simplement et mieux manger au quotidien."}
+      defaultCtaCount={1}
+      defaultPrimaryCtaLabel={aboutData?.heroCtaLabel || 'Réserver un échange'}
+      defaultPrimaryCtaUrl={aboutData?.heroCtaLink || '/contact'}
+      defaultSecondaryCtaLabel="Prendre contact"
+      defaultSecondaryCtaUrl="/contact"
+      sectionClass="bg-white"
+    />
   )}
 
   <!-- Bénéfices Section -->
@@ -241,7 +260,7 @@ const pageImage = getImageUrl(aboutData?.photo)
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
               />
             ) : null}
-            <div class="aspect-[4/5] bg-mv-cream-80 border border-mv-leaf-20 rounded-2xl flex items-center justify-center" style={authorPhotoUrl ? 'display: none;' : 'display: flex;'}>
+            <div class="aspect-[4/5] bg-mv-cream-80 border border-mv-leaf-20 rounded-2xl flex items-center justify-center" style={aboutEmptyPhotoStyle}>
               <div class="text-center text-mv-forest-60">
                 <svg class="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -384,6 +403,32 @@ const pageImage = getImageUrl(aboutData?.photo)
       </div>
     </Section>
   )}
+
+  <Section class="bg-white" containerClass="max-w-5xl">
+    <div class="max-w-3xl" slot="content">
+      <p class="mv-kicker">Pages locales</p>
+      <h2 class="mv-section-title">Accès direct aux offres à Wavre</h2>
+      <p class="text-sm text-mv-forest-70">
+        Ces pages détaillent tarifs, formats, capacité, zone desservie et modalités de réservation.
+      </p>
+    </div>
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4" slot="content">
+      <article class="mv-card p-5">
+        <h3 class="text-lg font-semibold text-mv-forest">Événements privés à Wavre</h3>
+        <p class="mt-2 text-sm text-mv-forest-80">Dîners, célébrations et cours de cuisine privés selon vos envies.</p>
+        <a href="/evenements-prives-wavre" class="mt-3 inline-flex text-sm font-semibold text-mv-forest underline underline-offset-4 hover:text-mv-leaf">
+          Voir la page locale
+        </a>
+      </article>
+      <article class="mv-card p-5">
+        <h3 class="text-lg font-semibold text-mv-forest">Privatisation entreprise à Wavre</h3>
+        <p class="mt-2 text-sm text-mv-forest-80">Réunions, team building et événements d’entreprise sur mesure.</p>
+        <a href="/privatisation-entreprise-wavre" class="mt-3 inline-flex text-sm font-semibold text-mv-forest underline underline-offset-4 hover:text-mv-leaf">
+          Voir la page locale
+        </a>
+      </article>
+    </div>
+  </Section>
 
   <Section class="bg-mv-cream" containerClass="text-center max-w-4xl">
     <h2 class="mv-section-title mb-3 sm:mb-4" slot="content">

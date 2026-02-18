@@ -18,6 +18,7 @@ export interface Props {
   categories?: Array<{ value: string; label: string; count?: number }>;
   budgets?: Array<{ value: string; label: string }>;
   totalRecipes: number;
+  pageSize?: number;
 }
 
 const {
@@ -27,7 +28,8 @@ const {
   availableSeasons = [],
   categories = [],
   budgets = [],
-  totalRecipes
+  totalRecipes,
+  pageSize = 10
 } = Astro.props;
 ---
 
@@ -282,7 +284,7 @@ const {
   </div>
 </div>
 
-<script define:vars={{ currentFilters }}>
+<script define:vars={{ currentFilters, pageSize }}>
   const normalizeText = (value = '') =>
     (value ?? '')
       .toString()
@@ -601,7 +603,9 @@ const {
   let lastTotalRecipes = 0;
   let lastDisplayedRecipes = 0;
   let autoLoadInProgress = false;
-  const DEFAULT_PAGE_SIZE = 10;
+  const DEFAULT_PAGE_SIZE = Number.isFinite(Number(pageSize)) && Number(pageSize) > 0
+    ? Number(pageSize)
+    : 10;
   const MAX_AUTO_LOAD_STEPS = 9;
   let visibleRecipesLimit = DEFAULT_PAGE_SIZE;
 

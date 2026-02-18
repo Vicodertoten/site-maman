@@ -10,6 +10,11 @@ export const authorProfile = {
       initialValue: 'Muriel Cruysmans'
     },
     {
+      name: 'hero',
+      title: 'Hero (commun)',
+      type: 'pageHero'
+    },
+    {
       name: 'title',
       title: 'Titre',
       type: 'string',

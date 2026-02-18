@@ -18,6 +18,12 @@ export const contact = {
       initialValue: 'Contact - Muriel Cruysmans'
     },
     {
+      name: 'hero',
+      title: 'Hero (commun)',
+      type: 'pageHero',
+      description: 'Première section de la page contact. Le nombre de CTA se règle ici (1 ou 2).'
+    },
+    {
       name: 'heroTitle',
       title: 'Titre principal',
       type: 'string',

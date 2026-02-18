@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { sanityClient } from '../lib/sanity';
+import { getRecipesPagePath, getRecipesTotalPages, RECIPES_PAGE_SIZE } from '../lib/recipesPagination';
 
 export const prerender = false;
 
@@ -12,7 +13,8 @@ const staticPaths = [
   '/contact/',
   '/recettes/',
   '/thermomix/',
-  '/cours-cuisine-wavre/',
+  '/restaurant-wavre/',
+  '/evenements-prives-wavre/',
   '/privatisation-entreprise-wavre/'
 ];
 
@@ -54,6 +56,7 @@ export const GET: APIRoute = async ({ site }) => {
 
   const staticUrls = staticPaths.map((path) => ({
     loc: toUrl(baseUrl, path),
+    lastmod: undefined,
   }));
 
   const recipeUrls = recipes
@@ -66,8 +69,22 @@ export const GET: APIRoute = async ({ site }) => {
       };
     });
 
+  const recipeArchiveLastmod = recipeUrls
+    .map((entry) => entry.lastmod)
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .at(-1);
+
+  const recipeArchiveTotalPages = getRecipesTotalPages(recipeUrls.length, RECIPES_PAGE_SIZE);
+  const recipeArchivePaginationUrls = Array.from({ length: recipeArchiveTotalPages }, (_, index) => index + 1)
+    .filter((pageNumber) => pageNumber > 1)
+    .map((pageNumber) => ({
+      loc: toUrl(baseUrl, getRecipesPagePath(pageNumber)),
+      lastmod: recipeArchiveLastmod,
+    }));
+
   const dedupedUrls = new Map<string, { loc: string; lastmod?: string }>();
-  [...staticUrls, ...recipeUrls].forEach((entry) => {
+  [...staticUrls, ...recipeArchivePaginationUrls, ...recipeUrls].forEach((entry) => {
     const existing = dedupedUrls.get(entry.loc);
     if (!existing) {
       dedupedUrls.set(entry.loc, entry);

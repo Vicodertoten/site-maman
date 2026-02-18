@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
 import { sanityClient, queries, type ContactData } from '../lib/sanity';
 
 // Récupérer les données depuis Sanity
@@ -15,6 +16,11 @@ const showMap = contactData?.showMap !== false;
 
 const fallbackHeroSubtitle = 'Entrons en contact pour votre projet gastronomique';
 const pageDescription = (contactData?.heroSubtitle || fallbackHeroSubtitle).trim();
+const contactPhoneHref = `tel:${contactData?.contactInfo?.phone?.replace(/\s+/g, '') || '+32478444065'}`;
+const contactHero = {
+  ...(contactData?.hero || {}),
+  showUpdatedDate: false
+};
 
 const instagramUrl =
   contactData?.instagramUrl ||
@@ -42,15 +48,21 @@ const prefilledNeed = allowedNeeds.has(requestedNeed) ? requestedNeed : '';
 
 <MainLayout title={contactData?.title || 'Contact - Gastronomade'} description={pageDescription}>
   <!-- Hero Section -->
-  <Section class="bg-gradient-to-b from-mv-cream to-white" containerClass="text-center">
-    <h1 class="mv-hero-title mb-3 sm:mb-4" slot="content">
-      {contactData?.heroTitle || 'Contact'}
-    </h1>
-    <p class="mv-hero-subtitle mb-4 sm:mb-6 max-w-3xl mx-auto text-mv-forest-80" slot="content">
-      {contactData?.heroSubtitle || 'Entrons en contact pour votre projet gastronomique'}
-    </p>
-    {showContactCards && (
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-6 sm:mt-8" slot="content">
+  <PageHero
+    hero={contactHero}
+    updatedAtIso={contactData?._updatedAt}
+    defaultVariant="utilitaire"
+    defaultTitle={contactData?.heroTitle || 'Contact'}
+    defaultSubtitle={contactData?.heroSubtitle || 'Entrons en contact pour votre projet gastronomique'}
+    defaultCtaCount={1}
+    defaultPrimaryCtaLabel="Envoyer une demande"
+    defaultPrimaryCtaUrl="#contact-quick-form"
+    sectionClass="bg-white"
+  />
+
+  {showContactCards && (
+    <Section class="bg-white pt-0 pb-8 sm:pb-10" padless={true}>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" slot="content">
         {showPhoneCard && (
           <div class="mv-card p-5 sm:p-6 text-center hover:shadow-lg transition-all duration-300 hover:scale-105">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-mv-leaf rounded-full mb-4">
@@ -60,7 +72,7 @@ const prefilledNeed = allowedNeeds.has(requestedNeed) ? requestedNeed : '';
             </div>
             <h3 class="font-semibold text-mv-forest mb-2">{contactData?.phoneLabel || 'Téléphone'}</h3>
             <p class="text-mv-forest-80 mb-4">{contactData?.contactInfo?.phone || '+32 478 44 40 65'}</p>
-            <a href={`tel:${contactData?.contactInfo?.phone?.replace(/\s+/g, '') || '+32478444065'}`} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf hover:shadow-md transition-all duration-300 hover:scale-105">
+            <a href={contactPhoneHref} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf hover:shadow-md transition-all duration-300 hover:scale-105">
               {contactData?.phoneButtonLabel || 'Appeler maintenant'}
             </a>
           </div>
@@ -96,8 +108,8 @@ const prefilledNeed = allowedNeeds.has(requestedNeed) ? requestedNeed : '';
           </div>
         )}
       </div>
-    )}
-  </Section>
+    </Section>
+  )}
 
   <Section class="bg-white pt-3 sm:pt-4 pb-8 sm:pb-10" padless={true}>
     <div class="mv-card p-6 sm:p-8" slot="content">
@@ -153,6 +165,31 @@ const prefilledNeed = allowedNeeds.has(requestedNeed) ? requestedNeed : '';
           <p id="contact-form-status" class="text-sm text-mv-forest-70" role="status" aria-live="polite"></p>
         </div>
       </form>
+    </div>
+  </Section>
+
+  <Section class="bg-white pt-0 pb-8 sm:pb-10" padless={true}>
+    <div class="mv-card p-6 sm:p-8" slot="content">
+      <h2 class="text-xl font-serif font-bold text-mv-forest mb-3">Vous avez déjà un besoin précis ?</h2>
+      <p class="text-sm text-mv-forest-70 mb-4">
+        Accédez directement aux pages locales qui détaillent formats, tarifs, capacité et réservation.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <article class="rounded-2xl border border-mv-leaf-20 bg-mv-cream p-4">
+          <h3 class="text-base font-semibold text-mv-forest">Événements privés à Wavre</h3>
+          <p class="mt-2 text-sm text-mv-forest-80">Dîners privés, célébrations et atelier culinaire sur mesure.</p>
+          <a href="/evenements-prives-wavre" class="mt-3 inline-flex text-sm font-semibold text-mv-forest underline underline-offset-4 hover:text-mv-leaf">
+            Voir l’offre
+          </a>
+        </article>
+        <article class="rounded-2xl border border-mv-leaf-20 bg-mv-cream p-4">
+          <h3 class="text-base font-semibold text-mv-forest">Privatisation entreprise à Wavre</h3>
+          <p class="mt-2 text-sm text-mv-forest-80">Réunions, team building et événements d’équipe sur mesure.</p>
+          <a href="/privatisation-entreprise-wavre" class="mt-3 inline-flex text-sm font-semibold text-mv-forest underline underline-offset-4 hover:text-mv-leaf">
+            Voir l’offre
+          </a>
+        </article>
+      </div>
     </div>
   </Section>
 

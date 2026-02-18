@@ -1,0 +1,148 @@
+---
+import Section from './Section.astro';
+import type { HomeData, RestaurantData } from '../lib/sanity';
+
+interface Props {
+  id?: string;
+  sectionClass?: string;
+  restaurantData?: RestaurantData | null;
+  homeData?: HomeData | null;
+  ctaHref?: string;
+}
+
+const {
+  id = 'restaurant-section',
+  sectionClass = 'bg-white',
+  restaurantData = null,
+  homeData = null,
+  ctaHref = '/contact'
+} = Astro.props;
+
+const fallbackRestaurantDates = [
+  '2026-03-05',
+  '2026-04-09',
+  '2026-05-21',
+  '2026-06-11'
+];
+
+const formatRestaurantDay = (value?: string) => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+};
+
+const getRestaurantStatusLabel = (status?: string) => {
+  const normalized = (status ?? '').toLowerCase();
+  return normalized.includes('complet') ? 'Complet' : 'Disponible';
+};
+
+const getStatusBackground = (status?: string) => {
+  const normalized = (status ?? '').toLowerCase().replace(/[éèê]/g, 'e');
+  if (normalized.includes('complet') || normalized.includes('indisponible')) {
+    return 'bg-mv-plum border border-mv-plum text-mv-cream';
+  }
+  return 'bg-mv-forest border border-mv-forest text-mv-cream';
+};
+
+const restaurantDateSlots = (restaurantData?.dateSlots && restaurantData.dateSlots.length > 0)
+  ? restaurantData.dateSlots.filter((slot) => slot?.isVisible !== false)
+  : [];
+
+const restaurantSlots = (restaurantDateSlots.length > 0 ? restaurantDateSlots : fallbackRestaurantDates.map(date => ({
+  date,
+  status: 'Disponible'
+})))
+  .slice(0, 8)
+  .map(slot => ({
+    date: slot?.date,
+    day: slot?.date ? new Date(slot.date).getDate() : '',
+    label: formatRestaurantDay(slot?.date),
+    status: slot?.status || 'Disponible'
+  }));
+
+const filteredHighlights = (restaurantData?.highlights || []).filter((item) => {
+  const normalized = (item || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return normalized !== 'entree, plat, dessert';
+});
+---
+
+<Section id={id} class={sectionClass}>
+  <div class="max-w-3xl mb-8" slot="content">
+    <p class="mv-kicker">Restaurant</p>
+    <h2 class="mv-section-title">
+      {homeData?.restaurantSectionTitle || 'Le jeudi de Gastronomade'}
+    </h2>
+    <p class="mv-lead text-mv-forest-70">
+      {homeData?.restaurantSectionDescription || 'Un menu végétal, créatif et de saison. La nature s’invite dans vos assiettes.'}
+    </p>
+  </div>
+
+  <div class="max-w-5xl mx-auto" slot="content">
+    <div class="bg-white rounded-3xl border border-mv-leaf-20 p-8 shadow-xl">
+      <div class="grid gap-8 lg:grid-cols-[1.2fr,0.8fr]">
+        <div>
+          <h3 class="text-2xl font-serif font-bold text-mv-forest mb-4">
+            {restaurantData?.menuTitle || 'Menu végétal & sauvage'}
+          </h3>
+          <p class="text-mv-forest-80 mb-4">
+            {restaurantData?.menuDescription || 'Un menu unique, imaginé pour des soirées conviviales autour de produits locaux et de saison.'}
+          </p>
+          {filteredHighlights.length > 0 && (
+            <ul class="mb-5 flex flex-wrap gap-2 text-xs sm:text-sm text-mv-forest-80">
+              {filteredHighlights.map((item, index) => (
+                <li
+                  class="rounded-full border border-mv-leaf-20 bg-mv-cream-80 px-3 py-1 font-medium"
+                  key={index}
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          )}
+          <div class="space-y-3 text-sm text-mv-forest-90">
+            <p class="font-semibold text-mv-forest">
+              {restaurantData?.price ? `${restaurantData.price}€/personne` : '50€/personne'}
+            </p>
+            <p>Eaux, thé et café compris</p>
+            <p>RDV à 19h45</p>
+            <p>{`Réservation minimum ${restaurantData?.minGuests || 4} personnes`}</p>
+            <p>{`Acompte de ${restaurantData?.depositAmount || 25}€ par personne`}</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="text-center text-xs font-semibold uppercase tracking-[0.2em] text-mv-forest-60">
+            {restaurantData?.reservationTitle || 'Prochaines soirées'}
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            {restaurantSlots.map((slot, index) => (
+              <article
+                key={`${slot.date ?? 'fallback'}-${index}`}
+                class="rounded-2xl border border-mv-leaf-20 bg-mv-cream-80 p-3 text-center"
+              >
+                <span class="text-2xl leading-none text-mv-forest">{slot.day || '?'}</span>
+                <span class="mt-1 block text-xs text-mv-forest-70 leading-tight">{slot.label || 'Date à confirmer'}</span>
+                <span class={`mt-2 inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.18em] ${getStatusBackground(slot.status)}`}>
+                  {getRestaurantStatusLabel(slot.status)}
+                </span>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 flex justify-center">
+        <a
+          href={ctaHref}
+          class="mv-btn mv-btn-primary bg-mv-forest text-white text-sm uppercase tracking-[0.2em] shadow-lg hover:bg-mv-plum transition"
+        >
+          Réserver une table
+        </a>
+      </div>
+    </div>
+  </div>
+</Section>

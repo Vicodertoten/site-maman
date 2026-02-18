@@ -1,0 +1,163 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Section from '../components/Section.astro';
+import RestaurantSection from '../components/RestaurantSection.astro';
+import PageHero from '../components/PageHero.astro';
+import { getRestaurantData, getHomeData } from '../lib/sanity';
+
+const [restaurantData, homeData] = await Promise.all([
+  getRestaurantData(),
+  getHomeData()
+]);
+
+const fallbackRestaurantDates = [
+  '2026-03-05',
+  '2026-04-09',
+  '2026-05-21',
+  '2026-06-11'
+];
+
+const toIsoDate = (value?: string) => {
+  if (!value) return undefined;
+  const trimmed = value.split('T')[0];
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString();
+};
+
+const baseUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : Astro.url.origin;
+const restaurantDateSlots = (restaurantData?.dateSlots && restaurantData.dateSlots.length > 0)
+  ? restaurantData.dateSlots.filter((slot) => slot?.isVisible !== false)
+  : [];
+
+const restaurantSlots = (restaurantDateSlots.length > 0 ? restaurantDateSlots : fallbackRestaurantDates.map(date => ({
+  date,
+  status: 'Disponible'
+})))
+  .slice(0, 8)
+  .map(slot => ({
+    date: slot?.date,
+    status: slot?.status || 'Disponible'
+  }));
+
+const pageDescription = homeData?.restaurantSectionDescription || 'Restaurant à Wavre un jeudi soir par mois: menu unique à 50€, réservation et prochaines dates.';
+const faqs = [
+  {
+    question: 'Quand ont lieu les soirées restaurant ?',
+    answer: 'Le restaurant éphémère a lieu un jeudi soir par mois à Wavre. Les dates sont mises à jour dans la section “Prochaines soirées”.'
+  },
+  {
+    question: 'Quel est le format du menu ?',
+    answer: 'Un menu unique végétal: entrée, plat, dessert, avec eaux, thé et café compris.'
+  },
+  {
+    question: 'Comment réserver une table ?',
+    answer: 'Réservation à partir de 4 personnes, avec acompte de 25€/personne. Contactez-nous via la page contact pour confirmer votre date.'
+  }
+];
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((item) => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer
+    }
+  }))
+};
+const restaurantEventsJsonLd = restaurantSlots
+  .filter((slot) => slot?.date)
+  .map((slot) => {
+    const startDate = toIsoDate(slot?.date);
+    if (!startDate) return null;
+    const isFull = (slot?.status || '').toLowerCase().includes('complet');
+    return {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": restaurantData?.title || "Restaurant éphémère",
+      "description": restaurantData?.menuDescription || homeData?.restaurantSectionDescription,
+      "startDate": startDate,
+      "eventStatus": "https://schema.org/EventScheduled",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "location": {
+        "@type": "Place",
+        "name": "Gastronomade",
+        "address": "Wavre, Belgique"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": typeof restaurantData?.price === 'number' ? restaurantData.price : undefined,
+        "priceCurrency": "EUR",
+        "availability": isFull ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        "url": `${baseUrl}/restaurant-wavre/`
+      },
+      "organizer": {
+        "@type": "Organization",
+        "name": "Gastronomade",
+        "url": baseUrl
+      }
+    };
+  })
+  .filter(Boolean);
+---
+
+<MainLayout
+  title="Restaurant à Wavre | Gastronomade"
+  description={pageDescription}
+  jsonLd={[...restaurantEventsJsonLd, faqJsonLd]}
+>
+  <PageHero
+    hero={restaurantData?.hero}
+    updatedAtIso={restaurantData?._updatedAt}
+    defaultVariant="simple"
+    defaultKicker="Restaurant"
+    defaultTitle={restaurantData?.title || 'Restaurant | Un jeudi soir par mois'}
+    defaultSubtitle={restaurantData?.menuDescription || 'Une expérience unique où la nature s’invite dans vos assiettes.'}
+    defaultCtaCount={1}
+    defaultPrimaryCtaLabel="Réserver une table"
+    defaultPrimaryCtaUrl="/contact"
+    sectionClass="bg-white"
+    mediaImageUrl={restaurantData?.imageUrl}
+    mediaImageAlt={restaurantData?.imageAlt || restaurantData?.title || 'Restaurant'}
+  />
+
+  <RestaurantSection
+    id="restaurant-section"
+    sectionClass="bg-white"
+    restaurantData={restaurantData}
+    homeData={homeData}
+    ctaHref="/contact"
+  />
+
+  <Section class="bg-white" containerClass="max-w-4xl">
+    <div class="space-y-5" slot="content">
+      <div class="rounded-2xl border border-mv-leaf-20 bg-mv-cream p-5">
+        <h3 class="text-lg font-semibold text-mv-forest">Lancer votre demande</h3>
+        <p class="mt-2 text-sm text-mv-forest-80">
+          Réponse rapide pour confirmer la date, le nombre de convives et la réservation.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-3">
+          <a href="/contact" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream">Réserver une table</a>
+          <a href="/auteur" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">Voir le parcours de Muriel</a>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <Section class="bg-mv-cream" containerClass="max-w-4xl">
+    <div class="space-y-4" slot="content">
+      <h2 class="mv-section-title">FAQ</h2>
+      {faqs.map((faq) => (
+        <article class="mv-card p-5">
+          <h3 class="text-lg font-semibold text-mv-forest">{faq.question}</h3>
+          <p class="mt-2 text-mv-forest-80">{faq.answer}</p>
+        </article>
+      ))}
+    </div>
+  </Section>
+</MainLayout>

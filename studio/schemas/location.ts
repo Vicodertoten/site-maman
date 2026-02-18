@@ -30,6 +30,11 @@ export const location = {
       description: 'Ex: "Réunions d’équipe" ou "Événements privés".'
     },
     {
+      name: 'hero',
+      title: 'Hero (commun)',
+      type: 'pageHero'
+    },
+    {
       name: 'subtitle',
       title: 'Sous-titre',
       type: 'string',

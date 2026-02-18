@@ -18,6 +18,11 @@ export const thermomix = {
       initialValue: 'Thermomix'
     },
     {
+      name: 'hero',
+      title: 'Hero (commun)',
+      type: 'pageHero'
+    },
+    {
       name: 'heroTitle',
       title: 'Hero — Titre',
       type: 'string',

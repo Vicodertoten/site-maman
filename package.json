@@ -10,6 +10,8 @@
     "astro": "astro",
     "seo:qa:sitemap": "node scripts/qa-sitemap.mjs --strict --report ./.reports/seo-sitemap-qa.json",
     "seo:qa:sitemap:local": "node scripts/qa-sitemap.mjs --skip-http --sitemap-file ./dist/sitemap.xml --report ./.reports/seo-sitemap-qa.local.json",
+    "seo:qa:recipes-data": "node scripts/qa-recipes-data.mjs --report ./.reports/seo-recipes-data-qa.json",
+    "seo:fix:recipes-data": "node scripts/qa-recipes-data.mjs --write --fix-slug --fix-description --fix-alt --report ./.reports/seo-recipes-data-fix.json",
     "studio": "cd studio && npm run dev",
     "studio:build": "cd studio && npm run build",
     "lint": "eslint . --ext .js,.ts,.astro",

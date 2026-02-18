@@ -17,11 +17,28 @@ export const sanityWriteClient = createClient({
   token: import.meta.env.SANITY_AUTH_TOKEN, // Token requis pour les écritures
 })
 
+export interface CommonHeroData {
+  variant?: 'simple' | 'split' | 'utilitaire'
+  kicker?: string
+  title?: string
+  subtitle?: string
+  showUpdatedDate?: boolean
+  ctaCount?: number
+  primaryCtaLabel?: string
+  primaryCtaUrl?: string
+  secondaryCtaLabel?: string
+  secondaryCtaUrl?: string
+  imageUrl?: string
+  imageAlt?: string
+}
+
 // Types pour les données Sanity
 export interface RestaurantData {
   _id: string
+  _updatedAt?: string
   title: string
   subtitle: string
+  hero?: CommonHeroData
   image?: any
   imageUrl?: string
   imageAlt?: string
@@ -42,6 +59,8 @@ export interface RestaurantData {
 
 export interface ThermomixData {
   _id: string
+  _updatedAt?: string
+  hero?: CommonHeroData
   heroKicker?: string
   heroTitle?: string
   heroLead?: string
@@ -89,8 +108,10 @@ export interface ThermomixData {
 
 export interface LocationData {
   _id: string
+  _updatedAt?: string
   type: 'societe' | 'prive'
   title: string
+  hero?: CommonHeroData
   subtitle: string
   price: string
   features: string[]
@@ -182,7 +203,9 @@ export interface PackData {
 
 export interface AboutData {
   _id: string
+  _updatedAt?: string
   title: string
+  hero?: CommonHeroData
   heroTitle: string
   heroSubtitle: string
   heroCtaLabel?: string
@@ -230,6 +253,8 @@ export interface AboutData {
 
 export interface AuthorData {
   _id: string
+  _updatedAt?: string
+  hero?: CommonHeroData
   name?: string
   title?: string
   tagline?: string
@@ -273,7 +298,9 @@ export interface AuthorData {
 
 export interface HomeData {
   _id: string
+  _updatedAt?: string
   title: string
+  hero?: CommonHeroData
   heroTitle: string
   heroSubtitle: string
   heroDescription: string
@@ -309,7 +336,9 @@ export interface CompanyAgendaData {
 
 export interface ContactData {
   _id: string
+  _updatedAt?: string
   title: string
+  hero?: CommonHeroData
   heroTitle: string
   heroSubtitle: string
   phoneLabel?: string
@@ -449,7 +478,22 @@ export const queries = {
   // Restaurant - Récupère le document le plus récent
   restaurant: `*[_type == "restaurant"] | order(_updatedAt desc)[0] {
     _id,
+    _updatedAt,
     title,
+    hero{
+      variant,
+      kicker,
+      title,
+      subtitle,
+      showUpdatedDate,
+      ctaCount,
+      primaryCtaLabel,
+      primaryCtaUrl,
+      secondaryCtaLabel,
+      secondaryCtaUrl,
+      "imageUrl": splitImage.asset->url,
+      "imageAlt": splitImageAlt
+    },
     subtitle,
     image,
     "imageUrl": image.asset->url,
@@ -472,6 +516,21 @@ export const queries = {
   // Thermomix - Document unique
   thermomix: `*[_type == "thermomix"] | order(_updatedAt desc)[0] {
     _id,
+    _updatedAt,
+    hero{
+      variant,
+      kicker,
+      title,
+      subtitle,
+      showUpdatedDate,
+      ctaCount,
+      primaryCtaLabel,
+      primaryCtaUrl,
+      secondaryCtaLabel,
+      secondaryCtaUrl,
+      "imageUrl": splitImage.asset->url,
+      "imageAlt": splitImageAlt
+    },
     heroKicker,
     heroTitle,
     heroLead,
@@ -507,8 +566,23 @@ export const queries = {
   // Locations - Tous les types
   locations: `*[_type == "location"] {
     _id,
+    _updatedAt,
     type,
     title,
+    hero{
+      variant,
+      kicker,
+      title,
+      subtitle,
+      showUpdatedDate,
+      ctaCount,
+      primaryCtaLabel,
+      primaryCtaUrl,
+      secondaryCtaLabel,
+      secondaryCtaUrl,
+      "imageUrl": splitImage.asset->url,
+      "imageAlt": splitImageAlt
+    },
     subtitle,
     price,
     features,
@@ -704,7 +778,22 @@ export const queries = {
   // About - Informations personnelles
   about: `*[_type == "about"] | order(_updatedAt desc)[0] {
     _id,
+    _updatedAt,
     title,
+    hero{
+      variant,
+      kicker,
+      title,
+      subtitle,
+      showUpdatedDate,
+      ctaCount,
+      primaryCtaLabel,
+      primaryCtaUrl,
+      secondaryCtaLabel,
+      secondaryCtaUrl,
+      "imageUrl": splitImage.asset->url,
+      "imageAlt": splitImageAlt
+    },
     heroTitle,
     heroSubtitle,
     heroCtaLabel,
@@ -747,7 +836,22 @@ export const queries = {
   // Contact - Informations de contact
   contact: `*[_type == "contact"] | order(_updatedAt desc)[0] {
     _id,
+    _updatedAt,
     title,
+    hero{
+      variant,
+      kicker,
+      title,
+      subtitle,
+      showUpdatedDate,
+      ctaCount,
+      primaryCtaLabel,
+      primaryCtaUrl,
+      secondaryCtaLabel,
+      secondaryCtaUrl,
+      "imageUrl": splitImage.asset->url,
+      "imageAlt": splitImageAlt
+    },
     heroTitle,
     heroSubtitle,
     phoneLabel,
@@ -870,6 +974,21 @@ export const queries = {
   // Auteur
   authorProfile: `*[_type == "authorProfile"][0] {
     _id,
+    _updatedAt,
+    hero{
+      variant,
+      kicker,
+      title,
+      subtitle,
+      showUpdatedDate,
+      ctaCount,
+      primaryCtaLabel,
+      primaryCtaUrl,
+      secondaryCtaLabel,
+      secondaryCtaUrl,
+      "imageUrl": splitImage.asset->url,
+      "imageAlt": splitImageAlt
+    },
     name,
     title,
     tagline,
@@ -913,7 +1032,22 @@ export const queries = {
   // Home - Page d'accueil
   home: `*[_type == "home"] | order(_updatedAt desc)[0] {
     _id,
+    _updatedAt,
     title,
+    hero{
+      variant,
+      kicker,
+      title,
+      subtitle,
+      showUpdatedDate,
+      ctaCount,
+      primaryCtaLabel,
+      primaryCtaUrl,
+      secondaryCtaLabel,
+      secondaryCtaUrl,
+      "imageUrl": splitImage.asset->url,
+      "imageAlt": splitImageAlt
+    },
     heroTitle,
     heroSubtitle,
     heroDescription,

@@ -42,17 +42,33 @@ function getCategoryName(category: string): string {
   return categories[category] || category
 }
 
+function getRecipeDescription(recipe: RecipeData): string {
+  const explicitDescription = (recipe.description || '').trim()
+  if (explicitDescription) return explicitDescription
+
+  const subtitle = (recipe.subtitle || '').trim()
+  if (subtitle) return subtitle
+
+  return `Recette ${getCategoryName(normalizeCategoryValue(recipe.category)).toLowerCase()}: ${recipe.title}.`
+}
+
+function getRecipeAlt(recipe: RecipeData): string {
+  const explicitAlt = (recipe.featuredImageAlt || '').trim()
+  if (explicitAlt) return explicitAlt
+  return `Photo de ${recipe.title}`
+}
+
 function mapCardData(recipe: RecipeData) {
   const categoryValue = normalizeCategoryValue(recipe.category)
   return {
     id: recipe._id,
     slug: recipe.slug?.current || recipe._id,
     title: recipe.title,
-    description: recipe.description,
+    description: getRecipeDescription(recipe),
     image: recipe.featuredImageUrl
       ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format`
       : undefined,
-    imageAlt: recipe.featuredImageAlt,
+    imageAlt: getRecipeAlt(recipe),
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,
     restTime: recipe.restTime,
@@ -73,7 +89,7 @@ function mapIndexData(recipe: RecipeData) {
     id: recipe._id,
     slug: recipe.slug?.current || recipe._id,
     title: recipe.title,
-    description: recipe.description,
+    description: getRecipeDescription(recipe),
     category: normalizeCategoryValue(recipe.category),
     difficulty: recipe.difficulty,
     prepTime: recipe.prepTime || 0,

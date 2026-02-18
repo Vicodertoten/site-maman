@@ -1,5 +1,28 @@
 // schemas/recipe.ts
 import type { Rule } from '@sanity/types'
+
+const RECIPE_SLUG_MAX_LENGTH = 72
+
+function toAsciiSlug(value: string): string {
+  const normalized = (value || '')
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/['’]/g, '-')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+  if (!normalized) return 'recette'
+
+  if (normalized.length <= RECIPE_SLUG_MAX_LENGTH) {
+    return normalized
+  }
+
+  return normalized.slice(0, RECIPE_SLUG_MAX_LENGTH).replace(/-+$/g, '')
+}
+
 export const recipe = {
   name: 'recipe',
   title: 'Recettes',
@@ -42,6 +65,7 @@ export const recipe = {
       title: 'Nom de la recette',
       type: 'string',
       description: 'Titre de la recette',
+      validation: (Rule: Rule) => Rule.required().min(5),
       fieldset: 'presentation'
     },
     {
@@ -50,8 +74,21 @@ export const recipe = {
       type: 'slug',
       options: {
         source: 'title',
-        maxLength: 96
+        maxLength: RECIPE_SLUG_MAX_LENGTH,
+        slugify: (input: string) => toAsciiSlug(input)
       },
+      validation: (Rule: Rule) =>
+        Rule.required().custom((value: any) => {
+          const current = value?.current?.trim()
+          if (!current) return 'Le slug est obligatoire.'
+          if (current.length > RECIPE_SLUG_MAX_LENGTH) {
+            return `Le slug doit faire ${RECIPE_SLUG_MAX_LENGTH} caractères maximum.`
+          }
+          if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(current)) {
+            return 'Slug invalide: utilisez uniquement lettres/chiffres ASCII et tirets.'
+          }
+          return true
+        }),
       fieldset: 'presentation'
     },
     {
@@ -83,6 +120,8 @@ export const recipe = {
       type: 'text',
       rows: 3,
       description: 'Courte description de la recette',
+      validation: (Rule: Rule) =>
+        Rule.required().min(30).max(220).error('Ajoutez une description utile (30 à 220 caractères).'),
       fieldset: 'presentation'
     },
     {
@@ -93,9 +132,23 @@ export const recipe = {
         hotspot: true
       },
       fields: [
-        { name: 'alt', title: 'Texte alternatif', type: 'string' }
+        {
+          name: 'alt',
+          title: 'Texte alternatif',
+          type: 'string',
+          validation: (Rule: Rule) =>
+            Rule.required().min(5).error('Le texte alternatif est obligatoire.')
+        }
       ],
       description: 'Photo de la recette terminée',
+      validation: (Rule: Rule) =>
+        Rule.required().custom((value: any) => {
+          if (!value?.asset) return "L'image principale est obligatoire."
+          if (!value?.alt || value.alt.trim().length < 5) {
+            return 'Ajoutez un texte alternatif descriptif (min. 5 caractères).'
+          }
+          return true
+        }),
       fieldset: 'presentation'
     },
     {

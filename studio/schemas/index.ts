@@ -13,8 +13,10 @@ import { siteSettings } from './siteSettings'
 import { newsletterSettings } from './newsletterSettings'
 import { recipesPage } from './recipesPage'
 import { authorProfile } from './authorProfile'
+import { pageHero } from './pageHero'
 
 export const schemaTypes = [
+  pageHero,
   restaurant,
   thermomix,
   location,
