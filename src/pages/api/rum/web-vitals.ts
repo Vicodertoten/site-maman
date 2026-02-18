@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getSupabaseAdmin } from '../../../../lib/server/access';
+import { getSupabaseAdmin } from '../../../lib/server/access';
 
 export const prerender = false;
 
