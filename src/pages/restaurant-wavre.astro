@@ -44,10 +44,11 @@ const restaurantSlots = (restaurantDateSlots.length > 0 ? restaurantDateSlots : 
   }));
 
 const pageDescription = homeData?.restaurantSectionDescription || 'Restaurant à Wavre un jeudi soir par mois: menu unique à 50€, réservation et prochaines dates.';
-const faqs = [
+
+const fallbackFaqs = [
   {
     question: 'Quand ont lieu les soirées restaurant ?',
-    answer: 'Le restaurant éphémère a lieu un jeudi soir par mois à Wavre. Les dates sont mises à jour dans la section “Prochaines soirées”.'
+    answer: 'Le restaurant éphémère a lieu un jeudi soir par mois à Wavre. Les dates sont mises à jour dans la section "Prochaines soirées".'
   },
   {
     question: 'Quel est le format du menu ?',
@@ -58,6 +59,10 @@ const faqs = [
     answer: 'Réservation à partir de 4 personnes, avec acompte de 25€/personne. Contactez-nous via la page contact pour confirmer votre date.'
   }
 ];
+
+const faqs = (restaurantData?.faqs && restaurantData.faqs.length > 0)
+  ? restaurantData.faqs.filter((item) => item?.question && item?.answer && item?.isVisible !== false)
+  : fallbackFaqs;
 const faqJsonLd = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -150,13 +155,15 @@ const restaurantEventsJsonLd = restaurantSlots
   </Section>
 
   <Section class="bg-mv-cream" containerClass="max-w-4xl">
-    <div class="space-y-4" slot="content">
+    <div class="max-w-3xl" slot="content">
       <h2 class="mv-section-title">FAQ</h2>
-      {faqs.map((faq) => (
-        <article class="mv-card p-5">
-          <h3 class="text-lg font-semibold text-mv-forest">{faq.question}</h3>
-          <p class="mt-2 text-mv-forest-80">{faq.answer}</p>
-        </article>
+    </div>
+    <div class="mt-6 space-y-3" slot="content">
+      {faqs.map((faq, index) => (
+        <details class="mv-card p-4 sm:p-5" key={index}>
+          <summary class="cursor-pointer text-sm font-semibold text-mv-forest">{faq.question}</summary>
+          <p class="mt-3 text-sm text-mv-forest-70">{faq.answer}</p>
+        </details>
       ))}
     </div>
   </Section>

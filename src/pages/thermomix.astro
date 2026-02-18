@@ -42,6 +42,25 @@ const demoDetails = (thermomixData?.demoDetails && thermomixData.demoDetails.len
       { label: 'À prévoir', text: 'Durée : 60 à 90 min • Groupe réduit', isVisible: true },
       { label: 'Où', text: 'Chez moi ou à convenir selon disponibilité.', isVisible: true }
     ];
+
+const defaultFaqs = [
+  {
+    question: "Qu'est-ce qu'un Thermomix exactement ?",
+    answer: "Un robot de cuisine multifonction qui pèse, hache, mixe, cuit et mijote. Il est guidé par des recettes intégrées qui vous accompagnent pas à pas."
+  },
+  {
+    question: "Combien ça coûte ?",
+    answer: "Le prix varie selon le modèle. Contactez-moi pour la tarification actuelle et les offres en cours."
+  },
+  {
+    question: "Comment ça marche ?",
+    answer: "Elle scannez la recette, les ingrédients se placent, et le Thermomix guide chaque étape. Simple et sûr."
+  }
+];
+
+const faqs = (thermomixData?.faqs && thermomixData.faqs.length > 0)
+  ? thermomixData.faqs.filter((item) => item?.question && item?.answer && item?.isVisible !== false)
+  : defaultFaqs;
 ---
 
 <MainLayout
@@ -183,6 +202,22 @@ const demoDetails = (thermomixData?.demoDetails && thermomixData.demoDetails.len
             </a>
           </div>
         )}
+      </div>
+    </Section>
+  )}
+
+  {faqs.length > 0 && (
+    <Section class="bg-white" containerClass="max-w-4xl">
+      <div class="max-w-3xl" slot="content">
+        <h2 class="mv-section-title">FAQ</h2>
+      </div>
+      <div class="mt-6 space-y-3" slot="content">
+        {faqs.map((faq, index) => (
+          <details class="mv-card p-4 sm:p-5" key={index}>
+            <summary class="cursor-pointer text-sm font-semibold text-mv-forest">{faq.question}</summary>
+            <p class="mt-3 text-sm text-mv-forest-70">{faq.answer}</p>
+          </details>
+        ))}
       </div>
     </Section>
   )}
