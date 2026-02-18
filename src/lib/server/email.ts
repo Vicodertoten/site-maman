@@ -66,12 +66,16 @@ export async function sendContactRequestEmail(options: {
   message?: string | null
 }): Promise<void> {
   const apiKey = getEnv('RESEND_API_KEY')
-  const from = getEnv('CONTACT_EMAIL_FROM') || getEnv('ACCESS_EMAIL_FROM') || 'Gastronomade <murielcruysmans@gmail.com>'
-  const to = getEnv('CONTACT_EMAIL_TO') || getEnv('ACCESS_EMAIL_REPLY_TO') || 'muriel.cruysmans@gmail.com'
+  const from = getEnv('CONTACT_EMAIL_FROM') || getEnv('ACCESS_EMAIL_FROM') || 'Gastronomade <onboarding@resend.dev>'
+  const to = getEnv('CONTACT_EMAIL_TO') || 'muriel.cruysmans@gmail.com'
   const defaultReplyTo = getEnv('CONTACT_EMAIL_REPLY_TO') || getEnv('ACCESS_EMAIL_REPLY_TO') || ''
 
   if (!apiKey) {
     throw new Error('RESEND_API_KEY manquant')
+  }
+
+  if (!to) {
+    throw new Error('CONTACT_EMAIL_TO ou destinataire par défaut manquant')
   }
 
   const resend = new Resend(apiKey)
