@@ -34,8 +34,28 @@ const fallbackLongBio = [
 ].join(' ');
 
 const fallbackVisionParagraphs = [
-  'Bien s’alimenter oui, mais dans le respect du travail et de la planète. Je privilégie les produits locaux, de saison, de culture biologique.',
-  'Ma cuisine se veut simple, savoureuse, fraîche, nourrissante et conviviale. Rien n’est interdit, c’est en prenant conscience de notre manière de nous alimenter et en découvrant de délicieuses nouvelles alternatives que petit à petit les aliments indésirables sortent de nos assiettes.'
+  "Bien s'alimenter oui, mais dans le respect du travail et de la planète. Je privilégie les produits locaux, de saison, de culture biologique."
+];
+
+const fallbackVisionCards = [
+  {
+    label: 'Santé',
+    title: 'Équilibre & vitalité',
+    text: 'Des recettes accessibles, bonnes et saines, pour retrouver énergie et plaisir sans pression.',
+    isVisible: true
+  },
+  {
+    label: 'Transmission',
+    title: 'Apprendre en faisant',
+    text: 'Des gestes simples, des repères clairs, pour gagner en autonomie et en confiance.',
+    isVisible: true
+  },
+  {
+    label: 'Plaisir',
+    title: 'Cuisine vivante',
+    text: 'Végétal, saison, gourmandise : une cuisine qui fait du bien et qui rassemble.',
+    isVisible: true
+  }
 ];
 
 const fallbackSignatureParagraphs = [
@@ -97,6 +117,9 @@ const visionTitle = authorData?.visionTitle || 'Vision & méthode';
 const visionParagraphs = (authorData?.visionParagraphs && authorData.visionParagraphs.length > 0)
   ? authorData.visionParagraphs
   : fallbackVisionParagraphs;
+const visionCards = (authorData?.visionCards && authorData.visionCards.length > 0)
+  ? authorData.visionCards
+  : fallbackVisionCards;
 const signatureTitle = authorData?.signatureTitle || 'Fil rouge de mes recettes';
 const signatureParagraphs = (authorData?.signatureParagraphs && authorData.signatureParagraphs.length > 0)
   ? authorData.signatureParagraphs
@@ -196,9 +219,6 @@ const pageJsonLd = faqJsonLd ? [faqJsonLd] : undefined;
       <p class="mv-kicker">Parcours</p>
       <h2 class="mv-section-title">Mon parcours</h2>
       <p class="mv-lead text-mv-forest-70">{journeyIntro}</p>
-      {longBio && (
-        <p class="mt-4 text-base sm:text-lg text-mv-forest-80 leading-relaxed">{longBio}</p>
-      )}
     </div>
     <div class="mt-6 rounded-3xl border border-mv-leaf-20 bg-mv-cream-50 p-6 sm:p-8" slot="content">
       <ol class="relative space-y-6 border-l border-mv-leaf-30 pl-6">
@@ -219,12 +239,16 @@ const pageJsonLd = faqJsonLd ? [faqJsonLd] : undefined;
       <p class="mv-kicker">Vision</p>
       <h2 class="mv-section-title">{visionTitle}</h2>
     </div>
-    <div class="mt-5 rounded-3xl border border-mv-leaf-20 bg-mv-cream-50 p-6 sm:p-8" slot="content">
-      <div class="space-y-4 text-base sm:text-lg text-mv-forest-80 leading-relaxed">
-        {visionParagraphs.map((paragraph, index) => (
-          <p key={index}>{paragraph}</p>
-        ))}
-      </div>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6" slot="content">
+      {visionCards.filter((card) => card?.isVisible !== false).map((card, index) => (
+        <div class="mv-card p-5 sm:p-6" key={index}>
+          <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-50">{card.label}</p>
+          <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">{card.title}</h3>
+          <p class="mt-2 text-sm text-mv-forest-70">
+            {card.text}
+          </p>
+        </div>
+      ))}
     </div>
     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4" slot="content">
       {signatureParagraphs.map((paragraph, index) => {

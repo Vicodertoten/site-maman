@@ -101,19 +101,34 @@ const authorPhotoUrl = authorPhoto
 const proofItems = (authorData?.proofs && authorData.proofs.length > 0) ? authorData.proofs : fallbackProofs;
 const fallbackTestimonials = [
   {
-    name: 'Claire D.',
-    role: 'Atelier cuisine',
-    quote: 'Des recettes simples, un cadre bienveillant et surtout des repères qui restent. Je cuisine autrement depuis.'
+    name: 'Catherine',
+    role: '',
+    quote: "Dans une ambiance très relax et sans prise de tête, on aborde l'alimentation et la préparation des repas autrement, avec des conseils-santé nouveaux, des petits trucs faciles à implémenter dans la vie quotidienne et moderne, le tout agrémenté d'une didactique fort avisée. Bref, essayer c'est l'adopter."
   },
   {
-    name: 'Nicolas P.',
-    role: 'Coaching',
-    quote: 'J’ai retrouvé de l’énergie et une vraie clarté dans mes repas. Les conseils sont concrets et faciles à appliquer.'
+    name: 'Ariane',
+    role: '',
+    quote: "Muriel, tu es épatante, j'apprécie ta créativité, ta dextérité, tes associations de goûts, de couleurs, de saveurs, un vrai bonheur de venir a tes cours! Toujours sympa, pas trop nombreux, on y apprend un tas de choses sur la nourriture vraie, sincère, pensée et bonne pour la santé. Tes recettes sont simples et faciles à refaire chez soi."
   },
   {
-    name: 'Sophie R.',
-    role: 'Conférence entreprise',
-    quote: 'Une approche humaine, accessible et inspirante. L’équipe a adoré.'
+    name: 'Fabi',
+    role: '',
+    quote: "C'est tout un art de cuisiner sain et délicieux et il en faut des trucs et astuces pour adapter les recettes aux besoins et restrictions de certains ;-) Merci pour ces moments instructifs, gustatifs et joyeux! A bientôt pour d'autres trucs!"
+  },
+  {
+    name: 'Nath',
+    role: '',
+    quote: "Ta cuisine est saine sans être compliquée, inventive en toute simplicité, haute en couleurs. Elle nous fait découvrir des aliments oubliés dans le respect du non gaspillage !!! Que du bonheur!"
+  },
+  {
+    name: 'Nanou',
+    role: '',
+    quote: "Ces cours de cuisine saine et appétissante sont d'abord un tout bon moment passé entre copines... Et puis surtout c'est une démarche sympa vers une alimentation simple, facile et \"goûteuse\" de tous les jours... Parce que pour moi, illuminer le quotidien, c'est une autre histoire! Merci pour tes recettes, tes conseils, tes petits mails \"ding ding\" de rappel!"
+  },
+  {
+    name: 'Val',
+    role: '',
+    quote: "Je découvre des nouvelles saveurs et des nouvelles recettes faciles à faire dans une ambiance chaleureuse, calme, organisée, décontractée et avec beaucoup de patience! Comme tu es passionnée, tu nous donnes un tas de trucs et astuces en plus, des conseils sur les produits à choisir et des informations précieuses sur l'alimentation saine. Un vrai moment de bonheur partagé!"
   }
 ];
 
@@ -197,32 +212,6 @@ const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;
     />
   )}
 
-  <!-- Bénéfices Section -->
-  {showVision && (
-    <Section id="benefices" class="bg-white" containerClass="max-w-5xl">
-      <div class="max-w-3xl" slot="content">
-        <h2 class="mv-section-title">
-          {benefitsTitle}
-        </h2>
-        <p class="mv-lead text-mv-forest-70">
-          {benefitsText}
-        </p>
-      </div>
-
-      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6" slot="content">
-        {visionCards.filter((card) => card?.isVisible !== false).map((card, index) => (
-          <div class="mv-card p-5 sm:p-6" key={index}>
-            <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-50">{card.label}</p>
-            <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">{card.title}</h3>
-            <p class="mt-2 text-sm text-mv-forest-70">
-              {card.text}
-            </p>
-          </div>
-        ))}
-      </div>
-    </Section>
-  )}
-
   <!-- Bio courte + preuves -->
   {showAboutSection && (
     <Section class="bg-white" containerClass="max-w-6xl">
@@ -298,8 +287,9 @@ const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-8" slot="content">
-        {aboutData?.services ? aboutData.services.map((service, index) => (
+      <div class="flex justify-center" slot="content">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 w-full lg:w-auto" style="max-width: 900px;">
+          {aboutData?.services ? aboutData.services.map((service, index) => (
           <PricingCard
             title={service.title}
             subtitle={service.description}
@@ -363,8 +353,9 @@ const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;
               ctaLink={servicesCtaLink}
             />
           </>
-        )}
-      </div>
+        )
+        }</div>
+        </div>
     </Section>
   )}
 
@@ -374,15 +365,22 @@ const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;
         <p class="mv-kicker">Témoignages</p>
         <h2 class="mv-section-title">Ils en parlent mieux que nous</h2>
       </div>
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" slot="content">
-        {testimonials.map((item, index) => (
-          <div class="mv-card p-5 sm:p-6" key={index}>
-            <p class="text-sm text-mv-forest-80 leading-relaxed">“{item.quote}”</p>
-            <div class="mt-4 text-xs uppercase tracking-[0.18em] text-mv-forest-60">
-              {item.name}{item.role ? ` · ${item.role}` : ''}
+      <div class="mt-6 overflow-x-auto scrollbar-hide" slot="content">
+        <div class="flex gap-6 sm:gap-8 pb-4" style="width: fit-content; min-width: 100%;">
+          {testimonials.map((item, index) => (
+            <div class="mv-card p-6 sm:p-7 flex flex-col flex-shrink-0" style="width: 320px; min-width: 320px;" key={index}>
+              <div class="flex-1">
+                <p class="text-base text-mv-forest-80 leading-relaxed italic">"{item.quote}"</p>
+              </div>
+              <div class="mt-5 pt-5 border-t border-mv-leaf-20">
+                <p class="text-sm font-semibold text-mv-forest">{item.name}</p>
+                {item.role && (
+                  <p class="text-xs text-mv-forest-60 mt-1">{item.role}</p>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </Section>
   )}

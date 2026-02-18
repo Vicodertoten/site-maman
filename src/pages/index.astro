@@ -4,35 +4,17 @@ import Section from '../components/Section.astro';
 import PricingCard from '../components/PricingCard.astro';
 import RestaurantSection from '../components/RestaurantSection.astro';
 import {
-  getCompanyAgendaData,
   getHomeData,
   getLocationsData,
   getRestaurantData,
-  type CompanyAgendaSlot,
   type LocationData,
 } from '../lib/sanity';
 
-const fallbackAgendaSlots: CompanyAgendaSlot[] = [
-  {
-    date: '2026-02-19',
-    status: 'Indisponible'
-  },
-  {
-    date: '2026-03-04',
-    status: 'Indisponible'
-  },
-  {
-    date: '2026-03-18',
-    status: 'Indisponible'
-  }
-];
-
 // Récupérer les données depuis Sanity (en parallèle pour réduire le TTFB)
-const [locations, restaurantData, homeData, companyAgenda] = await Promise.all([
+const [locations, restaurantData, homeData] = await Promise.all([
   getLocationsData(),
   getRestaurantData(),
   getHomeData(),
-  getCompanyAgendaData()
 ]);
 
 const fallbackHeroDescription = "À Wavre, à 1 km de la E411, Gastronomade accueille réunions, événements privés et dîners. Un cadre naturel, chaleureux et simple d’accès.";
@@ -42,156 +24,6 @@ const hasLocationData = locations.length > 0
 const visibleLocations = locations.filter(loc => loc.isVisible !== false);
 const societeLocations = visibleLocations.filter(loc => loc.type === 'societe');
 const priveLocations = visibleLocations.filter(loc => loc.type === 'prive');
-
-const agendaSlots = (companyAgenda?.slots && companyAgenda.slots.length > 0 ? companyAgenda.slots : fallbackAgendaSlots)
-  .filter((slot) => slot?.isVisible !== false)
-  .slice()
-  .sort((a, b) => {
-    const aDate = a?.date ? new Date(a.date).getTime() : Infinity;
-    const bDate = b?.date ? new Date(b.date).getTime() : Infinity;
-    return aDate - bDate;
-  });
-
-const statusPalette: Record<string, {background: string; text: string; dot: string}> = {
-  disponible: {
-    background: 'bg-mv-forest border border-mv-forest',
-    text: 'text-mv-cream',
-    dot: 'bg-mv-forest'
-  },
-  indisponible: {
-    background: 'bg-mv-plum border border-mv-plum',
-    text: 'text-mv-cream',
-    dot: 'bg-mv-plum'
-  }
-}
-
-const normalizeStatusKey = (status?: string) => {
-  const normalized = (status ?? 'disponible').trim().toLowerCase()
-    .replace(/[éèê]/g, 'e')
-    .replace(/[àâ]/g, 'a')
-  if (normalized.includes('complet')) return 'indisponible'
-  if (normalized.includes('indisponible')) return 'indisponible'
-  return 'disponible'
-}
-
-const getStatusTheme = (status?: string) => statusPalette[normalizeStatusKey(status)] ?? statusPalette.disponible
-const getStatusBackground = (status?: string) => {
-  const theme = getStatusTheme(status)
-  return `${theme.background} ${theme.text}`
-}
-
-const getStatusDotClass = (status?: string) => getStatusTheme(status).dot
-
-const normalizeSlotDateKey = (value?: string) => {
-  if (!value) return '';
-  const trimmed = value.split('T')[0];
-  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(trimmed)) {
-    return trimmed;
-  }
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return '';
-  const year = parsed.getUTCFullYear();
-  const month = String(parsed.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(parsed.getUTCDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const slotsByDate: Record<string, CompanyAgendaSlot[]> = {};
-agendaSlots.forEach(slot => {
-  const key = normalizeSlotDateKey(slot?.date);
-  if (!key) return;
-  if (!slotsByDate[key]) {
-    slotsByDate[key] = [];
-  }
-  slotsByDate[key].push(slot);
-});
-
-const debugDateKeys = Object.keys(slotsByDate);
-
-const getBaseCalendarDate = (slots: CompanyAgendaSlot[]) => {
-  for (const slot of slots) {
-    if (!slot?.date) continue;
-    const parsed = new Date(slot.date);
-    if (!Number.isNaN(parsed.getTime())) {
-      return parsed;
-    }
-  }
-  return new Date();
-};
-
-const calendarBaseDate = getBaseCalendarDate(agendaSlots);
-const calendarWeekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-const calendarLegendStates = [
-  { label: 'Disponible', status: 'Disponible' },
-  { label: 'Indisponible', status: 'Indisponible' }
-];
-
-const determineCellStatusLabel = (slots: CompanyAgendaSlot[]) => {
-  if (!slots || slots.length === 0) return 'Disponible';
-  const normalized = slots
-    .map(slot => (slot.status ?? 'Disponible').toLowerCase())
-    .map(status => status.replace(/[éèê]/g, 'e'));
-  if (normalized.some(status => status.includes('indisponible'))) return 'Indisponible';
-  return 'Disponible';
-};
-
-const buildCalendarCells = (
-  year: number,
-  month: number,
-  dates: Record<string, CompanyAgendaSlot[]>
-) => {
-  const firstOfMonth = new Date(year, month, 1);
-  const firstWeekday = ((firstOfMonth.getDay() + 6) % 7);
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const totalCells = firstWeekday + daysInMonth;
-  const rows = Math.ceil(totalCells / 7);
-  const cells = [];
-
-  for (let index = 0; index < rows * 7; index += 1) {
-    const dayIndex = index - firstWeekday + 1;
-    const isCurrentMonth = index >= firstWeekday && dayIndex <= daysInMonth;
-    const day = isCurrentMonth ? dayIndex : undefined;
-    const dateKey = isCurrentMonth ? `${year}-${String(month + 1).padStart(2, '0')}-${String(dayIndex).padStart(2, '0')}` : undefined;
-    const slots = dateKey ? dates[dateKey] ?? [] : [];
-    const status = determineCellStatusLabel(slots);
-
-    cells.push({
-      day,
-      dateKey,
-      slots,
-      isCurrentMonth,
-      status
-    });
-  }
-
-  return cells;
-};
-
-const monthsToShow = Math.max(1, Math.min(4, companyAgenda?.monthsToShow ?? 2));
-const startMonthCandidate = companyAgenda?.startMonth ? new Date(companyAgenda.startMonth) : calendarBaseDate;
-const normalizedStartMonthCandidate = Number.isNaN(startMonthCandidate.getTime())
-  ? new Date(calendarBaseDate.getFullYear(), calendarBaseDate.getMonth(), 1)
-  : new Date(startMonthCandidate.getFullYear(), startMonthCandidate.getMonth(), 1);
-const hasSlotInStartMonth = debugDateKeys.some(dateKey => dateKey.startsWith(
-  `${normalizedStartMonthCandidate.getFullYear()}-${String(normalizedStartMonthCandidate.getMonth() + 1).padStart(2, '0')}`
-));
-const normalizedStartMonth = hasSlotInStartMonth
-  ? normalizedStartMonthCandidate
-  : new Date(calendarBaseDate.getFullYear(), calendarBaseDate.getMonth(), 1);
-
-const calendarMonths = Array.from({ length: monthsToShow }, (_, monthIndex) => {
-  const monthDate = new Date(normalizedStartMonth.getFullYear(), normalizedStartMonth.getMonth() + monthIndex, 1);
-  return {
-    label: monthDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
-    year: monthDate.getFullYear(),
-    month: monthDate.getMonth()
-  };
-});
-
-const monthlyCalendars = calendarMonths.map(calendar => ({
-  ...calendar,
-  cells: buildCalendarCells(calendar.year, calendar.month, slotsByDate)
-}));
 
 const fallbackRestaurantDates = [
   '2026-03-05',
@@ -230,8 +62,7 @@ const restaurantSlots = (restaurantDateSlots.length > 0 ? restaurantDateSlots : 
   }))
 
 const showRestaurant = restaurantData?.isVisible !== false
-// Le calendrier reste masqué tant que `isVisible` n’est pas explicitement true dans Sanity.
-const showCompanyAgenda = companyAgenda?.isVisible === true
+
 
 const restaurantEventsJsonLd = showRestaurant
   ? restaurantSlots
@@ -515,131 +346,6 @@ const buildLocationFeatures = (location?: LocationData) => {
     />
   )}
 
-  <!-- Agenda Entreprises Section -->
-  {showCompanyAgenda && (
-    <Section id="entreprise-agenda" class="bg-mv-cream" tight={true} containerClass="max-w-5xl" aria-labelledby="entreprise-agenda-title">
-      <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between" id="entreprise-agenda-title" slot="content">
-        <div class="max-w-2xl">
-          <p class="mv-kicker mb-1">Entreprises</p>
-          <h2 class="mv-section-title">
-            {companyAgenda?.calendarTitle || "Disponibilités entreprises"}
-          </h2>
-          <p class="mt-2 text-sm text-mv-forest-70">
-            Planifiez votre journée d’équipe dans un lieu qui respire.
-          </p>
-        </div>
-        <div class="flex flex-col items-start gap-2">
-          <a
-            href="/contact"
-            class="mv-btn mv-btn-secondary border-mv-forest bg-white px-4 py-1 text-xs text-mv-forest transition hover:bg-mv-forest/5"
-          >
-            Réserver un créneau
-          </a>
-        </div>
-      </div>
-
-      <div class="mt-6 space-y-4" slot="content">
-        <div class="flex items-center justify-between gap-4">
-          <span id="enterprise-calendar-current" class="text-sm font-semibold uppercase tracking-[0.2em] text-mv-forest-60">
-            {monthlyCalendars.length ? monthlyCalendars[0].label : ''}
-          </span>
-          <div class="flex gap-2">
-            <button
-              type="button"
-              id="enterprise-calendar-prev"
-              class="rounded-full border border-mv-forest/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-mv-forest transition hover:bg-mv-forest/5"
-            >
-              Préc.
-            </button>
-            <button
-              type="button"
-              id="enterprise-calendar-next"
-              class="rounded-full border border-mv-forest/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-mv-forest transition hover:bg-mv-forest/5"
-            >
-              Suiv.
-            </button>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-mv-forest-50">
-          {calendarLegendStates.map(state => (
-            <span key={state.label} class="flex items-center gap-1">
-              <span
-                class={`inline-flex h-2 w-2 rounded-full ${getStatusDotClass(state.status)}`}
-                aria-hidden="true"
-              ></span>
-              {state.label}
-            </span>
-          ))}
-        </div>
-
-        <div class="relative">
-          {monthlyCalendars.map((month, index) => (
-            <div
-              key={month.label}
-              data-calendar-month-index={index}
-              data-calendar-label={month.label}
-              class={`space-y-2 rounded-2xl border border-mv-leaf-20 bg-white p-4 shadow-lg transition ${
-                index === 0 ? '' : 'hidden'
-              }`}
-            >
-              <div class="grid grid-cols-7 gap-[1px] text-xs font-semibold uppercase tracking-[0.2em] text-mv-forest-60">
-                {calendarWeekDays.map(day => (
-                  <span key={`${month.label}-${day}`}>{day}</span>
-                ))}
-              </div>
-              <div class="grid grid-cols-7 gap-1 text-xs">
-                {month.cells.map((cell, cellIndex) => (
-                  <div
-                    key={`${month.label}-${cell.dateKey ?? 'empty'}-${cellIndex}`}
-                    class={`flex h-10 items-center justify-center rounded-lg text-xs font-semibold transition ${
-                      cell.isCurrentMonth
-                        ? `${getStatusBackground(cell.status)} shadow-mv-forest-5`
-                        : 'bg-mv-cream-80 border border-mv-leaf-20 text-mv-forest-50'
-                    }`}
-                  >
-                    {cell.day ?? ''}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Section>
-    <script type="module">
-      (() => {
-        const months = Array.from(document.querySelectorAll('[data-calendar-month-index]'))
-        if (!months.length) return
-        const prev = document.getElementById('enterprise-calendar-prev')
-        const next = document.getElementById('enterprise-calendar-next')
-        const label = document.getElementById('enterprise-calendar-current')
-        let currentIndex = 0
-
-        const update = index => {
-          months.forEach((month, idx) => {
-            const isActive = idx === index
-            month.classList.toggle('hidden', !isActive)
-            month.setAttribute('aria-hidden', (!isActive).toString())
-          })
-          if (label) {
-            label.textContent = months[index]?.dataset.calendarLabel ?? ''
-          }
-        }
-
-        prev?.addEventListener('click', () => {
-          currentIndex = (currentIndex - 1 + months.length) % months.length
-          update(currentIndex)
-        })
-
-        next?.addEventListener('click', () => {
-          currentIndex = (currentIndex + 1) % months.length
-          update(currentIndex)
-        })
-        update(0)
-      })()
-    </script>
-  )}
 
   <Section class="bg-white scroll-fade-in">
     <div class="max-w-3xl" slot="content">

@@ -1,83 +1,167 @@
-// studio/schemas/about.ts
+// studio/schemas/about.ts (Version améliorée Phase 1)
 export const about = {
   name: 'about',
-  title: 'À propos — Cours & coaching',
+  title: '📚 À propos — Cours & Coaching',
   type: 'document',
+  description: 'Gère la page "À propos - Cours & Coaching". C\'est ici que tu parles de tes offres, ta vision et tes services.',
+
   fieldsets: [
     {
-      name: 'visibility',
-      title: 'Affichage (avancé)',
+      name: 'seo',
+      title: '🔍 SEO & Technique',
       options: { collapsible: true, collapsed: true }
+    },
+    {
+      name: 'hero_section',
+      title: '🎬 Hero (Section haute)',
+      options: { collapsible: true, collapsed: false }
+    },
+    {
+      name: 'vision_section',
+      title: '💡 Ta Vision & Valeurs',
+      options: { collapsible: true, collapsed: false }
+    },
+    {
+      name: 'about_section',
+      title: '👤 Section À propos (Muriel)',
+      options: { collapsible: true, collapsed: false }
+    },
+    {
+      name: 'journey_section',
+      title: '🛤️ Ton Parcours',
+      options: { collapsible: true, collapsed: false }
+    },
+    {
+      name: 'signature_section',
+      title: '✍️ Ton Fil Rouge',
+      options: { collapsible: true, collapsed: false }
+    },
+    {
+      name: 'services_section',
+      title: '💼 Tes Services & Offres',
+      options: { collapsible: true, collapsed: false }
     }
   ],
+
   fields: [
+    // ━━━━━━━━━━━━━━━━━━━ SEO ━━━━━━━━━━━━━━━━━━━
     {
       name: 'title',
-      title: 'Titre de la page',
+      title: '📄 Titre SEO (onglet navigateur)',
       type: 'string',
-      initialValue: 'Cours & Coaching - Muriel Cruysmans'
+      initialValue: 'Cours & Coaching - Muriel Cruysmans',
+      description: 'Ceci apparaît dans l\'onglet du navigateur et dans Google. Garde-le court (<60 caractères).',
+      fieldset: 'seo',
+      validation: (Rule) => Rule.required().max(60).warning('Max 60 caractères')
     },
+
+    // ━━━━━━━━━━━━━━━━━━━ HERO ━━━━━━━━━━━━━━━━━━━
     {
       name: 'hero',
-      title: 'Hero (commun)',
-      type: 'pageHero'
+      title: '🎬 Hero (Image + titre principal)',
+      type: 'pageHero',
+      description: 'La grande section en haut avec image de fond. Configure ici le titre, image, et boutons.',
+      fieldset: 'hero_section'
     },
+
     {
       name: 'heroTitle',
       title: 'Titre principal',
       type: 'string',
       initialValue: 'Cours & coaching personnalisés',
-      description: 'Titre du hero.'
+      description: 'Le titre visible au-dessus de l\'image du hero. Sois court et impactant.',
+      fieldset: 'hero_section',
+      validation: (Rule) => Rule.required().max(80)
     },
+
     {
       name: 'heroSubtitle',
-      title: 'Sous-titre principal',
+      title: 'Sous-titre / Accroche',
       type: 'text',
+      rows: 3,
       initialValue: 'Une cuisine saine, vivante et joyeuse, pour apprendre à cuisiner simplement et mieux manger au quotidien.',
-      description: '2 phrases max.'
+      description: 'Texte court sous le titre (2-3 phrases max). Décrit ton approche.',
+      fieldset: 'hero_section'
     },
+
     {
       name: 'heroCtaLabel',
-      title: 'Bouton hero — Libellé',
+      title: 'CTA — Libellé du bouton',
       type: 'string',
-      initialValue: 'Mes services'
+      initialValue: 'Mes services',
+      description: 'Texte du bouton d\'appel-à-l\'action. Ex: "Mes services", "Prendre rendez-vous"',
+      fieldset: 'hero_section'
     },
+
     {
       name: 'heroCtaLink',
-      title: 'Bouton hero — Lien',
+      title: 'CTA — Lien cible',
       type: 'string',
-      initialValue: '/contact'
+      initialValue: '/contact',
+      description: 'Où le bouton mène. Ex: "/contact", "#services", "https://..."',
+      fieldset: 'hero_section'
     },
+
+    // ━━━━━━━━━━━━━━━━━━━ VISION ━━━━━━━━━━━━━━━━━━━
     {
       name: 'visionKicker',
-      title: 'Vision — Kicker',
+      title: 'Kicker (petit label)',
       type: 'string',
-      initialValue: 'Vision'
+      initialValue: 'Vision',
+      description: 'Petit texte au-dessus du titre (ex: "Vision", "Nos valeurs"). Court !',
+      fieldset: 'vision_section'
     },
+
     {
       name: 'visionTitle',
-      title: 'Vision — Titre',
+      title: 'Titre de ta vision',
       type: 'string',
-      initialValue: 'Ma vision de la cuisine'
+      initialValue: 'Ma vision de la cuisine',
+      description: 'Titre principal de la section vision (Santé, Transmission, Plaisir).',
+      fieldset: 'vision_section'
     },
+
     {
       name: 'visionText',
-      title: 'Vision — Texte',
+      title: 'Description courte',
       type: 'text',
-      initialValue: 'Je crois à une cuisine simple, locale et profondément humaine — une cuisine qui nourrit le corps, apaise l’esprit et crée du lien.',
-      description: 'Court paragraphe de vision.'
+      rows: 3,
+      initialValue: 'Je crois à une cuisine simple, locale et profondément humaine — une cuisine qui nourrit le corps, apaise l\'esprit et crée du lien.',
+      description: 'Court paragraphe (3-5 phrases) qui résume ta vision globale.',
+      fieldset: 'vision_section'
     },
+
     {
       name: 'visionCards',
-      title: 'Vision — Cartes',
+      title: '3 piliers (Santé, Transmission, Plaisir)',
       type: 'array',
       of: [{
         type: 'object',
         fields: [
-          { name: 'label', title: 'Libellé', type: 'string' },
-          { name: 'title', title: 'Titre', type: 'string' },
-          { name: 'text', title: 'Texte', type: 'text' },
-          { name: 'isVisible', title: 'Afficher', type: 'boolean', initialValue: true }
+          {
+            name: 'label',
+            title: 'Catégorie (ex: "Santé")',
+            type: 'string'
+          },
+          {
+            name: 'title',
+            title: 'Titre court',
+            type: 'string',
+            description: 'Ex: "Équilibre & vitalité"'
+          },
+          {
+            name: 'text',
+            title: 'Description',
+            type: 'text',
+            rows: 2,
+            description: 'Texte affiché sous le titre (2-3 phrases max)'
+          },
+          {
+            name: 'isVisible',
+            title: '👁️ Afficher ce pilier',
+            type: 'boolean',
+            initialValue: true
+          }
         ]
       }],
       initialValue: [
@@ -99,158 +183,202 @@ export const about = {
           text: 'Végétal, saison, gourmandise : une cuisine qui fait du bien et qui rassemble.',
           isVisible: true
         }
-      ]
+      ],
+      fieldset: 'vision_section',
+      description: 'Les 3 piliers de ta philosophie. Reordonne-les si tu veux. Coche "Afficher" pour les inclure.'
     },
+
+    // ━━━━━━━━━━━━━━━━━━━ À PROPOS (MURIEL) ━━━━━━━━━━━━━━━━━━━
     {
       name: 'aboutTitle',
-      title: 'Titre section Muriel',
+      title: 'Titre de la section',
       type: 'string',
-      initialValue: 'Muriel, cuisine & transmission'
+      initialValue: 'Muriel, cuisine & transmission',
+      description: 'Titre visible sur la page. Ex: "Muriel, cuisine & transmission"',
+      fieldset: 'about_section'
     },
+
     {
       name: 'aboutLead',
-      title: 'Accroche personnelle',
+      title: 'Accroche personnelle (phrase clé)',
       type: 'string',
-      initialValue: 'Introduire du plaisir et du bon sens en respectant les principes d’une nutrition équilibrée.'
+      initialValue: 'Introduire du plaisir et du bon sens en respectant les principes d\'une nutrition équilibrée.',
+      description: 'Une phrase courte qui te définit. Très visible sur la page.',
+      fieldset: 'about_section'
     },
+
     {
       name: 'bio',
-      title: 'Texte bio',
+      title: 'Paragraphe principal (ta bio)',
       type: 'text',
-      initialValue: 'Je suis passionnée par l’alimentation depuis une vingtaine d’années et convaincue que c’est un des piliers de notre bonne santé.',
-      description: 'Paragraphe principal de la section Muriel.'
+      rows: 4,
+      initialValue: 'Je suis passionnée par l\'alimentation depuis une vingtaine d\'années et convaincue que c\'est un des piliers de notre bonne santé.',
+      description: 'Courte bio (100-200 mots). Parle-moi de toi, ta passion, ta démarche.',
+      fieldset: 'about_section'
     },
+
     {
       name: 'aboutParagraphs',
       title: 'Paragraphes complémentaires',
       type: 'array',
       of: [{ type: 'text' }],
       initialValue: [
-        'Bien s’alimenter oui, mais dans le respect du travail et de la planète. Je privilégie les produits locaux, de saison, de culture biologique. Ma cuisine se veut simple, savoureuse, fraîche, nourrissante et conviviale. Rien n’est interdit, c’est en prenant conscience de notre manière de nous alimenter et en découvrant de délicieuses nouvelles alternatives que petit à petit les aliments indésirables sortent de nos assiettes.'
-      ]
+        "Bien s'alimenter oui, mais dans le respect du travail et de la planète. Je privilégie les produits locaux, de saison, de culture biologique."
+      ],
+      description: 'Ajoute des paragraphes supplémentaires (philosophie, approche, etc.). Un par ligne.',
+      fieldset: 'about_section'
     },
+
     {
       name: 'photo',
-      title: 'Photo de Muriel',
+      title: '📸 Photo de Muriel',
       type: 'image',
-      options: {
-        hotspot: true
-      },
-      description: 'Photo principale de Muriel Cruysmans pour la section À propos'
+      options: { hotspot: true },
+      description: 'Photo principale visible dans la section. Portrait recommandé (500x600px min).',
+      fieldset: 'about_section'
     },
+
     {
       name: 'achievements',
-      title: 'Réalisations',
+      title: '✨ Tes réalisations / certifications',
       type: 'array',
       of: [{ type: 'string' }],
       initialValue: [
         'Diplômée restaurateur-traiteur (mai 2024)',
         'Auteur d\'un livre de recettes',
         'Spécialiste en cuisine santé et bien-être'
-      ]
+      ],
+      description: 'Liste tes diplômes, certifications, publications. Un par ligne.',
+      fieldset: 'about_section'
     },
+
     {
       name: 'aboutCtaLabel',
-      title: 'Bouton section Muriel — Libellé',
+      title: 'CTA — Libellé du bouton',
       type: 'string',
-      initialValue: 'Voir les services'
+      initialValue: 'Voir les services',
+      description: 'Texte du bouton (ex: "Voir les services", "Prendre rendez-vous")',
+      fieldset: 'about_section'
     },
+
     {
       name: 'aboutCtaLink',
-      title: 'Bouton section Muriel — Lien',
+      title: 'CTA — Lien cible',
       type: 'string',
-      initialValue: '#services'
+      initialValue: '#services',
+      description: 'Où le bouton mène. Ex: "#services", "/contact"',
+      fieldset: 'about_section'
     },
+
+    // ━━━━━━━━━━━━━━━━━━━ PARCOURS ━━━━━━━━━━━━━━━━━━━
     {
       name: 'journeyTitle',
-      title: 'Parcours — Titre',
+      title: 'Titre de la section',
       type: 'string',
-      initialValue: 'Mon parcours'
+      initialValue: 'Mon parcours',
+      description: 'Titre du bloc qui raconte ton parcours.',
+      fieldset: 'journey_section'
     },
+
     {
       name: 'journeyIntro',
-      title: 'Parcours — Introduction',
+      title: 'Phrase d\'introduction',
       type: 'text',
-      initialValue: 'Après une licence en Affaires Publiques et Internationales (UCL), c’est la passion pour l’alimentation qui m’a guidé pour la suite.'
+      rows: 2,
+      initialValue: 'Après une licence en Affaires Publiques et Internationales (UCL), c\'est la passion pour l\'alimentation qui m\'a guidé pour la suite.',
+      description: 'Phrase qui ouvre la section parcours.',
+      fieldset: 'journey_section'
     },
+
     {
       name: 'journeyItems',
-      title: 'Parcours — Points clés',
+      title: 'Points clés du parcours',
       type: 'array',
       of: [{ type: 'text' }],
       initialValue: [
-        'Ma curiosité, ma gourmandise et mon envie de comprendre m’ont mené à travers de nombreuses conférences, formations et cours de cuisine (CERDEN, Taty Lauwers, Pol Grégoire, Coaching, pleine conscience, Formation potager, Cuisine sauvage et l’accès à la profession de traiteur-restaurateur).',
-        'J’ai mis en pratique tout ce savoir à travers des cours de cuisine (notamment à la Vie-Là à Ottignies), des animations au goût dans les écoles, des créations de recettes pour une nutritionniste, la publication de mon livre de recettes « Et si on mangeait vrai ? », la livraison de plats ressourçant et Gastronomade (notre restaurant et lieu mis en location).'
-      ]
+        'Ma curiosité, ma gourmandise et mon envie de comprendre m\'ont mené à travers de nombreuses conférences, formations et cours de cuisine (CERDEN, Taty Lauwers, Pol Grégoire, Coaching, pleine conscience, Formation potager, Cuisine sauvage et l\'accès à la profession de traiteur-restaurateur).',
+        'J\'ai mis en pratique tout ce savoir à travers des cours de cuisine (notamment à la Vie-Là à Ottignies), des animations au goût dans les écoles, des créations de recettes pour une nutritionniste, la publication de mon livre de recettes « Et si on mangeait vrai ? », la livraison de plats ressourçant et Gastronomade (notre restaurant et lieu mis en location).'
+      ],
+      description: 'Ajoute les étapes importantes de ton parcours. Un paragraphe par étape.',
+      fieldset: 'journey_section'
     },
+
+    // ━━━━━━━━━━━━━━━━━━━ FIL ROUGE ━━━━━━━━━━━━━━━━━━━
     {
       name: 'signatureTitle',
-      title: 'Fil rouge — Titre',
+      title: 'Titre de la section',
       type: 'string',
-      initialValue: 'Fil rouge de mes recettes'
+      initialValue: 'Fil rouge de mes recettes',
+      description: 'Titre du bloc qui décrit ta philosophie culinaire.',
+      fieldset: 'signature_section'
     },
+
     {
       name: 'signatureParagraphs',
-      title: 'Fil rouge — Paragraphes',
+      title: 'Paragraphes de philosophie',
       type: 'array',
       of: [{ type: 'text' }],
       initialValue: [
-        'L’important est de trouver l’équilibre. Chacun a le sien et il est toujours à moduler.',
-        'Je ne suis « anti » rien. C’est juste le bon sens qui a fait sortir de mon assiette tous les produits industriels, chémiqués, ....qui ne sont plus des aliments mais de la « bouffe ».',
-        'Quel plaisir d’offrir un festival de goûts, de textures et de saveurs à nos papilles à partir de produits simples, frais et naturels.'
-      ]
+        'L\'important est de trouver l\'équilibre. Chacun a le sien et il est toujours à moduler.',
+        'Je ne suis « anti » rien. C\'est juste le bon sens qui a fait sortir de mon assiette tous les produits industriels, chémiqués, ....qui ne sont plus des aliments mais de la « bouffe ».',
+        'Quel plaisir d\'offrir un festival de goûts, de textures et de saveurs à nos papilles à partir de produits simples, frais et naturels.'
+      ],
+      description: 'Ajoute les principes qui guident ta cuisine. Un par ligne.',
+      fieldset: 'signature_section'
     },
+
+    // ━━━━━━━━━━━━━━━━━━━ SERVICES (OFFRES) ━━━━━━━━━━━━━━━━━━━
     {
       name: 'servicesTitle',
-      title: 'Services — Titre',
+      title: 'Titre de la section',
       type: 'string',
-      initialValue: 'Mes Services'
+      initialValue: 'Mes Services',
+      description: 'Titre visible sur la page. Ex: "Mes Services", "Offres"',
+      fieldset: 'services_section'
     },
+
     {
       name: 'servicesSubtitle',
-      title: 'Services — Sous-titre',
+      title: 'Sous-titre / Accroche',
       type: 'text',
-      initialValue: 'Cours de cuisine à la carte et coaching personnalisé pour votre bien-être alimentaire'
+      rows: 2,
+      initialValue: 'Cours de cuisine à la carte et coaching personnalisé pour votre bien-être alimentaire',
+      description: 'Description courte de tes services (2-3 phrases).',
+      fieldset: 'services_section'
     },
-    {
-      name: 'servicesCtaText',
-      title: 'Services — CTA (libellé)',
-      type: 'string',
-      initialValue: 'En savoir plus'
-    },
-    {
-      name: 'servicesCtaLink',
-      title: 'Services — CTA (lien)',
-      type: 'string',
-      initialValue: '/contact'
-    },
+
     {
       name: 'services',
-      title: 'Services',
+      title: 'Tes offres / Services',
       type: 'array',
       of: [{
         type: 'object',
         fields: [
           {
             name: 'title',
-            title: 'Titre du service',
-            type: 'string'
+            title: '📌 Titre du service',
+            type: 'string',
+            description: 'Ex: "Cours individuels", "Ateliers thématiques"'
           },
           {
             name: 'description',
-            title: 'Description',
-            type: 'text'
+            title: '📝 Description courte',
+            type: 'text',
+            rows: 2,
+            description: 'Ce que propose cette offre (2-3 phrases)'
           },
           {
             name: 'price',
-            title: 'Prix',
-            type: 'string'
+            title: '💰 Prix',
+            type: 'string',
+            description: 'Ex: "80€/personne", "Sur devis"'
           },
           {
             name: 'features',
-            title: 'Caractéristiques',
+            title: '✨ Ce qui est inclus',
             type: 'array',
-            of: [{ type: 'string' }]
+            of: [{ type: 'string' }],
+            description: 'Les points forts de cette offre. Un par ligne.'
           }
         ]
       }],
@@ -288,56 +416,34 @@ export const about = {
             'Ajustements selon vos progrès'
           ]
         }
-      ]
+      ],
+      fieldset: 'services_section',
+      description: 'Ajoute toutes tes offres. Trieble par drag-drop pour changer l\'ordre.'
     },
+
     {
-      name: 'showHero',
-      title: 'Afficher le hero',
-      type: 'boolean',
-      initialValue: true,
-      fieldset: 'visibility'
+      name: 'servicesCtaLabel',
+      title: 'CTA — Libellé du bouton',
+      type: 'string',
+      initialValue: 'En savoir plus',
+      description: 'Texte du bouton pour chaque service.',
+      fieldset: 'services_section'
     },
+
     {
-      name: 'showVision',
-      title: 'Afficher la section Vision',
-      type: 'boolean',
-      initialValue: true,
-      fieldset: 'visibility'
-    },
-    {
-      name: 'showAboutSection',
-      title: 'Afficher la section Muriel',
-      type: 'boolean',
-      initialValue: true,
-      fieldset: 'visibility'
-    },
-    {
-      name: 'showAchievements',
-      title: 'Afficher les réalisations',
-      type: 'boolean',
-      initialValue: true,
-      fieldset: 'visibility'
-    },
-    {
-      name: 'showServices',
-      title: 'Afficher la section Services',
-      type: 'boolean',
-      initialValue: true,
-      fieldset: 'visibility'
-    },
-    {
-      name: 'showJourney',
-      title: 'Afficher la section Parcours',
-      type: 'boolean',
-      initialValue: true,
-      fieldset: 'visibility'
-    },
-    {
-      name: 'showSignature',
-      title: 'Afficher la section Fil rouge',
-      type: 'boolean',
-      initialValue: true,
-      fieldset: 'visibility'
+      name: 'servicesCtaLink',
+      title: 'CTA — Lien cible',
+      type: 'string',
+      initialValue: '/contact',
+      description: 'Où le bouton mène.',
+      fieldset: 'services_section'
     }
-  ]
+  ],
+
+  preview: {
+    select: { title: 'title' },
+    prepare() {
+      return { title: '📚 Page : À propos / Cours & Coaching' }
+    }
+  }
 }

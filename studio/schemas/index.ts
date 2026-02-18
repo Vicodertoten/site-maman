@@ -7,7 +7,6 @@ import { about } from './about'
 import { contact } from './contact'
 import { home } from './home'
 import { newsletter } from './newsletter'
-import { companyAgenda } from './companyAgenda'
 import { pack } from './pack'
 import { siteSettings } from './siteSettings'
 import { newsletterSettings } from './newsletterSettings'
@@ -25,7 +24,6 @@ export const schemaTypes = [
   about,
   contact,
   home,
-  companyAgenda,
   newsletter,
   pack,
   siteSettings,

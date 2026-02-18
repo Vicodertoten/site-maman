@@ -25,37 +25,38 @@ function toAsciiSlug(value: string): string {
 
 export const recipe = {
   name: 'recipe',
-  title: 'Recettes',
+  title: '📖 Recettes',
   type: 'document',
+  description: 'Une recette individuelle. Ici tu rentres titre, image, ingrédients, étapes. Sauvegarde et elle apparaît en ligne !',
   fieldsets: [
     {
       name: 'presentation',
-      title: 'Présentation',
+      title: '🎯 Présentation (À remplir d\'abord)',
       options: { collapsible: true, collapsed: false }
     },
     {
       name: 'timing',
-      title: 'Temps & portions',
+      title: '⏱️ Temps & portions',
       options: { collapsible: true, collapsed: false }
     },
     {
       name: 'content',
-      title: 'Contenu recette',
+      title: '📝 Contenu recette (Ingrédients & Étapes)',
       options: { collapsible: true, collapsed: false }
     },
     {
       name: 'practical',
-      title: 'Infos pratiques',
+      title: '📌 Infos pratiques (Tags, allergènes)',
       options: { collapsible: true, collapsed: true }
     },
     {
       name: 'nutrition',
-      title: 'Nutrition',
+      title: '🥗 Nutrition (Optionnel)',
       options: { collapsible: true, collapsed: true }
     },
     {
       name: 'visibility',
-      title: 'Visibilité & mise en avant',
+      title: '⭐ Mise en avant & Statut',
       options: { collapsible: true, collapsed: true }
     }
   ],

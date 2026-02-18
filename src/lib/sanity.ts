@@ -125,11 +125,6 @@ export interface LocationData {
   isVisible?: boolean
 }
 
-export interface CompanyAgendaSlot {
-  date?: string
-  status?: string
-}
-
 export interface RecipeData {
   _id: string
   _updatedAt?: string
@@ -321,17 +316,6 @@ export interface HomeData {
   ctaTitle: string
   ctaDescription: string
   ctaPrimaryButton: string
-}
-
-export interface CompanyAgendaData {
-  _id: string
-  title: string
-  description: string
-  slots: CompanyAgendaSlot[]
-  calendarTitle?: string
-  startMonth?: string
-  monthsToShow?: number
-  isVisible?: boolean
 }
 
 export interface ContactData {
@@ -593,20 +577,6 @@ export const queries = {
     maxCapacity,
     image,
     "imageUrl": image.asset->url,
-    isVisible
-  }`,
-
-  companyAgenda: `*[_type == "companyAgenda"] | order(_updatedAt desc)[0] {
-    _id,
-    title,
-    description,
-    calendarTitle,
-    startMonth,
-    monthsToShow,
-    slots[]{
-      date,
-      status
-    },
     isVisible
   }`,
 
@@ -1094,7 +1064,9 @@ async function fetchSanityWithCache<T>(options: {
   }
 
   try {
-    const data = await sanityClient.fetch<T>(options.query, options.params)
+    const data = options.params
+      ? await sanityClient.fetch<T>(options.query, options.params)
+      : await sanityClient.fetch<T>(options.query)
     sanityCache.set(key, { expiresAt: now + SANITY_CACHE_TTL_MS, value: data })
     return data
   } catch (error) {
@@ -1130,14 +1102,6 @@ export async function getLocationsData(): Promise<LocationData[]> {
   })
 }
 
-export async function getCompanyAgendaData(): Promise<CompanyAgendaData | null> {
-  return fetchSanityWithCache({
-    cacheKey: 'companyAgenda',
-    query: queries.companyAgenda,
-    fallback: null,
-    errorLabel: 'Erreur lors de la récupération des données agenda entreprises:'
-  })
-}
 
 export async function getRecipesData(): Promise<RecipeData[]> {
   return fetchSanityWithCache({
