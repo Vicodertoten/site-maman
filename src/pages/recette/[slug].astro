@@ -7,7 +7,6 @@ import Section from '../../components/Section.astro';
 import { getRecipeBySlug, getRecipesData } from '../../lib/sanity';
 import { renderPortableText } from '../../lib/portableText';
 import { getEntitledPackIds, getSessionEmail, getSessionTokenFromRequest } from '../../lib/server/access';
-import { getRecipesPagePath, RECIPES_PAGE_SIZE } from '../../lib/recipesPagination';
 
 export const prerender = false;
 
@@ -219,7 +218,7 @@ const relatedRecipes = (!isNotFound && recipe)
       const currentTags = new Set((recipe.tags || []).map((tag) => normalizeSearchValue(tag)).filter(Boolean));
 
       return allRecipes
-        .map((candidate, index) => {
+        .map((candidate) => {
           if (!candidate?.slug?.current || candidate._id === recipe._id) return null;
 
           const candidateCategory = normalizeSearchValue(candidate.category);
@@ -237,7 +236,6 @@ const relatedRecipes = (!isNotFound && recipe)
 
           if (score <= 0) return null;
 
-          const archivePage = Math.floor(index / RECIPES_PAGE_SIZE) + 1;
           const relationLabel = sameCategory
             ? 'Même catégorie'
             : sharedTags.length > 0
@@ -254,7 +252,6 @@ const relatedRecipes = (!isNotFound && recipe)
               : '',
             imageAlt: (candidate.featuredImageAlt || '').trim() || `Photo de ${candidate.title}`,
             relationLabel,
-            archivePath: getRecipesPagePath(archivePage),
             score,
             publishedAt: candidate.publishedAt
           };
@@ -278,6 +275,11 @@ if (recipe?.difficulty) keywordSet.add(recipe.difficulty);
 const keywords = keywordSet.size > 0 ? Array.from(keywordSet).join(', ') : undefined;
 const nutrition = recipe?.nutrition || {};
 const hasNutrition = Object.values(nutrition).some((value) => typeof value === 'number');
+const hasPracticalInfo = Boolean(
+  (recipe?.equipment && recipe.equipment.length > 0)
+  || (recipe?.allergens && recipe.allergens.length > 0)
+  || (recipe?.storage && recipe.storage.trim().length > 0)
+);
 const nutritionJsonLd = hasNutrition
   ? {
       "@type": "NutritionInformation",
@@ -444,7 +446,7 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
 
         <div class="flex flex-wrap gap-3 mb-6">
           <button
-            class="favorite-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-mv-leaf text-mv-cream hover:bg-mv-forest transition-colors"
+            class="favorite-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-mv-leaf text-mv-cream hover:bg-mv-forest hover:text-mv-cream transition-colors"
             data-recipe-id={recipe._id}
             data-recipe-title={recipe.title}
             aria-label="Ajouter aux favoris"
@@ -457,7 +459,7 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
 
           <button
             id="add-all-ingredients"
-            class="mv-btn mv-btn-secondary hover:bg-mv-cream transition-colors"
+            class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream transition-colors"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -467,22 +469,12 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
 
           <button
             id="copy-recipe-link"
-            class="mv-btn mv-btn-secondary hover:bg-mv-cream transition-colors"
+            class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream transition-colors"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 8a3 3 0 00-3-3H6a3 3 0 00-3 3v6a3 3 0 003 3h6a3 3 0 003-3m0-6h2a3 3 0 013 3v6a3 3 0 01-3 3h-6a3 3 0 01-3-3"/>
             </svg>
             <span class="text-sm font-medium">Copier le lien</span>
-          </button>
-
-          <button
-            id="print-recipe"
-            class="mv-btn mv-btn-secondary hover:bg-mv-cream transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4h12v5m-3 4H9m-6 5h18v-8H3v8z"/>
-            </svg>
-            <span class="text-sm font-medium">Imprimer</span>
           </button>
         </div>
 
@@ -679,77 +671,79 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
       </div>
     </section>
 
-    <section class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="mv-card p-5">
-        <h3 class="text-lg font-semibold text-mv-forest mb-3">Infos pratiques</h3>
-        {recipe.equipment?.length > 0 && (
-          <div class="mb-4">
-            <p class="text-xs uppercase tracking-wide text-mv-forest-50 mb-2">Matériel</p>
-            <div class="flex flex-wrap gap-2">
-              {recipe.equipment.map((item, index) => (
-                <span key={index} class="px-3 py-1 text-xs bg-mv-cream text-mv-forest rounded-full">{item}</span>
-              ))}
-            </div>
+    {(hasPracticalInfo || hasNutrition) && (
+      <section class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {hasPracticalInfo && (
+          <div class="mv-card p-5">
+            <h3 class="text-lg font-semibold text-mv-forest mb-3">Infos pratiques</h3>
+            {recipe.equipment?.length > 0 && (
+              <div class="mb-4">
+                <p class="text-xs uppercase tracking-wide text-mv-forest-50 mb-2">Matériel</p>
+                <div class="flex flex-wrap gap-2">
+                  {recipe.equipment.map((item, index) => (
+                    <span key={index} class="px-3 py-1 text-xs bg-mv-cream text-mv-forest rounded-full">{item}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {recipe.allergens?.length > 0 && (
+              <div class="mb-4">
+                <p class="text-xs uppercase tracking-wide text-mv-forest-50 mb-2">Allergènes</p>
+                <div class="flex flex-wrap gap-2">
+                  {recipe.allergens.map((item, index) => (
+                    <span key={index} class="px-3 py-1 text-xs bg-mv-coral-20 text-mv-coral rounded-full">{item}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {recipe.storage && (
+              <div>
+                <p class="text-xs uppercase tracking-wide text-mv-forest-50 mb-2">Conservation</p>
+                <p class="text-sm text-mv-forest-70">{recipe.storage}</p>
+              </div>
+            )}
           </div>
         )}
-        {recipe.allergens?.length > 0 && (
-          <div class="mb-4">
-            <p class="text-xs uppercase tracking-wide text-mv-forest-50 mb-2">Allergènes</p>
-            <div class="flex flex-wrap gap-2">
-              {recipe.allergens.map((item, index) => (
-                <span key={index} class="px-3 py-1 text-xs bg-mv-coral-20 text-mv-coral rounded-full">{item}</span>
-              ))}
-            </div>
-          </div>
-        )}
-        {recipe.storage && (
-          <div>
-            <p class="text-xs uppercase tracking-wide text-mv-forest-50 mb-2">Conservation</p>
-            <p class="text-sm text-mv-forest-70">{recipe.storage}</p>
-          </div>
-        )}
-      </div>
 
-      <div class="mv-card p-5">
-        <h3 class="text-lg font-semibold text-mv-forest mb-3">Nutrition</h3>
-        {recipe.nutrition ? (
-          <div class="grid grid-cols-2 gap-3 text-sm text-mv-forest-70">
-            {recipe.nutrition.calories !== undefined && (
-              <div>
-                <p class="text-xs uppercase tracking-wide text-mv-forest-50">Calories</p>
-                <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.calories} kcal</p>
-              </div>
-            )}
-            {recipe.nutrition.protein !== undefined && (
-              <div>
-                <p class="text-xs uppercase tracking-wide text-mv-forest-50">Protéines</p>
-                <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.protein} g</p>
-              </div>
-            )}
-            {recipe.nutrition.carbs !== undefined && (
-              <div>
-                <p class="text-xs uppercase tracking-wide text-mv-forest-50">Glucides</p>
-                <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.carbs} g</p>
-              </div>
-            )}
-            {recipe.nutrition.fat !== undefined && (
-              <div>
-                <p class="text-xs uppercase tracking-wide text-mv-forest-50">Lipides</p>
-                <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.fat} g</p>
-              </div>
-            )}
-            {recipe.nutrition.fiber !== undefined && (
-              <div>
-                <p class="text-xs uppercase tracking-wide text-mv-forest-50">Fibres</p>
-                <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.fiber} g</p>
-              </div>
-            )}
+        {hasNutrition && (
+          <div class="mv-card p-5">
+            <h3 class="text-lg font-semibold text-mv-forest mb-3">Nutrition</h3>
+            <div class="grid grid-cols-2 gap-3 text-sm text-mv-forest-70">
+              {recipe.nutrition?.calories !== undefined && (
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-mv-forest-50">Calories</p>
+                  <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.calories} kcal</p>
+                </div>
+              )}
+              {recipe.nutrition?.protein !== undefined && (
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-mv-forest-50">Protéines</p>
+                  <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.protein} g</p>
+                </div>
+              )}
+              {recipe.nutrition?.carbs !== undefined && (
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-mv-forest-50">Glucides</p>
+                  <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.carbs} g</p>
+                </div>
+              )}
+              {recipe.nutrition?.fat !== undefined && (
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-mv-forest-50">Lipides</p>
+                  <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.fat} g</p>
+                </div>
+              )}
+              {recipe.nutrition?.fiber !== undefined && (
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-mv-forest-50">Fibres</p>
+                  <p class="text-base font-semibold text-mv-forest">{recipe.nutrition.fiber} g</p>
+                </div>
+              )}
+            </div>
           </div>
-        ) : (
-          <p class="text-sm text-mv-forest-60">Informations nutritionnelles à venir.</p>
         )}
-      </div>
-    </section>
+      </section>
+    )}
 
     {relatedRecipes.length > 0 && (
       <section class="mt-10">
@@ -789,9 +783,6 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
                 <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-mv-forest-70">
                   <a href={`/recette/${encodeURIComponent(related.slug)}`} class="underline underline-offset-4 hover:text-mv-leaf">
                     Ouvrir la recette
-                  </a>
-                  <a href={related.archivePath} class="underline underline-offset-4 hover:text-mv-leaf">
-                    Voir sa page d'archive
                   </a>
                 </div>
               </div>
@@ -958,12 +949,6 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
         });
       }
 
-      const printBtn = document.getElementById('print-recipe');
-      if (printBtn) {
-        printBtn.addEventListener('click', () => {
-          window.print();
-        });
-      }
     });
   </script>
     </>
