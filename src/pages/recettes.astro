@@ -379,8 +379,14 @@ const formatPrice = (price?: number, currency?: string) => {
         pageSize={INITIAL_RECIPES_LIMIT}
       />
 
-      {allRecipes && allRecipes.length > 0 ? (
-        <>
+      <p class="mt-4 text-mv-forest-70">
+        Envie d’inspiration ? Découvrez nos
+        <a href="/recettes/thermomix" class="text-mv-leaf underline">recettes Thermomix</a>
+        ou nos
+        <a href="/recettes/rapides" class="text-mv-leaf underline">recettes rapides</a>.
+      </p>
+
+      {allRecipes && allRecipes.length > 0 ? (        <>
         <!-- Enhanced Recipes Grid -->
         <div
           id="recipes-grid"

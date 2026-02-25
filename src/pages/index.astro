@@ -7,14 +7,16 @@ import {
   getHomeData,
   getLocationsData,
   getRestaurantData,
+  getContactData,
   type LocationData,
 } from '../lib/sanity';
 
 // Récupérer les données depuis Sanity (en parallèle pour réduire le TTFB)
-const [locations, restaurantData, homeData] = await Promise.all([
+const [locations, restaurantData, homeData, contactData] = await Promise.all([
   getLocationsData(),
   getRestaurantData(),
   getHomeData(),
+  getContactData(),
 ]);
 
 const fallbackHeroDescription = "À Wavre, à 1 km de la E411, Gastronomade accueille réunions, événements privés et dîners. Un cadre naturel, chaleureux et simple d’accès.";
@@ -133,10 +135,11 @@ const buildLocationFeatures = (location?: LocationData) => {
 ---
 
 <MainLayout
-  title={homeData?.title || "Gastronomade - Manger Vrai | Muriel Cruysmans"}
-  description={pageDescription}
+  title="Ateliers Cuisine & Restaurant Éphémère à Wavre"
+  description="Découvrez Gastronomade par Muriel Cruysmans. Location de salle, restaurant éphémère et cours de cuisine à Wavre."
   image={pageImage}
   jsonLd={restaurantEventsJsonLd}
+  seo={{ type: 'LocalBusiness', data: contactData }}
 >
   <!-- Hero Section -->
   <Section class="relative overflow-hidden bg-white fade-in-up" role="banner">
@@ -160,6 +163,9 @@ const buildLocationFeatures = (location?: LocationData) => {
           <h1 class="mv-hero-title max-w-3xl">
             {homeHeroTitle}
           </h1>
+          <h2 class="text-2xl font-serif font-semibold text-mv-forest">
+            Ateliers & restaurant éphémère à Wavre
+          </h2>
           <p class="mv-hero-subtitle max-w-3xl text-mv-forest-80">
             {homeHeroSubtitle}
           </p>

@@ -4,6 +4,8 @@ import '../styles/global.css';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
 import MicroInteractions from '../components/MicroInteractions.astro';
 import { getContactData, getSiteSettingsData } from '../lib/sanity';
+import BaseHead from '../components/seo/BaseHead.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
 
 const [contactData, siteSettings] = await Promise.all([
   getContactData(),
@@ -24,19 +26,11 @@ const {
   url = Astro.url.pathname,
   robots = 'index,follow',
   jsonLd = [],
-  enableMicroInteractions = true
+  enableMicroInteractions = true,
+  articleDate,
+  seo,
 } = Astro.props;
 
-const canonicalPath = (() => {
-  if (url instanceof URL) return `${url.pathname}${url.search}`;
-  if (typeof url !== 'string') return '/';
-  if (/^https?:\/\//i.test(url)) {
-    const parsed = new URL(url);
-    return `${parsed.pathname}${parsed.search}`;
-  }
-  return url;
-})();
-const canonicalUrl = new URL(canonicalPath, `${siteUrl}/`).toString();
 const resolvedImage = image.startsWith('http') ? image : new URL(image, `${siteUrl}/`).toString();
 
 const fallbackNavItems = [
@@ -93,94 +87,15 @@ const socialLinks = (siteSettings?.footer?.socialLinks && siteSettings.footer.so
     ]
 ).filter((link) => link?.isVisible !== false && link?.url);
 
-const address = siteSettings?.address;
 const copyrightText = (siteSettings?.footer?.copyrightText || '© {year} Gastronomade - Manger Vrai. Tous droits réservés.')
   .replace('{year}', String(new Date().getFullYear()));
 
-const searchTarget = `${siteUrl}/recettes?search={search_term_string}`;
-const socialSameAs = socialLinks.map((link) => link.url).filter(Boolean);
 const extraJsonLd = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
-
-const localBusinessJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": footerTitle,
-  "description": defaultDescription,
-  "url": siteUrl,
-  "telephone": phone,
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": address?.street || "Adresse de Wavre",
-    "addressLocality": address?.city || "Wavre",
-    "addressRegion": address?.region || "Brabant wallon",
-    "postalCode": address?.postalCode || "1300",
-    "addressCountry": address?.country || "BE"
-  },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": 50.717,
-    "longitude": 4.611
-  },
-  "openingHours": "Mo-Fr 09:00-18:00",
-  "priceRange": "$$",
-  "servesCuisine": ["Healthy", "French", "Belgian"],
-  "founder": {
-    "@type": "Person",
-    "name": "Muriel Cruysmans"
-  }
-};
-
-const organizationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": footerTitle,
-  "url": siteUrl,
-  "logo": resolvedImage,
-  "sameAs": socialSameAs.length > 0 ? socialSameAs : undefined,
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "telephone": phone,
-    "email": email,
-    "contactType": "customer service"
-  }
-};
-
-const personJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Muriel Cruysmans",
-  "url": siteUrl,
-  "sameAs": socialSameAs.length > 0 ? socialSameAs : undefined
-};
-
-const websiteJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": footerTitle,
-  "url": siteUrl,
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": searchTarget,
-    "query-input": "required name=search_term_string"
-  }
-};
-
-const jsonLdObjects = [
-  localBusinessJsonLd,
-  organizationJsonLd,
-  personJsonLd,
-  websiteJsonLd,
-  ...extraJsonLd
-].filter(Boolean);
 ---
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="description" content={description} />
-  <meta name="robots" content={robots} />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script>/* Set class early to avoid FOUT: hide animated elements immediately when JS is enabled */
     try {
       if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
@@ -191,30 +106,17 @@ const jsonLdObjects = [
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" />
-  <link rel="icon" type="image/png" href="/images/logo-manger-vrai.png" />
   <link rel="apple-touch-icon" href="/images/logo-manger-vrai.png" />
-  <link rel="canonical" href={canonicalUrl} />
-  <title>{title}</title>
-
-  <!-- Open Graph -->
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
-  <meta property="og:image" content={resolvedImage} />
-  <meta property="og:url" content={canonicalUrl} />
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="fr_FR" />
-  <meta property="og:site_name" content={footerTitle} />
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={title} />
-  <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={resolvedImage} />
+  
+  <BaseHead {title} {description} image={resolvedImage} {robots} {articleDate} />
 
   <!-- Structured Data (JSON-LD) -->
-  {jsonLdObjects.map((item) => (
+  {seo?.type && <JsonLd type={seo.type} data={seo.data} />}
+  {extraJsonLd.map((item) => (
     <script type="application/ld+json" set:html={JSON.stringify(item)} />
   ))}
+  {/* default local business schema injected on every page unless the page already provided one */}
+  {seo?.type !== 'LocalBusiness' && <JsonLd type="LocalBusiness" data={contactData} />}
 </head>
 <body class="bg-mv-cream font-sans text-mv-forest min-h-screen">
   <a href="#main-content" class="skip-link">Aller au contenu</a>

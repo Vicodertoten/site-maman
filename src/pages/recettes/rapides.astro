@@ -1,0 +1,62 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Section from '../../components/Section.astro';
+import EnhancedRecipeCard from '../../components/EnhancedRecipeCard.astro';
+import { getRecipesData } from '../../lib/sanity';
+
+const allRecipes = await getRecipesData();
+// filter recipes with prepTime <= 30 minutes (or cookTime)
+const quickRecipes = allRecipes.filter(r => {
+  const prep = typeof r.prepTime === 'number' ? r.prepTime : 0;
+  const cook = typeof r.cookTime === 'number' ? r.cookTime : 0;
+  return prep <= 30 || cook <= 30;
+});
+
+function getRecipeSlug(recipe: any): string {
+  return recipe.slug?.current || recipe._id;
+}
+function getRecipeDescription(recipe: any): string {
+  const explicit = (recipe.description || '').trim();
+  if (explicit) return explicit;
+  const subtitle = (recipe.subtitle || '').trim();
+  if (subtitle) return subtitle;
+  return `Recette : ${recipe.title}`;
+}
+function getRecipeImageAlt(recipe: any): string {
+  const explicit = (recipe.featuredImageAlt || '').trim();
+  if (explicit) return explicit;
+  return `Photo de ${recipe.title}`;
+}
+
+const cards = quickRecipes.map(r => ({
+  id: r._id,
+  slug: getRecipeSlug(r),
+  title: r.title,
+  description: getRecipeDescription(r),
+  image: r.featuredImageUrl ? `${r.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : undefined,
+  imageAlt: getRecipeImageAlt(r),
+}));
+
+const pageDescription = 'Recettes rapides à préparer en moins de 30 minutes, parfaites pour les soirs pressés ou les déjeuners express.';
+---
+
+<MainLayout title="Recettes rapides | Gastronomade" description={pageDescription}>
+  <Section class="bg-white">
+    <h1 class="mv-section-title">Recettes rapides</h1>
+    <p class="mv-lead text-mv-forest-70 mb-6">
+      Idées de plats simples et savoureux qui se cuisinent en un rien de temps. Pour les emplois du temps serrés et les envies de fraîcheur.
+    </p>
+
+    {cards.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-7">
+        {cards.map((recipe, index) => (
+          <div key={recipe.id} class={`scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`} style={`animation-delay: ${index * 0.1}s`}>
+            <EnhancedRecipeCard recipe={recipe} showFavoriteButton={true} showShoppingListButton={true} compact={false} />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p class="text-center text-mv-forest-70">Aucune recette rapide n'a été trouvée pour l'instant.</p>
+    )}
+  </Section>
+</MainLayout>

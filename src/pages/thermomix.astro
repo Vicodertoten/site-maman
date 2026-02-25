@@ -21,7 +21,7 @@ const heroHighlights = (thermomixData?.heroHighlights && thermomixData.heroHighl
       { label: '3', title: 'Vaisselle réduite', text: 'Un seul appareil pour tout faire.', isVisible: true }
     ];
 
-const fallbackHeroLead = 'Le Thermomix pèse, hache, mixe, cuit et mijote dans un seul bol. Il guide chaque étape grâce à ses recettes intégrées : vous gardez la main, il vous simplifie la vie.';
+const fallbackHeroLead = 'À Wavre comme ailleurs, le Thermomix pèse, hache, mixe, cuit et mijote dans un seul bol. Il guide chaque étape grâce à ses recettes intégrées : vous gardez la main, il vous simplifie la vie.';
 const pageDescription = (thermomixData?.heroLead || fallbackHeroLead).trim();
 const pageImage = thermomixData?.featuredImageUrl
   ? `${thermomixData.featuredImageUrl}?w=1200&h=630&fit=crop&auto=format`
@@ -64,7 +64,7 @@ const faqs = (thermomixData?.faqs && thermomixData.faqs.length > 0)
 ---
 
 <MainLayout
-  title="Thermomix - Gastronomade"
+  title="Thermomix à Wavre - Gastronomade"
   description={pageDescription}
   image={pageImage}
 >

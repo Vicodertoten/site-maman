@@ -293,37 +293,6 @@ const nutritionJsonLd = hasNutrition
 
 const pageUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
 
-const recipeJsonLd = (!isNotFound && recipe) ? {
-  "@context": "https://schema.org",
-  "@type": "Recipe",
-  name: recipe.title,
-  description: recipe.description,
-  image: recipe.featuredImageUrl
-    ? [`${recipe.featuredImageUrl}?w=1200&h=630&fit=crop&auto=format`]
-    : undefined,
-  datePublished: recipe.publishedAt,
-  dateModified: recipe._updatedAt || recipe.publishedAt,
-  author: {
-    "@type": "Person",
-    "name": "Muriel Cruysmans"
-  },
-  mainEntityOfPage: {
-    "@type": "WebPage",
-    "@id": pageUrl
-  },
-  recipeCategory: recipe.category,
-  recipeYield: recipe.servings ? `${recipe.servings} personnes` : undefined,
-  prepTime: recipe.prepTime ? `PT${recipe.prepTime}M` : undefined,
-  cookTime: recipe.cookTime ? `PT${recipe.cookTime}M` : undefined,
-  totalTime: totalTime ? `PT${totalTime}M` : undefined,
-  recipeIngredient: recipeIngredients.length > 0 ? recipeIngredients : undefined,
-  recipeInstructions: instructionSteps.length > 0
-    ? instructionSteps.map((step) => ({ "@type": "HowToStep", "text": step }))
-    : undefined,
-  nutrition: nutritionJsonLd,
-  keywords
-} : null;
-
 const breadcrumbJsonLd = (!isNotFound && recipe) ? {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -335,14 +304,16 @@ const breadcrumbJsonLd = (!isNotFound && recipe) ? {
   }))
 } : null;
 
-const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
+const jsonLd = [breadcrumbJsonLd].filter(Boolean);
 ---
 
 <MainLayout
-  title={`${recipe?.title || 'Recette'} - Recettes | Gastronomade`}
+  title={recipe.title}
   description={pageDescription}
   image={pageImage}
   jsonLd={jsonLd}
+  articleDate={recipe.publishedAt}
+  seo={{ type: 'Recipe', data: recipe }}
 >
   {isNotFound ? (
     <Section class="bg-white" containerClass="max-w-xl text-center">
@@ -533,6 +504,16 @@ const jsonLd = [recipeJsonLd, breadcrumbJsonLd].filter(Boolean);
         )}
       </div>
     </header>
+
+    <!-- liens majeurs vers pages thématiques -->
+    <section class="mb-10 bg-mv-cream rounded-xl p-6">
+      <p class="text-mv-forest-80">
+        Envie d'autres idées ? Parcourez nos
+        <a href="/recettes/thermomix" class="text-mv-leaf underline">recettes Thermomix</a>
+        ou nos
+        <a href="/recettes/rapides" class="text-mv-leaf underline">recettes rapides</a>.
+      </p>
+    </section>
 
     {recipe.highlights && recipe.highlights.length > 0 && (
       <section class="mb-10">

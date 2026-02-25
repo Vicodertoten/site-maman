@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import netlify from '@astrojs/netlify';
+import sitemap from '@astrojs/sitemap';
 
 const CANONICAL_SITE_URL = 'https://murielcruysmans.com';
 
@@ -8,7 +9,7 @@ const CANONICAL_SITE_URL = 'https://murielcruysmans.com';
 export default defineConfig({
   site: CANONICAL_SITE_URL,
   adapter: netlify(),
-  integrations: [],
+  integrations: [sitemap()],
   redirects: {
     '/easy-blog': '/recettes/',
     '/copie-de-accueil': '/thermomix/',

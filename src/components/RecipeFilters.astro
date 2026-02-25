@@ -33,11 +33,11 @@ const {
 } = Astro.props;
 ---
 
-<div class="recipe-filters mv-card p-6 mb-8">
-  <div class="flex flex-col lg:flex-row gap-4">
+<div class="recipe-filters mv-card p-4 mb-6">
+  <div class="flex flex-col lg:flex-row gap-2">
     <div class="flex-1">
-      <label for="recipe-search" class="block text-sm font-medium text-mv-forest mb-2">
-        Rechercher une recette
+      <label for="recipe-search" class="sr-only">
+        Rechercher
       </label>
       <div class="relative">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-mv-forest-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +48,7 @@ const {
           id="recipe-search"
           value={currentFilters.search || ''}
           placeholder="Nom, ingrédient, tag..."
-          class="mv-input mv-input--icon w-full"
+          class="mv-input mv-input--icon w-full py-2"
         />
         <button
           id="clear-search"
@@ -63,12 +63,12 @@ const {
     </div>
 
     <div class="w-full lg:w-56">
-      <label for="sort-filter" class="block text-sm font-medium text-mv-forest mb-2">
+      <label for="sort-filter" class="sr-only">
         Trier
       </label>
       <select
         id="sort-filter"
-        class="filter-select mv-input w-full py-3"
+        class="filter-select mv-input w-full py-2"
       >
         <option value="recent">Plus récent</option>
         <option value="popular">Populaire</option>
@@ -94,7 +94,7 @@ const {
 
   <div id="filters-panel" class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 hidden">
     <div class="filter-dropdown" data-filter="category">
-      <label class="block text-sm font-medium text-mv-forest mb-2">Catégorie</label>
+      <label class="block text-xs font-medium text-mv-forest mb-1">Catégorie</label>
       <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-category">
         <span>Choisir</span>
         <span id="category-count" class="text-xs text-mv-forest-60">Tous</span>
@@ -117,7 +117,7 @@ const {
     </div>
 
     <div class="filter-dropdown" data-filter="difficulty">
-      <label class="block text-sm font-medium text-mv-forest mb-2">Difficulté</label>
+      <label class="block text-xs font-medium text-mv-forest mb-1">Difficulté</label>
       <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-difficulty">
         <span>Choisir</span>
         <span id="difficulty-count" class="text-xs text-mv-forest-60">Tous</span>
@@ -140,7 +140,7 @@ const {
     </div>
 
     <div class="filter-dropdown" data-filter="time">
-      <label class="block text-sm font-medium text-mv-forest mb-2">Temps total</label>
+      <label class="block text-xs font-medium text-mv-forest mb-1">Temps</label>
       <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-time">
         <span>Choisir</span>
         <span id="time-count" class="text-xs text-mv-forest-60">Tous</span>
@@ -168,7 +168,7 @@ const {
     </div>
 
     <div class="filter-dropdown" data-filter="budget">
-      <label class="block text-sm font-medium text-mv-forest mb-2">Budget</label>
+      <label class="block text-xs font-medium text-mv-forest mb-1">Budget</label>
       <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-budget">
         <span>Choisir</span>
         <span id="budget-count" class="text-xs text-mv-forest-60">Tous</span>
@@ -194,7 +194,7 @@ const {
   <div id="filters-advanced" class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 hidden">
     {availableTags.length > 0 && (
       <div class="filter-dropdown" data-filter="tags">
-        <label class="block text-sm font-medium text-mv-forest mb-2">Tags</label>
+        <label class="block text-xs font-medium text-mv-forest mb-1">Tags</label>
         <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between" aria-haspopup="true" aria-expanded="false" aria-controls="filter-menu-tags">
           <span>Choisir</span>
           <span id="tags-count" class="text-xs text-mv-forest-60">Tous</span>

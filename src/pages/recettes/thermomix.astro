@@ -1,0 +1,61 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Section from '../../components/Section.astro';
+import EnhancedRecipeCard from '../../components/EnhancedRecipeCard.astro';
+import { getRecipesData } from '../../lib/sanity';
+
+const allRecipes = await getRecipesData();
+// filter recipes tagged with "Thermomix"
+const thermomixRecipes = allRecipes.filter(r =>
+  Array.isArray(r.tags) &&
+  r.tags.some((tag: string) => tag.toLowerCase().includes('thermomix'))
+);
+
+function getRecipeSlug(recipe: any): string {
+  return recipe.slug?.current || recipe._id;
+}
+function getRecipeDescription(recipe: any): string {
+  const explicit = (recipe.description || '').trim();
+  if (explicit) return explicit;
+  const subtitle = (recipe.subtitle || '').trim();
+  if (subtitle) return subtitle;
+  return `Recette : ${recipe.title}`;
+}
+function getRecipeImageAlt(recipe: any): string {
+  const explicit = (recipe.featuredImageAlt || '').trim();
+  if (explicit) return explicit;
+  return `Photo de ${recipe.title}`;
+}
+
+const cards = thermomixRecipes.map(r => ({
+  id: r._id,
+  slug: getRecipeSlug(r),
+  title: r.title,
+  description: getRecipeDescription(r),
+  image: r.featuredImageUrl ? `${r.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : undefined,
+  imageAlt: getRecipeImageAlt(r),
+}));
+
+const pageDescription = 'Recettes réalisables avec un Thermomix : découvrez des plats guidés, simples et savoureux conçus pour l’appareil.';
+---
+
+<MainLayout title="Recettes Thermomix | Gastronomade" description={pageDescription}>
+  <Section class="bg-white">
+    <h1 class="mv-section-title">Recettes Thermomix</h1>
+    <p class="mv-lead text-mv-forest-70 mb-6">
+      Une sélection de recettes adaptées au Thermomix, pour tirer le meilleur de votre robot de cuisine.
+    </p>
+
+    {cards.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-7">
+        {cards.map((recipe, index) => (
+          <div key={recipe.id} class={`scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`} style={`animation-delay: ${index * 0.1}s`}>
+            <EnhancedRecipeCard recipe={recipe} showFavoriteButton={true} showShoppingListButton={true} compact={false} />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p class="text-center text-mv-forest-70">Aucune recette Thermomix n'a été trouvée pour l'instant.</p>
+    )}
+  </Section>
+</MainLayout>

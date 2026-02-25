@@ -1,0 +1,94 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  type: 'LocalBusiness' | 'Recipe' | 'Event' | 'Person';
+  data: any; // Idéalement typé avec tes interfaces Sanity
+}
+
+const { type, data } = Astro.props;
+let schema = {};
+
+const SITE_URL = import.meta.env.SITE || 'https://murielcruysmans.com';
+
+// 1. Stratégie LOCALE (Home, Contact, Privatisation)
+if (type === 'LocalBusiness') {
+  // try to glean contact details from passed data (sanity contactData or similar)
+  const phone = data?.contactInfo?.phone || "+32475000000";
+  const addressText: string =
+    data?.contactInfo?.address || "Chemin de la ...\nWavre\n1300\nBE";
+  const [streetAddress = "Chemin de la ...", locality = "Wavre", postalCode = "1300", country = "BE"] =
+    addressText.split('\n').map((s) => s.trim());
+  const geoLat = data?.geo?.latitude || 50.716;
+  const geoLong = data?.geo?.longitude || 4.612;
+  schema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Gastronomade - Muriel Cruysmans",
+    "image": `${SITE_URL}/images/muriel-cuisine.jpg`,
+    "@id": `${SITE_URL}/#localbusiness`,
+    "url": SITE_URL,
+    "telephone": phone,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": streetAddress,
+      "addressLocality": locality,
+      "postalCode": postalCode,
+      "addressCountry": country
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": geoLat,
+      "longitude": geoLong
+    },
+    "priceRange": "€€"
+  };
+}
+
+// 2. Stratégie RECETTES (Trafic global)
+if (type === 'Recipe') {
+  schema = {
+    "@context": "https://schema.org",
+    "@type": "Recipe",
+    "name": data.title,
+    "image": data.image, // URL de l'image Sanity
+    "author": {
+      "@type": "Person",
+      "name": "Muriel Cruysmans"
+    },
+    "datePublished": data.publishedAt,
+    "description": data.description,
+    "prepTime": data.prepTime ? `PT${data.prepTime}M` : undefined, // Format ISO 8601
+    "cookTime": data.cookTime ? `PT${data.cookTime}M` : undefined,
+    "recipeCategory": data.category,
+    "recipeIngredient": data.ingredients, // Array de strings
+    "recipeInstructions": data.instructions?.map((step: any, index: number) => ({
+      "@type": "HowToStep",
+      "text": step.text,
+      "position": index + 1
+    }))
+  };
+}
+
+// 3. Stratégie ÉVÉNEMENT (Restaurant éphémère)
+if (type === 'Event') {
+  schema = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Restaurant Éphémère Gastronomade",
+    "startDate": data.date, // Format ISO
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+    "location": {
+      "@type": "Place",
+      "name": "Gastronomade",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Wavre",
+        "addressCountry": "BE"
+      }
+    }
+  };
+}
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
