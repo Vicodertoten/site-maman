@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    ".astro/types.d.ts",
+    "src/lib/**/*.ts",
+    "src/types/**/*.ts",
+    "src/pages/api/**/*.ts",
+    "netlify/functions/**/*.ts"
+  ],
+  "exclude": [
+    "dist",
+    "archive",
+    "images",
+    "recettes",
+    "public",
+    "studio",
+    "tmp",
+    ".reports",
+    ".netlify",
+    "src/lib/portableText.ts"
+  ]
+}

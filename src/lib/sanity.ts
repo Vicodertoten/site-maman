@@ -134,6 +134,27 @@ export interface LocationData {
   maxCapacity: number
   image: any
   imageUrl?: string
+  companyReasonsTitle?: string
+  companyReasons?: Array<{
+    title?: string
+    text?: string
+    isVisible?: boolean
+    order?: number
+  }>
+  companyFormulasTitle?: string
+  companyFormulasIntro?: string
+  companyFormulas?: Array<{
+    title?: string
+    durationLabel?: string
+    priceLabel?: string
+    priceValue?: number
+    description?: string
+    isVisible?: boolean
+    order?: number
+  }>
+  companyOptionsTitle?: string
+  companyOptions?: string[]
+  showCompanyFaq?: boolean
   isVisible?: boolean
   faqs?: Array<{
     question?: string
@@ -613,8 +634,29 @@ export const queries = {
     maxCapacity,
     image,
     "imageUrl": image.asset->url,
+    companyReasonsTitle,
+    companyReasons[isVisible != false] | order(order asc){
+      title,
+      text,
+      isVisible,
+      order
+    },
+    companyFormulasTitle,
+    companyFormulasIntro,
+    companyFormulas[isVisible != false] | order(order asc){
+      title,
+      durationLabel,
+      priceLabel,
+      priceValue,
+      description,
+      isVisible,
+      order
+    },
+    companyOptionsTitle,
+    companyOptions,
+    showCompanyFaq,
     isVisible,
-    faqs[isVisible == true] | order(order asc){
+    faqs[isVisible != false] | order(order asc){
       question,
       answer,
       isVisible,

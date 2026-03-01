@@ -98,7 +98,6 @@ const filteredHighlights = (restaurantData?.highlights || []).filter((item) => {
               {filteredHighlights.map((item, index) => (
                 <li
                   class="rounded-full border border-mv-leaf-20 bg-mv-cream-80 px-3 py-1 font-medium"
-                  key={index}
                 >
                   {item}
                 </li>
@@ -122,7 +121,6 @@ const filteredHighlights = (restaurantData?.highlights || []).filter((item) => {
           <div class="grid grid-cols-2 gap-3">
             {restaurantSlots.map((slot, index) => (
               <article
-                key={`${slot.date ?? 'fallback'}-${index}`}
                 class="rounded-2xl border border-mv-leaf-20 bg-mv-cream-80 p-3 text-center"
               >
                 <span class="text-2xl leading-none text-mv-forest">{slot.day || '?'}</span>

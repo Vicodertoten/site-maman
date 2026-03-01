@@ -5,7 +5,8 @@
   "description": "Studio d'administration pour le site Gastronomade",
   "main": "sanity.config.ts",
   "scripts": {
-    "dev": "sanity dev",
+    "dev": "node scripts/clearDevCaches.mjs && sanity dev --host localhost --port 3333",
+    "dev:raw": "sanity dev --host localhost --port 3333",
     "build": "sanity build",
     "start": "sanity start",
     "setup": "./setup.sh",

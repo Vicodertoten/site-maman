@@ -50,7 +50,7 @@ const pageDescription = 'Recettes rapides à préparer en moins de 30 minutes, p
     {cards.length > 0 ? (
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-7">
         {cards.map((recipe, index) => (
-          <div key={recipe.id} class={`scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`} style={`animation-delay: ${index * 0.1}s`}>
+          <div class={`scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`} style={`animation-delay: ${index * 0.1}s`}>
             <EnhancedRecipeCard recipe={recipe} showFavoriteButton={true} showShoppingListButton={true} compact={false} />
           </div>
         ))}

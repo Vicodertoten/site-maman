@@ -176,8 +176,6 @@ const faqJsonLd = faqs.length > 0
     }
   : null;
 
-const finalCtaTitle = 'Prête à avancer avec une méthode simple et joyeuse ?';
-const finalCtaText = 'Parlons de votre contexte pour choisir le format le plus adapté.';
 const finalCtaLabel = aboutData?.heroCtaLabel || 'Réserver un échange';
 const finalCtaLink = aboutData?.heroCtaLink || '/contact';
 const pageDescription = (aboutData?.heroSubtitle || authorShortBio || fallbackHeroSubtitle).trim();
@@ -206,8 +204,6 @@ const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;
       defaultCtaCount={1}
       defaultPrimaryCtaLabel={aboutData?.heroCtaLabel || 'Réserver un échange'}
       defaultPrimaryCtaUrl={aboutData?.heroCtaLink || '/contact'}
-      defaultSecondaryCtaLabel="Prendre contact"
-      defaultSecondaryCtaUrl="/contact"
       sectionClass="bg-white"
     />
   )}
@@ -263,7 +259,7 @@ const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;
       </div>
       <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4" slot="content">
         {proofItems.slice(0, 3).map((proof, index) => (
-          <div class="mv-card p-4 sm:p-5" key={index}>
+          <div class="mv-card p-4 sm:p-5">
             <p class="text-xs uppercase tracking-[0.18em] text-mv-forest-60">{proof.label || 'Preuve'}</p>
             <p class="mt-2 text-sm font-semibold text-mv-forest">{proof.value}</p>
             {proof.description && (
@@ -368,7 +364,7 @@ const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;
       <div class="mt-6 overflow-x-auto scrollbar-hide" slot="content">
         <div class="flex gap-6 sm:gap-8 pb-4" style="width: fit-content; min-width: 100%;">
           {testimonials.map((item, index) => (
-            <div class="mv-card p-6 sm:p-7 flex flex-col flex-shrink-0" style="width: 320px; min-width: 320px;" key={index}>
+            <div class="mv-card p-6 sm:p-7 flex flex-col flex-shrink-0" style="width: 320px; min-width: 320px;">
               <div class="flex-1">
                 <p class="text-base text-mv-forest-80 leading-relaxed italic">"{item.quote}"</p>
               </div>
@@ -393,7 +389,7 @@ const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;
       </div>
       <div class="mt-6 space-y-3" slot="content">
         {faqs.map((item, index) => (
-          <details class="mv-card p-4 sm:p-5" key={index}>
+          <details class="mv-card p-4 sm:p-5">
             <summary class="cursor-pointer text-sm font-semibold text-mv-forest">{item.question}</summary>
             <p class="mt-3 text-sm text-mv-forest-70">{item.answer}</p>
           </details>
@@ -401,43 +397,5 @@ const aboutEmptyPhotoStyle = authorPhotoUrl ? 'display: none;' : 'display: flex;
       </div>
     </Section>
   )}
-
-  <Section class="bg-white" containerClass="max-w-5xl">
-    <div class="max-w-3xl" slot="content">
-      <p class="mv-kicker">Pages locales</p>
-      <h2 class="mv-section-title">Accès direct aux offres à Wavre</h2>
-      <p class="text-sm text-mv-forest-70">
-        Ces pages détaillent tarifs, formats, capacité, zone desservie et modalités de réservation.
-      </p>
-    </div>
-    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4" slot="content">
-      <article class="mv-card p-5">
-        <h3 class="text-lg font-semibold text-mv-forest">Événements privés à Wavre</h3>
-        <p class="mt-2 text-sm text-mv-forest-80">Dîners, célébrations et cours de cuisine privés selon vos envies.</p>
-        <a href="/evenements-prives-wavre" class="mt-3 inline-flex text-sm font-semibold text-mv-forest underline underline-offset-4 hover:text-mv-leaf">
-          Voir la page locale
-        </a>
-      </article>
-      <article class="mv-card p-5">
-        <h3 class="text-lg font-semibold text-mv-forest">Privatisation entreprise à Wavre</h3>
-        <p class="mt-2 text-sm text-mv-forest-80">Réunions, team building et événements d’entreprise sur mesure.</p>
-        <a href="/privatisation-entreprise-wavre" class="mt-3 inline-flex text-sm font-semibold text-mv-forest underline underline-offset-4 hover:text-mv-leaf">
-          Voir la page locale
-        </a>
-      </article>
-    </div>
-  </Section>
-
-  <Section class="bg-mv-cream" containerClass="text-center max-w-4xl">
-    <h2 class="mv-section-title mb-3 sm:mb-4" slot="content">
-      {finalCtaTitle}
-    </h2>
-    <p class="text-base sm:text-lg text-mv-forest-70 mb-6" slot="content">
-      {finalCtaText}
-    </p>
-    <a href={finalCtaLink} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf" slot="content">
-      {finalCtaLabel}
-    </a>
-  </Section>
 
 </MainLayout>

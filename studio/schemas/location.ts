@@ -5,15 +5,30 @@ export const location = {
   type: 'document',
   fieldsets: [
     {
-      name: 'visibility',
-      title: 'Affichage (avancé)',
-      options: { collapsible: true, collapsed: true }
+      name: 'company_reasons',
+      title: 'Entreprise - Pourquoi notre lieu ?',
+      options: { collapsible: true, collapsed: false },
+    },
+    {
+      name: 'company_formulas',
+      title: 'Entreprise - Nos formules',
+      options: { collapsible: true, collapsed: false },
+    },
+    {
+      name: 'company_options',
+      title: 'Entreprise - Options',
+      options: { collapsible: true, collapsed: false },
     },
     {
       name: 'faqs_section',
-      title: '❓ Questions Fréquentes',
-      options: { collapsible: true, collapsed: false }
-    }
+      title: 'Questions frequentes',
+      options: { collapsible: true, collapsed: false },
+    },
+    {
+      name: 'visibility',
+      title: 'Affichage (avance)',
+      options: { collapsible: true, collapsed: true },
+    },
   ],
   fields: [
     {
@@ -22,141 +37,359 @@ export const location = {
       type: 'string',
       options: {
         list: [
-          { title: 'Sociétés', value: 'societe' },
-          { title: 'Privé', value: 'prive' }
-        ]
+          { title: 'Societes', value: 'societe' },
+          { title: 'Prive', value: 'prive' },
+        ],
       },
-      description: 'Choisissez la catégorie de l’offre.'
+      validation: (Rule) => Rule.required(),
+      description: 'Choisissez la categorie de l’offre.',
     },
     {
       name: 'title',
       title: 'Titre de l’offre',
       type: 'string',
-      description: 'Ex: "Réunions d’équipe" ou "Événements privés".'
+      validation: (Rule) => Rule.required().min(5).max(120),
+      description: 'Ex: "Privatisation entreprise a Wavre".',
     },
     {
       name: 'hero',
       title: 'Hero (commun)',
-      type: 'pageHero'
+      type: 'pageHero',
     },
     {
       name: 'subtitle',
       title: 'Sous-titre',
       type: 'string',
-      description: 'Texte court sous le titre.'
+      description: 'Texte court sous le titre.',
     },
     {
       name: 'price',
       title: 'Prix HTVA',
       type: 'string',
       initialValue: '400€',
-      description: 'Prix de location en euros HTVA'
+      description: 'Prix de location en euros HTVA.',
     },
     {
       name: 'features',
       title: 'Points forts (optionnel)',
       type: 'array',
       of: [{ type: 'string' }],
-      description: 'Liste des avantages et équipements. Peut rester vide.',
+      description: 'Liste des avantages et equipements. Peut rester vide.',
       initialValue: [
         'Cadre inspirant et chaleureux',
-        'Cuisine entièrement équipée',
-        'Parking privé',
-        'Accès facile via E411'
-      ]
+        'Cuisine entierement equipee',
+        'Parking prive',
+        'Acces facile via E411',
+      ],
     },
     {
       name: 'description',
-      title: 'Description détaillée',
+      title: 'Description detaillee',
       type: 'text',
-      description: 'Texte plus long pour la page de détails.'
+      description: 'Texte plus long pour la page de details.',
     },
     {
       name: 'details',
-      title: 'Détails (liste)',
+      title: 'Details (liste)',
       type: 'array',
       of: [{ type: 'string' }],
-      description: 'Points supplémentaires à afficher (conditions, options, etc.).'
+      description: 'Points supplementaires a afficher (conditions, options, etc.).',
     },
     {
       name: 'ctaLabel',
-      title: 'Bouton — Libellé',
+      title: 'Bouton - Libelle',
       type: 'string',
-      initialValue: 'Demander un devis'
+      initialValue: 'Demander un devis',
     },
     {
       name: 'ctaLink',
-      title: 'Bouton — Lien',
+      title: 'Bouton - Lien',
       type: 'string',
-      initialValue: '/contact'
+      initialValue: '/contact?need=entreprise',
     },
     {
       name: 'maxCapacity',
-      title: 'Capacité maximale',
+      title: 'Capacite maximale',
       type: 'number',
-      description: 'Nombre maximum de personnes'
+      description: 'Nombre maximum de personnes.',
     },
     {
       name: 'image',
-      title: 'Image représentative',
+      title: 'Image representative',
       type: 'image',
       options: {
-        hotspot: true
+        hotspot: true,
       },
-      description: 'Photo de l\'espace',
-      validation: (Rule) => Rule.required()
+      description: "Photo de l'espace.",
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'companyReasonsTitle',
+      title: 'Titre section raisons',
+      type: 'string',
+      initialValue: 'Pourquoi notre lieu ?',
+      fieldset: 'company_reasons',
+      hidden: ({ document }) => document?.type !== 'societe',
+    },
+    {
+      name: 'companyReasons',
+      title: 'Cartes raisons (4 recommandees)',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'title',
+              title: 'Titre',
+              type: 'string',
+              validation: (Rule) => Rule.required().min(3).max(80),
+            },
+            {
+              name: 'text',
+              title: 'Texte',
+              type: 'text',
+              rows: 3,
+              validation: (Rule) => Rule.required().min(12).max(320),
+            },
+            {
+              name: 'isVisible',
+              title: 'Afficher cette carte',
+              type: 'boolean',
+              initialValue: true,
+            },
+            {
+              name: 'order',
+              title: 'Ordre',
+              type: 'number',
+              initialValue: 0,
+            },
+          ],
+          preview: {
+            select: { title: 'title', subtitle: 'text' },
+          },
+        },
+      ],
+      validation: (Rule) => Rule.min(1).max(8),
+      fieldset: 'company_reasons',
+      hidden: ({ document }) => document?.type !== 'societe',
+      initialValue: [
+        {
+          title: 'Cadre inspirant',
+          text: 'Maison en bois, poele a bois, cadre verdoyant.',
+          isVisible: true,
+          order: 1,
+        },
+        {
+          title: 'Confort et praticite',
+          text: 'Cuisine equipee, parking prive, ecran + flipchart, a 1 min de la E411.',
+          isVisible: true,
+          order: 2,
+        },
+        {
+          title: 'Prestations sur mesure',
+          text: 'Petit-dejeuner, lunch ou diner maison, local et de saison.',
+          isVisible: true,
+          order: 3,
+        },
+        {
+          title: 'Services supplementaires',
+          text: 'Experience culinaire, balade plantes sauvages, conference alimentation sante.',
+          isVisible: true,
+          order: 4,
+        },
+      ],
+    },
+    {
+      name: 'companyFormulasTitle',
+      title: 'Titre section formules',
+      type: 'string',
+      initialValue: 'Nos formules',
+      fieldset: 'company_formulas',
+      hidden: ({ document }) => document?.type !== 'societe',
+    },
+    {
+      name: 'companyFormulasIntro',
+      title: 'Intro section formules',
+      type: 'text',
+      rows: 3,
+      fieldset: 'company_formulas',
+      hidden: ({ document }) => document?.type !== 'societe',
+    },
+    {
+      name: 'companyFormulas',
+      title: 'Packs entreprise',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'title',
+              title: 'Titre du pack',
+              type: 'string',
+              validation: (Rule) => Rule.required().min(4).max(120),
+            },
+            {
+              name: 'durationLabel',
+              title: 'Duree',
+              type: 'string',
+              description: 'Ex: 4h, 8h, demi-journee.',
+            },
+            {
+              name: 'priceLabel',
+              title: 'Prix affiche',
+              type: 'string',
+              validation: (Rule) => Rule.required().min(3).max(120),
+            },
+            {
+              name: 'priceValue',
+              title: 'Prix numerique (pour SEO)',
+              type: 'number',
+              description: 'Optionnel. Ex: 290, 75, 110.',
+            },
+            {
+              name: 'description',
+              title: 'Description',
+              type: 'text',
+              rows: 3,
+              validation: (Rule) => Rule.max(320),
+            },
+            {
+              name: 'isVisible',
+              title: 'Afficher ce pack',
+              type: 'boolean',
+              initialValue: true,
+            },
+            {
+              name: 'order',
+              title: 'Ordre',
+              type: 'number',
+              initialValue: 0,
+            },
+          ],
+          preview: {
+            select: {
+              title: 'title',
+              subtitle: 'priceLabel',
+            },
+          },
+        },
+      ],
+      validation: (Rule) => Rule.min(1).max(6),
+      fieldset: 'company_formulas',
+      hidden: ({ document }) => document?.type !== 'societe',
+      initialValue: [
+        {
+          title: 'Pack demi-journee',
+          durationLabel: '4h',
+          priceLabel: '290€ HTVA (21%)',
+          priceValue: 290,
+          description: 'Ideal pour une reunion d’equipe ciblee.',
+          isVisible: true,
+          order: 1,
+        },
+        {
+          title: 'Pack journee strategique',
+          durationLabel: '8h',
+          priceLabel: 'A partir de 75€/pers HTVA',
+          priceValue: 75,
+          description: 'Pour CODIR, ateliers de travail et decisions strategiques.',
+          isVisible: true,
+          order: 2,
+        },
+        {
+          title: 'Pack experience team building',
+          durationLabel: 'Journee + activite',
+          priceLabel: 'A partir de 110€/pers HTVA',
+          priceValue: 110,
+          description: 'Combine travail d’equipe et experience culinaire.',
+          isVisible: true,
+          order: 3,
+        },
+      ],
+    },
+    {
+      name: 'companyOptionsTitle',
+      title: 'Titre section options',
+      type: 'string',
+      initialValue: 'Options',
+      fieldset: 'company_options',
+      hidden: ({ document }) => document?.type !== 'societe',
+    },
+    {
+      name: 'companyOptions',
+      title: 'Liste d’options',
+      type: 'array',
+      of: [{ type: 'string' }],
+      fieldset: 'company_options',
+      hidden: ({ document }) => document?.type !== 'societe',
+      initialValue: [
+        'Petit dejeuner',
+        'Decouverte plantes sauvages comestibles',
+        'Conference interactive',
+      ],
+    },
+    {
+      name: 'showCompanyFaq',
+      title: 'Afficher la FAQ entreprise',
+      type: 'boolean',
+      initialValue: true,
+      fieldset: 'faqs_section',
+      hidden: ({ document }) => document?.type !== 'societe',
+    },
+    {
+      name: 'faqs',
+      title: 'Questions frequentes',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'question',
+              title: 'Question',
+              type: 'string',
+              validation: (Rule) => Rule.required().min(10).max(200),
+            },
+            {
+              name: 'answer',
+              title: 'Reponse',
+              type: 'text',
+              rows: 3,
+              validation: (Rule) => Rule.required().min(20).max(1000),
+            },
+            {
+              name: 'isVisible',
+              title: 'Afficher cette FAQ',
+              type: 'boolean',
+              initialValue: true,
+            },
+            {
+              name: 'order',
+              title: 'Ordre',
+              type: 'number',
+              initialValue: 0,
+            },
+          ],
+        },
+      ],
+      fieldset: 'faqs_section',
+      description: 'Questions les plus posees sur la privatisation.',
     },
     {
       name: 'isVisible',
       title: 'Afficher cette offre',
       type: 'boolean',
       initialValue: true,
-      fieldset: 'visibility'
+      fieldset: 'visibility',
     },
-
-    {
-      name: 'faqs',
-      title: 'Questions Fréquentes',
-      type: 'array',
-      of: [{
-        type: 'object',
-        fields: [
-          {
-            name: 'question',
-            title: '❓ Question',
-            type: 'string',
-            validation: (Rule: any) => Rule.required().min(10).max(200)
-          },
-          {
-            name: 'answer',
-            title: '✅ Réponse',
-            type: 'text',
-            rows: 3,
-            validation: (Rule: any) => Rule.required().min(20).max(1000)
-          },
-          {
-            name: 'isVisible',
-            title: '👁️ Afficher cette FAQ',
-            type: 'boolean',
-            initialValue: true
-          },
-          {
-            name: 'order',
-            title: '🔢 Ordre',
-            type: 'number',
-            initialValue: 0
-          }
-        ]
-      }],
-      fieldset: 'faqs_section',
-      description: 'Les questions les plus posées sur la privatisation.'
-    }
   ],
   preview: {
     select: {
       title: 'title',
       subtitle: 'type',
-      media: 'image'
-    }
-  }
+      media: 'image',
+    },
+  },
 }

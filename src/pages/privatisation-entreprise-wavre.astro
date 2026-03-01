@@ -7,209 +7,234 @@ import { getLocationsData } from '../lib/sanity';
 const locations = await getLocationsData();
 const companyLocation = locations.find((location) => location?.type === 'societe') || null;
 
-const serviceOffers = [
-  {
-    name: 'Location du lieu',
-    price: 400,
-    priceSuffix: 'HTVA (21%)',
-    scope: 'Journée et/ou soirée avec pauses café/thé, eau plate et pétillante, collations'
-  },
-  {
-    name: 'Restauration midi',
-    price: 25,
-    priceSuffix: 'à partir de / pers.',
-    scope: 'Lunch de saison préparé par nos soins'
-  },
-  {
-    name: 'Restauration soir',
-    price: 50,
-    priceSuffix: 'à partir de / pers.',
-    scope: 'Dîner de saison (minimum 8 pers)'
-  },
-  {
-    name: 'Ateliers cuisine (2h)',
-    price: 65,
-    priceSuffix: 'à partir de / pers.',
-    scope: 'Selon le menu, en complément de votre journée'
-  }
-];
-
-const placeHighlights = [
+const defaultReasons = [
   {
     title: 'Cadre inspirant',
-    text: 'Un cadre naturel pour des réunions plus concentrées et des échanges de qualité.'
+    text: 'Maison en bois, poele a bois, cadre verdoyant.',
   },
   {
-    title: 'Confort et praticité',
-    text: 'Cuisine équipée, parking facile, accès rapide depuis Bruxelles (1 minute de la E411).'
+    title: 'Confort et praticite',
+    text: 'Cuisine equipee, parking prive, ecran + flipchart, a 1 min de la E411.',
   },
   {
     title: 'Prestations sur mesure',
-    text: 'Formats flexibles: réunion, team building, déjeuner, dîner.'
+    text: 'Petit-dejeuner, lunch ou diner maison, local et de saison.',
   },
   {
-    title: 'Services supplémentaires',
-    text: 'Activités en option: ateliers, balade comestible, conférences alimentation santé.'
-  }
+    title: 'Services supplementaires',
+    text: 'Experience culinaire, balade plantes sauvages, conference alimentation sante.',
+  },
 ];
 
-const activityOffers = [
+const defaultFormulas = [
   {
-    name: 'Conférence',
-    duration: '2h',
-    priceLabel: '250€'
+    title: 'Pack demi-journee',
+    durationLabel: '4h',
+    priceLabel: '290€ HTVA (21%)',
+    priceValue: 290,
+    description: 'Format court et efficace pour reunion d’equipe, atelier cible ou CODIR.',
   },
   {
-    name: 'Balade comestible',
-    duration: '1h',
-    priceLabel: '125€'
+    title: 'Pack journee strategique',
+    durationLabel: '8h',
+    priceLabel: 'A partir de 75€/pers HTVA',
+    priceValue: 75,
+    description: 'Journee complete pour prendre du recul, aligner l’equipe et decider.',
   },
   {
-    name: 'Atelier cuisine',
-    duration: '2h',
-    priceLabel: 'à partir de 65€/pers'
-  }
+    title: 'Pack experience team building',
+    durationLabel: 'Journee + activite',
+    priceLabel: 'A partir de 110€/pers HTVA',
+    priceValue: 110,
+    description: 'Combine temps de travail, cohesion et experience culinaire sur mesure.',
+  },
+];
+
+const defaultOptions = [
+  'Petit dejeuner',
+  'Decouverte plantes sauvages comestibles',
+  'Conference interactive',
 ];
 
 const defaultFaqs = [
   {
-    question: 'Quelle capacité pour un événement entreprise ?',
-    answer: "La location entreprise est prévue pour des groupes jusqu'à 12 personnes."
+    question: 'Quelle capacite pour un evenement entreprise ?',
+    answer: "La location entreprise est prevue pour des groupes jusqu'a 12 personnes.",
   },
   {
     question: 'Que comprend la location du lieu ?',
-    answer: "Location journée/soirée avec pauses café/thé, eau plate et pétillante, et collations."
+    answer: 'Location journee/soiree avec pauses cafe/the, eau plate et petillante, et collations.',
   },
   {
-    question: "Quelles activités peut-on ajouter ?",
-    answer: "Ateliers culinaires, balade comestible et conférence sur l'alimentation santé."
-  }
+    question: 'Quelles activites peut-on ajouter ?',
+    answer: 'Ateliers culinaires, balade comestible et conference sur l’alimentation sante.',
+  },
 ];
 
-const faqs = (companyLocation?.faqs && companyLocation.faqs.length > 0)
-  ? companyLocation.faqs.filter((item) => item?.question && item?.answer && item?.isVisible !== false)
-  : defaultFaqs;
+const companyReasons =
+  companyLocation?.companyReasons && companyLocation.companyReasons.length > 0
+    ? companyLocation.companyReasons.filter((item) => item?.title && item?.text && item?.isVisible !== false)
+    : defaultReasons;
 
-const pageDescription = 'Privatisation de lieu pour entreprise à Wavre: réunions, team building et événements dans un cadre chaleureux proche de la E411.';
+const companyFormulas =
+  companyLocation?.companyFormulas && companyLocation.companyFormulas.length > 0
+    ? companyLocation.companyFormulas.filter((item) => item?.title && item?.priceLabel && item?.isVisible !== false)
+    : defaultFormulas;
+
+const companyOptions =
+  companyLocation?.companyOptions && companyLocation.companyOptions.length > 0
+    ? companyLocation.companyOptions.filter(Boolean)
+    : defaultOptions;
+
+const faqs =
+  companyLocation?.faqs && companyLocation.faqs.length > 0
+    ? companyLocation.faqs.filter((item) => item?.question && item?.answer && item?.isVisible !== false)
+    : defaultFaqs;
+
+const showCompanyFaq = companyLocation?.showCompanyFaq !== false && faqs.length > 0;
+
+const reasonsTitle = companyLocation?.companyReasonsTitle || 'Pourquoi notre lieu ?';
+const formulasTitle = companyLocation?.companyFormulasTitle || 'Nos formules';
+const formulasIntro =
+  companyLocation?.companyFormulasIntro ||
+  'Des formats clairs pour vos reunions d’equipe, CODIR et team buildings.';
+const optionsTitle = companyLocation?.companyOptionsTitle || 'Options';
+
+const contactCtaLabel = companyLocation?.ctaLabel || 'Nous contacter';
+const contactCtaUrl = companyLocation?.ctaLink || '/contact?need=entreprise';
+
+const pageDescription =
+  'Un espace confidentiel au coeur de la nature pour vos reunions d’equipe, CODIR et team buildings.';
+
+const formulaOffersForJsonLd = companyFormulas
+  .filter((pack) => typeof pack.priceValue === 'number')
+  .map((pack) => ({
+    '@type': 'Offer',
+    name: pack.title,
+    priceCurrency: 'EUR',
+    price: pack.priceValue,
+    description: [pack.durationLabel, pack.priceLabel, pack.description].filter(Boolean).join(' - '),
+    url: 'https://murielcruysmans.com/privatisation-entreprise-wavre/',
+  }));
+
 const serviceJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Service",
-  "name": "Privatisation entreprise à Wavre",
-  "serviceType": "Privatisation de lieu et événements d'entreprise",
-  "description": pageDescription,
-  "provider": {
-    "@type": "Organization",
-    "name": "Gastronomade"
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Privatisation entreprise a Wavre',
+  serviceType: "Privatisation de lieu et evenements d'entreprise",
+  description: pageDescription,
+  provider: {
+    '@type': 'Organization',
+    name: 'Gastronomade',
   },
-  "areaServed": [
-    { "@type": "City", "name": "Wavre" },
-    { "@type": "City", "name": "Louvain-la-Neuve" },
-    { "@type": "City", "name": "Bruxelles" }
+  areaServed: [
+    { '@type': 'City', name: 'Wavre' },
+    { '@type': 'City', name: 'Louvain-la-Neuve' },
+    { '@type': 'City', name: 'Bruxelles' },
   ],
-  "offers": serviceOffers.map((offer) => ({
-    "@type": "Offer",
-    "name": offer.name,
-    "priceCurrency": "EUR",
-    "price": offer.price,
-    "description": `${offer.scope} (${offer.priceSuffix})`,
-    "url": "https://murielcruysmans.com/privatisation-entreprise-wavre/"
-  }))
+  ...(formulaOffersForJsonLd.length > 0 ? { offers: formulaOffersForJsonLd } : {}),
 };
-const faqJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": faqs.map((item) => ({
-    "@type": "Question",
-    "name": item.question,
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": item.answer
+
+const faqJsonLd = showCompanyFaq
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
     }
-  }))
-};
+  : null;
 ---
 
 <MainLayout
-  title="Privatisation entreprise à Wavre | Gastronomade"
+  title="Privatisation entreprise a Wavre | Gastronomade"
   description={pageDescription}
-  jsonLd={[serviceJsonLd, faqJsonLd]}
+  jsonLd={[serviceJsonLd, faqJsonLd].filter(Boolean)}
 >
   <PageHero
     hero={companyLocation?.hero}
     updatedAtIso={companyLocation?._updatedAt}
     defaultVariant="simple"
     defaultKicker="Entreprise"
-    defaultTitle="Privatisation d’un lieu d’entreprise à Wavre"
-    defaultSubtitle="Un cadre naturel et chaleureux pour vos réunions et team buildings."
-    defaultCtaCount={1}
-    defaultPrimaryCtaLabel="Demander un devis"
+    defaultTitle="Privatisation entreprise a Wavre"
+    defaultSubtitle="Un espace confidentiel au coeur de la nature pour vos reunions d’equipe, CODIR et team buildings."
+    defaultCtaCount={2}
+    defaultPrimaryCtaLabel="Nous contacter"
     defaultPrimaryCtaUrl="/contact?need=entreprise"
+    defaultSecondaryCtaLabel="Nos formules"
+    defaultSecondaryCtaUrl="#nos-formules"
     sectionClass="bg-white"
   />
 
-  <Section class="bg-white" containerClass="max-w-4xl">
-    <div class="space-y-5" slot="content">
-      <h2 class="mv-section-title">Tarifs et infos clés</h2>
-      <p class="text-sm text-mv-forest-70">
-        Tarifs de référence pour vos réunions et team buildings à Wavre.
-      </p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {serviceOffers.map((offer) => (
-          <article class="mv-card p-5">
-            <p class="text-xs uppercase tracking-[0.16em] text-mv-forest-60">{offer.name}</p>
-            <p class="mt-2 text-2xl font-serif font-bold text-mv-forest">À partir de {offer.price}€</p>
-            <p class="text-xs text-mv-forest-60">{offer.priceSuffix}</p>
-            <p class="mt-2 text-sm text-mv-forest-80">{offer.scope}</p>
-          </article>
-        ))}
-      </div>
-      <div class="rounded-2xl border border-mv-leaf-20 bg-mv-cream p-5">
-        <h3 class="text-lg font-semibold text-mv-forest">Activités en option</h3>
-        <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-          {activityOffers.map((offer) => (
-            <div class="rounded-xl border border-mv-leaf-20 bg-white p-3">
-              <p class="text-xs uppercase tracking-[0.16em] text-mv-forest-60">{offer.name}</p>
-              <p class="mt-1 text-sm text-mv-forest-70">Durée: {offer.duration}</p>
-              <p class="mt-1 text-lg font-serif font-bold text-mv-forest">{offer.priceLabel}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div class="rounded-2xl border border-mv-leaf-20 bg-mv-cream p-5">
-        <h3 class="text-lg font-semibold text-mv-forest">Pourquoi ce lieu ?</h3>
-        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {placeHighlights.map((item) => (
-            <div class="rounded-xl border border-mv-leaf-20 bg-white p-3">
-              <p class="text-sm font-semibold text-mv-forest">{item.title}</p>
-              <p class="mt-1 text-xs sm:text-sm text-mv-forest-80">{item.text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div class="rounded-2xl border border-mv-leaf-20 bg-mv-cream p-5">
-        <h3 class="text-lg font-semibold text-mv-forest">Lancer votre demande</h3>
-        <p class="mt-2 text-sm text-mv-forest-80">Réponse rapide avec proposition de format, restauration et activités adaptées.</p>
-        <div class="mt-4 flex flex-wrap gap-3">
-          <a href="/contact?need=entreprise" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream">Demander un devis</a>
-          <a href="/auteur" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">Voir références & parcours</a>
-        </div>
-      </div>
-    </div>
-  </Section>
-
-  <Section class="bg-mv-cream" containerClass="max-w-4xl">
+  <Section class="bg-white" containerClass="max-w-5xl">
     <div class="max-w-3xl" slot="content">
-      <h2 class="mv-section-title">FAQ</h2>
+      <h2 class="mv-section-title">{reasonsTitle}</h2>
     </div>
-    <div class="mt-6 space-y-3" slot="content">
-      {faqs.map((faq, index) => (
-        <details class="mv-card p-4 sm:p-5" key={index}>
-          <summary class="cursor-pointer text-sm font-semibold text-mv-forest">{faq.question}</summary>
-          <p class="mt-3 text-sm text-mv-forest-70">{faq.answer}</p>
-        </details>
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4" slot="content">
+      {companyReasons.map((item) => (
+        <article class="mv-card p-5">
+          <h3 class="text-lg font-semibold text-mv-forest">{item.title}</h3>
+          <p class="mt-2 text-sm text-mv-forest-80">{item.text}</p>
+        </article>
       ))}
     </div>
   </Section>
+
+  <Section id="nos-formules" class="bg-mv-cream" containerClass="max-w-6xl">
+    <div class="max-w-3xl" slot="content">
+      <h2 class="mv-section-title">{formulasTitle}</h2>
+      <p class="mt-2 text-sm text-mv-forest-70">{formulasIntro}</p>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4" slot="content">
+      {companyFormulas.map((pack) => (
+        <article class="mv-card p-5 flex flex-col">
+          <p class="text-xs uppercase tracking-[0.16em] text-mv-forest-60">{pack.durationLabel || 'Format'}</p>
+          <h3 class="mt-2 text-lg font-semibold text-mv-forest">{pack.title}</h3>
+          <p class="mt-3 text-2xl font-serif font-bold text-mv-forest">{pack.priceLabel}</p>
+          {pack.description && (
+            <p class="mt-3 text-sm text-mv-forest-80">{pack.description}</p>
+          )}
+        </article>
+      ))}
+    </div>
+
+    <div class="mt-5 rounded-2xl border border-mv-leaf-20 bg-white p-5" slot="content">
+      <h3 class="text-lg font-semibold text-mv-forest">{optionsTitle}</h3>
+      <div class="mt-3 flex flex-wrap gap-2">
+        {companyOptions.map((item) => (
+          <span class="rounded-full border border-mv-leaf-20 bg-mv-cream px-3 py-1 text-xs sm:text-sm text-mv-forest-80">
+            {item}
+          </span>
+        ))}
+      </div>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href={contactCtaUrl} class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream">{contactCtaLabel}</a>
+        <a href="/contact?need=entreprise" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
+          Demander un devis
+        </a>
+      </div>
+    </div>
+  </Section>
+
+  {showCompanyFaq && (
+    <Section class="bg-white" containerClass="max-w-4xl">
+      <div class="max-w-3xl" slot="content">
+        <h2 class="mv-section-title">FAQ</h2>
+      </div>
+      <div class="mt-6 space-y-3" slot="content">
+        {faqs.map((faq) => (
+          <details class="mv-card p-4 sm:p-5">
+            <summary class="cursor-pointer text-sm font-semibold text-mv-forest">{faq.question}</summary>
+            <p class="mt-3 text-sm text-mv-forest-70">{faq.answer}</p>
+          </details>
+        ))}
+      </div>
+    </Section>
+  )}
 </MainLayout>

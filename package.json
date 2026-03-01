@@ -16,8 +16,9 @@
     "seo:fix:recipes-data": "node scripts/qa-recipes-data.mjs --write --fix-slug --fix-description --fix-alt --report ./.reports/seo-recipes-data-fix.json",
     "studio": "cd studio && npm run dev",
     "studio:build": "cd studio && npm run build",
-    "lint": "eslint . --ext .js,.ts,.astro",
-    "lint:fix": "eslint . --ext .js,.ts,.astro --fix",
+    "lint": "eslint src studio scripts netlify/functions --ext .js,.ts,.astro",
+    "lint:fix": "eslint src studio scripts netlify/functions --ext .js,.ts,.astro --fix",
+    "typecheck": "tsc --noEmit --project ./tsconfig.typecheck.json",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
