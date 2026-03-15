@@ -422,24 +422,16 @@ const formatPrice = (price?: number, currency?: string) => {
           </div>
         </div>
 
-        <div class="mt-8 text-center">
-          <button
-            id="recipes-load-more"
-            type="button"
-            class="mv-btn mv-btn-secondary hidden"
-            aria-controls="recipes-grid"
-          >
-            Charger plus
-          </button>
-        </div>
-        <div id="recipes-auto-load-sentinel" class="h-1 w-full" aria-hidden="true"></div>
-
         {totalRecipePages > 1 && (
-          <nav class="mt-10 space-y-4" aria-label="Pagination des recettes">
-            <p class="text-sm text-mv-forest-70">
-              Navigation crawlable des archives recettes (sans JavaScript).
-            </p>
-            <div class="flex flex-wrap items-center gap-2">
+          <nav id="recipes-archive-pagination" class="mt-10 space-y-4" aria-label="Pagination des recettes">
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              <span
+                class="inline-flex items-center justify-center min-w-10 h-10 px-3 rounded-lg border border-mv-leaf-20 text-mv-forest opacity-40 cursor-not-allowed"
+                aria-disabled="true"
+                aria-label="Page précédente indisponible"
+              >
+                ←
+              </span>
               {archivePages.map((pageNumber) => (
                 pageNumber === 1 ? (
                   <span
@@ -458,16 +450,15 @@ const formatPrice = (price?: number, currency?: string) => {
                   </a>
                 )
               ))}
-            </div>
-            {totalRecipePages > 1 && (
               <a
                 href={getRecipesPagePath(2)}
-                class="inline-flex items-center text-sm font-semibold text-mv-forest hover:text-mv-leaf transition-colors"
+                class="inline-flex items-center justify-center min-w-10 h-10 px-3 rounded-lg border border-mv-leaf-30 text-mv-forest hover:border-mv-leaf hover:bg-mv-leaf-10 transition-colors"
                 rel="next"
+                aria-label="Page suivante"
               >
-                Voir la page suivante des recettes →
+                →
               </a>
-            )}
+            </div>
           </nav>
         )}
         </>

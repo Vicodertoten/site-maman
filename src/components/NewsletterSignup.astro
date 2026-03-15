@@ -4,26 +4,71 @@ import { getNewsletterSettingsData } from '../lib/sanity';
 
 const newsletterSettings = await getNewsletterSettingsData();
 const buttonLabel = newsletterSettings?.buttonLabel || "S'inscrire";
+const loadingLabel = "Inscription...";
 const errorMessage = newsletterSettings?.errorMessage || "Une erreur est survenue lors de l'inscription. Veuillez réessayer.";
+const networkErrorMessage = "Erreur de connexion. Veuillez vérifier votre connexion internet et réessayer.";
 ---
 
-<div id="newsletter-signup-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="newsletter-signup-title">
-  <div id="newsletter-signup-panel" class="mv-card p-6 my-8 max-w-lg w-full relative" data-modal-panel tabindex="-1">
-    <button id="signup-modal-close" class="absolute top-4 right-4 text-mv-forest-60 hover:text-mv-forest transition-colors" aria-label="Fermer la fenêtre d'inscription">
+<div class="mv-card overflow-hidden border border-mv-leaf-20 bg-white/90 shadow-mv-forest-10">
+  <div class="p-6 sm:p-8">
+    <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div class="max-w-2xl">
+        <p class="mv-kicker mb-2">Newsletter</p>
+        <h2 class="mv-section-title mb-3">
+          {newsletterSettings?.title || 'Restez informé(e)'}
+        </h2>
+        <p class="mv-lead">
+          {newsletterSettings?.description || 'Abonnez-vous à ma newsletter et recevez une recette par mois et les dernières nouvelles de mes activités.'}
+        </p>
+      </div>
+      <div class="w-full md:w-auto md:min-w-[24rem]">
+        <form id="newsletter-inline-form" class="flex flex-col sm:flex-row gap-2" novalidate>
+          <label for="newsletter-inline-email" class="sr-only">Adresse email</label>
+          <input
+            type="email"
+            name="email"
+            id="newsletter-inline-email"
+            placeholder={newsletterSettings?.inputPlaceholder || 'Votre adresse email'}
+            class="mv-input flex-1 bg-white"
+            autocomplete="email"
+            inputmode="email"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-describedby="newsletter-inline-message"
+            required
+          />
+          <input type="text" name="website" autocomplete="off" tabindex="-1" class="sr-only" aria-hidden="true" />
+          <button
+            type="submit"
+            id="newsletter-inline-submit"
+            class="mv-btn mv-btn-primary bg-mv-leaf hover:bg-mv-forest w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2"
+          >
+            {buttonLabel}
+          </button>
+        </form>
+        <p id="newsletter-inline-message" class="text-sm mt-2 min-h-[1.25rem] text-mv-forest-80" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="newsletter-signup-modal" class="fixed inset-0 hidden z-40 items-center justify-center bg-black/65 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="newsletter-signup-title" aria-describedby="newsletter-signup-desc" aria-hidden="true">
+  <div id="newsletter-signup-panel" class="mv-card p-5 sm:p-6 my-8 max-w-lg w-full relative" data-modal-panel tabindex="-1">
+    <button id="signup-modal-close" type="button" class="absolute top-3 right-3 rounded-lg p-1 text-mv-forest-60 hover:text-mv-forest hover:bg-mv-leaf-10 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 transition-colors" aria-label="Fermer la fenêtre d'inscription">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
     </button>
-    <div class="text-center">
+    <div class="text-center sm:text-left">
       <h3 id="newsletter-signup-title" class="text-xl font-serif font-bold text-mv-forest mb-2">
         {newsletterSettings?.title || 'Restez informé(e)'}
       </h3>
-      <p class="text-mv-forest-80 mb-4">
+      <p id="newsletter-signup-desc" class="text-mv-forest-80 mb-4">
         {newsletterSettings?.description || 'Abonnez-vous à ma newsletter et recevez une recette par mois et les dernières nouvelles de mes activités.'}
       </p>
 
-      <form id="newsletter-form" class="max-w-md mx-auto">
-        <div class="flex gap-2">
+      <form id="newsletter-form" class="max-w-md mx-auto sm:mx-0" novalidate>
+        <div class="flex flex-col sm:flex-row gap-2">
           <label for="newsletter-email" class="sr-only">Adresse email</label>
           <input
             type="email"
@@ -31,28 +76,33 @@ const errorMessage = newsletterSettings?.errorMessage || "Une erreur est survenu
             id="newsletter-email"
             placeholder={newsletterSettings?.inputPlaceholder || 'Votre adresse email'}
             class="mv-input flex-1"
+            autocomplete="email"
+            inputmode="email"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-describedby="newsletter-message"
             required
           />
           <input type="text" name="website" autocomplete="off" tabindex="-1" class="sr-only" aria-hidden="true" />
           <button
             type="submit"
             id="newsletter-submit"
-            class="mv-btn mv-btn-primary hover:bg-mv-forest hover:scale-105 transition-all duration-300 transform shadow-sm hover:shadow-md"
+            class="mv-btn mv-btn-primary w-full sm:w-auto hover:bg-mv-forest hover:scale-105 transition-all duration-300 transform shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2"
           >
             {buttonLabel}
           </button>
         </div>
-        <p id="newsletter-message" class="text-sm mt-2 opacity-0 transition-opacity"></p>
+        <p id="newsletter-message" class="text-sm mt-3 min-h-[1.25rem] text-mv-forest-80" aria-live="polite"></p>
       </form>
     </div>
   </div>
 </div>
 
 <!-- Modal de remerciement -->
-<div id="newsletter-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="newsletter-title" aria-describedby="newsletter-desc">
+<div id="newsletter-modal" class="fixed inset-0 hidden z-50 items-center justify-center bg-black/65 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="newsletter-title" aria-describedby="newsletter-desc" aria-hidden="true">
   <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative" data-modal-panel tabindex="-1">
     <!-- Bouton de fermeture -->
-    <button id="modal-close" class="absolute top-4 right-4 text-mv-forest-60 hover:text-mv-forest transition-colors" aria-label="Fermer la fenêtre">
+    <button id="modal-close" type="button" class="absolute top-4 right-4 rounded-lg p-1 text-mv-forest-60 hover:text-mv-forest hover:bg-mv-leaf-10 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 transition-colors" aria-label="Fermer la fenêtre">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
@@ -74,154 +124,359 @@ const errorMessage = newsletterSettings?.errorMessage || "Une erreur est survenu
         {newsletterSettings?.successText || 'Votre inscription à la newsletter a bien été enregistrée. Vous recevrez bientôt mes dernières recettes et conseils nutritionnels.'}
       </p>
 
-      <button id="modal-ok" class="mv-btn mv-btn-primary bg-mv-leaf text-mv-cream hover:bg-mv-forest transition-colors">
+      <button id="modal-ok" type="button" class="mv-btn mv-btn-primary bg-mv-leaf text-mv-cream hover:bg-mv-forest transition-colors focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2">
         {newsletterSettings?.successButtonLabel || 'Parfait !'}
       </button>
     </div>
   </div>
 </div>
 
-<script type="module" define:vars={{ buttonLabel, errorMessage }}>
-  import { trapFocus } from '../lib/focus-trap.js';
-  import { showToast } from '../lib/notify.js';
+<script type="module" define:vars={{ buttonLabel, loadingLabel, errorMessage, networkErrorMessage }}>
+  function showToast(message = '', { type = 'info', duration = 3000 } = {}) {
+    let container = document.getElementById('mv-toasts');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'mv-toasts';
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-atomic', 'true');
+      container.className = 'fixed top-6 right-6 z-[60] flex flex-col items-end gap-2';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `max-w-sm w-full rounded-lg px-4 py-2 text-sm shadow-lg ${
+      type === 'error' ? 'bg-mv-coral text-white' : 'bg-mv-forest text-mv-cream'
+    }`;
+    toast.setAttribute('role', 'status');
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    window.setTimeout(() => {
+      toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-6px)';
+      window.setTimeout(() => {
+        toast.remove();
+        if (container && container.children.length === 0) container.remove();
+      }, 250);
+    }, duration);
+  }
+
+  function trapFocus(container, { initialFocus = null, onClose = null, returnFocusTo = null } = {}) {
+    if (!container) return () => {};
+
+    const focusableSelector =
+      'a[href], area[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const prevActive = document.activeElement;
+    const getFocusable = () =>
+      Array.from(container.querySelectorAll(focusableSelector)).filter(
+        (el) => el.offsetParent !== null || getComputedStyle(el).visibility !== 'hidden'
+      );
+
+    const firstFocusable = initialFocus || getFocusable()[0] || container;
+
+    const keyHandler = (e) => {
+      if (e.key === 'Tab') {
+        const focusable = getFocusable();
+        if (focusable.length === 0) {
+          e.preventDefault();
+          return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        } else if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      }
+      if (e.key === 'Escape' && typeof onClose === 'function') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', keyHandler);
+
+    try {
+      if (firstFocusable && typeof firstFocusable.focus === 'function') {
+        firstFocusable.focus();
+      }
+    } catch {
+      // ignore
+    }
+
+    return function release() {
+      document.removeEventListener('keydown', keyHandler);
+      try {
+        if (returnFocusTo && typeof returnFocusTo.focus === 'function') returnFocusTo.focus();
+        else if (prevActive && typeof prevActive.focus === 'function') prevActive.focus();
+      } catch {
+        // ignore
+      }
+    };
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Éléments du modal d'inscription
+    const inlineForm = document.getElementById('newsletter-inline-form');
+    const inlineEmailInput = document.getElementById('newsletter-inline-email');
+    const inlineSubmitButton = document.getElementById('newsletter-inline-submit');
+    const inlineStatusMessage = document.getElementById('newsletter-inline-message');
+
     const signupModal = document.getElementById('newsletter-signup-modal');
     const signupModalPanel = document.getElementById('newsletter-signup-panel');
     const signupModalClose = document.getElementById('signup-modal-close');
-    const emailInput = document.getElementById('newsletter-email');
+    const modalEmailInput = document.getElementById('newsletter-email');
+    const modalStatusMessage = document.getElementById('newsletter-message');
+    const modalForm = document.getElementById('newsletter-form');
+    const modalSubmitButton = document.getElementById('newsletter-submit');
     let signupReleaseTrap = null;
 
-    // Éléments du modal de remerciement
     const thanksModal = document.getElementById('newsletter-modal');
     const thanksModalPanel = thanksModal?.querySelector('[data-modal-panel]');
     const thanksModalClose = document.getElementById('modal-close');
     const thanksModalOk = document.getElementById('modal-ok');
-    const submitButton = document.getElementById('newsletter-submit');
     let thanksReleaseTrap = null;
-    
-    // Éléments du formulaire
-    const form = document.getElementById('newsletter-form');
 
-    // --- Gestion du Modal d'Inscription ---
+    if (
+      !inlineForm ||
+      !inlineEmailInput ||
+      !inlineSubmitButton ||
+      !inlineStatusMessage ||
+      !signupModal ||
+      !signupModalPanel ||
+      !signupModalClose ||
+      !modalEmailInput ||
+      !modalStatusMessage ||
+      !modalForm ||
+      !modalSubmitButton ||
+      !thanksModal ||
+      !thanksModalPanel ||
+      !thanksModalClose ||
+      !thanksModalOk
+    ) {
+      return;
+    }
 
-    const showSignupModal = () => {
-      if (signupModal) {
-        signupModal.classList.remove('hidden');
-        signupModal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-        signupReleaseTrap = trapFocus(signupModalPanel, { initialFocus: emailInput, onClose: hideSignupModal });
-        localStorage.setItem('newsletterModalShown', 'true');
+    const storageKeys = {
+      closed: 'newsletterModalClosed',
+      subscribed: 'newsletterSubscribed',
+    };
+
+    const readFlag = (key) => {
+      try {
+        return localStorage.getItem(key) === 'true';
+      } catch {
+        return false;
       }
     };
 
-    const hideSignupModal = () => {
-      if (signupModal) {
-        signupModal.classList.add('hidden');
-        signupModal.classList.remove('flex');
-        document.body.style.overflow = '';
-        if (signupReleaseTrap) {
-          signupReleaseTrap();
-          signupReleaseTrap = null;
-        }
+    const writeFlag = (key) => {
+      try {
+        localStorage.setItem(key, 'true');
+      } catch {
+        // Ignore localStorage errors (navigation privée, quota, etc.)
       }
     };
-    
-    // Afficher le modal d'inscription après un délai si pas déjà montré ou fermé
-    setTimeout(() => {
-        const alreadyShown = localStorage.getItem('newsletterModalShown');
-        const isSubscribed = localStorage.getItem('newsletterSubscribed');
-        if (!alreadyShown && !isSubscribed) {
-            showSignupModal();
-        }
-    }, 3000); // Délai de 3 secondes
 
+    const shouldHideModalPermanently = () =>
+      readFlag(storageKeys.closed) || readFlag(storageKeys.subscribed);
 
-    // Fermer le modal d'inscription
-    signupModalClose?.addEventListener('click', () => {
-      hideSignupModal();
-      localStorage.setItem('newsletterModalClosed', 'true');
-    });
+    const setStatusMessage = (targetElement, message, type = 'info') => {
+      targetElement.textContent = message || '';
+      targetElement.classList.remove('text-mv-forest-80', 'text-mv-leaf', 'text-mv-coral');
+      targetElement.classList.add(
+        type === 'error' ? 'text-mv-coral' : type === 'success' ? 'text-mv-leaf' : 'text-mv-forest-80'
+      );
+      targetElement.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    };
 
-    signupModal?.addEventListener('click', (e) => {
-      if (e.target === signupModal) {
-        hideSignupModal();
-        localStorage.setItem('newsletterModalClosed', 'true');
+    const clearStatusMessage = (targetElement) => {
+      setStatusMessage(targetElement, '', 'info');
+      targetElement.removeAttribute('role');
+    };
+
+    const updateBodyScrollLock = () => {
+      const isSignupOpen = !signupModal.classList.contains('hidden');
+      const isThanksOpen = !thanksModal.classList.contains('hidden');
+      document.body.style.overflow = isSignupOpen || isThanksOpen ? 'hidden' : '';
+    };
+
+    const showSignupModal = ({ force = false } = {}) => {
+      if (!force && shouldHideModalPermanently()) return;
+      signupModal.classList.remove('hidden');
+      signupModal.classList.add('flex');
+      signupModal.setAttribute('aria-hidden', 'false');
+      clearStatusMessage(modalStatusMessage);
+      updateBodyScrollLock();
+      signupReleaseTrap = trapFocus(signupModalPanel, {
+        initialFocus: modalEmailInput,
+        onClose: () => hideSignupModal(true),
+      });
+    };
+
+    const hideSignupModal = (persistDismissal = false) => {
+      signupModal.classList.add('hidden');
+      signupModal.classList.remove('flex');
+      signupModal.setAttribute('aria-hidden', 'true');
+      if (persistDismissal) {
+        writeFlag(storageKeys.closed);
       }
-    });
-
-
-    // --- Gestion du Modal de Remerciement ---
+      if (signupReleaseTrap) {
+        signupReleaseTrap();
+        signupReleaseTrap = null;
+      }
+      updateBodyScrollLock();
+    };
 
     const showThanksModal = () => {
       thanksModal.classList.remove('hidden');
       thanksModal.classList.add('flex');
-      document.body.style.overflow = 'hidden';
-      thanksReleaseTrap = trapFocus(thanksModalPanel, { initialFocus: thanksModalOk, returnFocusTo: submitButton, onClose: hideThanksModal });
+      thanksModal.setAttribute('aria-hidden', 'false');
+      updateBodyScrollLock();
+      thanksReleaseTrap = trapFocus(thanksModalPanel, {
+        initialFocus: thanksModalOk,
+        returnFocusTo: modalSubmitButton,
+        onClose: hideThanksModal,
+      });
     };
 
     const hideThanksModal = () => {
       thanksModal.classList.add('hidden');
       thanksModal.classList.remove('flex');
-      document.body.style.overflow = '';
+      thanksModal.setAttribute('aria-hidden', 'true');
       if (thanksReleaseTrap) {
         thanksReleaseTrap();
         thanksReleaseTrap = null;
       }
+      updateBodyScrollLock();
     };
 
-    thanksModalClose?.addEventListener('click', hideThanksModal);
-    thanksModalOk?.addEventListener('click', hideThanksModal);
-    thanksModal?.addEventListener('click', (e) => {
+    let triggerFired = false;
+    let timeoutId = 0;
+    const scrollThreshold = Math.max(240, Math.round(window.innerHeight * 0.3));
+    const clearTriggers = () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+        timeoutId = 0;
+      }
+      window.removeEventListener('scroll', onScroll);
+    };
+    const openFromTrigger = () => {
+      if (triggerFired || shouldHideModalPermanently()) {
+        clearTriggers();
+        return;
+      }
+      triggerFired = true;
+      clearTriggers();
+      showSignupModal({ force: false });
+    };
+    const onScroll = () => {
+      if (window.scrollY >= scrollThreshold) {
+        openFromTrigger();
+      }
+    };
+
+    if (!shouldHideModalPermanently()) {
+      timeoutId = window.setTimeout(openFromTrigger, 2500);
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    signupModalClose.addEventListener('click', () => hideSignupModal(true));
+    signupModal.addEventListener('click', (e) => {
+      if (e.target === signupModal) {
+        hideSignupModal(true);
+      }
+    });
+
+    thanksModalClose.addEventListener('click', hideThanksModal);
+    thanksModalOk.addEventListener('click', hideThanksModal);
+    thanksModal.addEventListener('click', (e) => {
       if (e.target === thanksModal) {
         hideThanksModal();
       }
     });
 
-    // --- Gestion de la soumission du formulaire ---
+    const submitNewsletterForm = async ({
+      formElement,
+      emailElement,
+      submitElement,
+      statusElement,
+      onSuccess = () => {},
+    }) => {
+      clearStatusMessage(statusElement);
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      submitButton.disabled = true;
-      submitButton.textContent = 'Inscription...';
+      const emailValue = emailElement.value.trim();
+      if (!emailValue) {
+        setStatusMessage(statusElement, 'Veuillez saisir une adresse email.', 'error');
+        emailElement.focus();
+        return;
+      }
+
+      const defaultLabel = submitElement.dataset.defaultLabel || submitElement.textContent || buttonLabel;
+      submitElement.dataset.defaultLabel = defaultLabel;
+      submitElement.disabled = true;
+      submitElement.setAttribute('aria-busy', 'true');
+      submitElement.textContent = loadingLabel;
 
       try {
-        const formData = new FormData(form);
+        const formData = new FormData(formElement);
         const response = await fetch('/.netlify/functions/newsletter', {
           method: 'POST',
           body: formData,
         });
-        const data = await response.json();
+        let data = {};
+        try {
+          data = await response.json();
+        } catch {
+          data = {};
+        }
 
         if (response.ok && data.success) {
-          hideSignupModal();
-          showThanksModal();
-          form.reset();
-          localStorage.setItem('newsletterSubscribed', 'true');
+          setStatusMessage(statusElement, data.message || 'Inscription prise en compte.', 'success');
+          writeFlag(storageKeys.subscribed);
+          writeFlag(storageKeys.closed);
+          formElement.reset();
+          onSuccess();
         } else {
-          showToast(data.error || errorMessage, { type: 'error' });
+          const apiError = data.error || errorMessage;
+          setStatusMessage(statusElement, apiError, 'error');
+          showToast(apiError, { type: 'error' });
         }
       } catch (error) {
         console.error("Erreur lors de l'inscription:", error);
-        showToast('Erreur de connexion. Veuillez vérifier votre connexion internet et réessayer.', { type: 'error' });
+        setStatusMessage(statusElement, networkErrorMessage, 'error');
+        showToast(networkErrorMessage, { type: 'error' });
       } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = buttonLabel;
+        submitElement.disabled = false;
+        submitElement.removeAttribute('aria-busy');
+        submitElement.textContent = defaultLabel;
       }
+    };
+
+    inlineForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await submitNewsletterForm({
+        formElement: inlineForm,
+        emailElement: inlineEmailInput,
+        submitElement: inlineSubmitButton,
+        statusElement: inlineStatusMessage,
+      });
     });
 
-    // Fermeture des modaux avec la touche 'Echap'
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (!signupModal.classList.contains('hidden')) {
+    modalForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await submitNewsletterForm({
+        formElement: modalForm,
+        emailElement: modalEmailInput,
+        submitElement: modalSubmitButton,
+        statusElement: modalStatusMessage,
+        onSuccess: () => {
           hideSignupModal();
-          localStorage.setItem('newsletterModalClosed', 'true');
-        }
-        if (!thanksModal.classList.contains('hidden')) {
-          hideThanksModal();
-        }
-      }
+          showThanksModal();
+        },
+      });
     });
   });
 </script>

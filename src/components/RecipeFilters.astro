@@ -19,6 +19,7 @@ export interface Props {
   budgets?: Array<{ value: string; label: string }>;
   totalRecipes: number;
   pageSize?: number;
+  currentPage?: number;
 }
 
 const {
@@ -29,7 +30,8 @@ const {
   categories = [],
   budgets = [],
   totalRecipes,
-  pageSize = 10
+  pageSize = 10,
+  currentPage = 1
 } = Astro.props;
 ---
 
@@ -284,7 +286,7 @@ const {
   </div>
 </div>
 
-<script define:vars={{ currentFilters, pageSize }}>
+<script define:vars={{ currentFilters, pageSize, currentPage }}>
   const normalizeText = (value = '') =>
     (value ?? '')
       .toString()
@@ -596,18 +598,13 @@ const {
   let cardsById = new Map();
   let grid = null;
   let emptyState = null;
-  let loadMoreButton = null;
-  let autoLoadSentinel = null;
-  let autoLoadObserver = null;
-  let autoLoadedSteps = 0;
-  let lastTotalRecipes = 0;
-  let lastDisplayedRecipes = 0;
-  let autoLoadInProgress = false;
+  let archivePagination = null;
   const DEFAULT_PAGE_SIZE = Number.isFinite(Number(pageSize)) && Number(pageSize) > 0
     ? Number(pageSize)
     : 10;
-  const MAX_AUTO_LOAD_STEPS = 9;
-  let visibleRecipesLimit = DEFAULT_PAGE_SIZE;
+  const DEFAULT_PAGE_NUMBER = Number.isFinite(Number(currentPage)) && Number(currentPage) > 0
+    ? Math.floor(Number(currentPage))
+    : 1;
 
   const mergeById = (base = [], incoming = []) => {
     const map = new Map();
@@ -631,53 +628,121 @@ const {
     filterState.season.length
   );
 
-  const ensureCardForRecipe = (recipe, index = 0) => {
-    const existing = cardsById.get(recipe.id);
-    if (existing) return existing;
-    if (!grid || typeof window.renderRecipeCard !== 'function') return null;
-
+  const createFallbackCard = (recipe, index = 0) => {
     const wrapper = document.createElement('div');
     wrapper.className = `scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`;
     wrapper.style.animationDelay = `${Math.min(index, 18) * 0.05}s`;
-    wrapper.dataset.recipeCard = '';
-    wrapper.dataset.recipeId = recipe.id;
-    wrapper.innerHTML = window.renderRecipeCard(recipe);
+    wrapper.setAttribute('data-recipe-card', '');
+    wrapper.setAttribute('data-recipe-id', recipe.id);
+
+    const safeText = (value) => (value ?? '').toString();
+    const safeUrl = (value) => {
+      const raw = (value ?? '').toString().trim();
+      if (!raw) return '';
+      if (raw.startsWith('/') && !raw.startsWith('//')) return raw;
+      if (raw.startsWith('#')) return raw;
+      if (/^https?:\/\//i.test(raw)) return raw;
+      return '';
+    };
+
+    const article = document.createElement('article');
+    article.className = 'mv-card group relative p-6';
+
+    const imageWrapper = document.createElement('div');
+    imageWrapper.className = 'relative z-20 overflow-hidden rounded-lg mb-4 pointer-events-none';
+
+    const imageUrl = safeUrl(recipe.image);
+    if (imageUrl) {
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.alt = safeText(recipe.title) || 'Recette';
+      img.className = 'w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.width = 400;
+      img.height = 300;
+      img.setAttribute('sizes', '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw');
+      imageWrapper.appendChild(img);
+    } else {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'w-full h-48 bg-gradient-to-br from-mv-cream to-mv-leaf flex items-center justify-center';
+      placeholder.innerHTML = '<svg class="w-12 h-12 text-mv-forest opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
+      imageWrapper.appendChild(placeholder);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'relative z-20 space-y-3 pointer-events-none';
+
+    const textBlock = document.createElement('div');
+    const title = document.createElement('h3');
+    title.className = 'text-lg font-semibold text-mv-forest';
+    title.textContent = safeText(recipe.title);
+    textBlock.appendChild(title);
+    if (recipe.description) {
+      const desc = document.createElement('p');
+      desc.className = 'text-sm text-mv-forest-80';
+      desc.textContent = safeText(recipe.description);
+      textBlock.appendChild(desc);
+    }
+    body.appendChild(textBlock);
+
+    const meta = document.createElement('div');
+    meta.className = 'flex items-center justify-between text-sm text-mv-forest-70';
+    const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0) + (recipe.restTime || 0);
+    const time = document.createElement('div');
+    time.textContent = totalTime ? `⏱️ ${totalTime} min` : '';
+    const servings = document.createElement('div');
+    servings.textContent = recipe.servings ? `${recipe.servings} pers.` : '';
+    meta.appendChild(time);
+    meta.appendChild(servings);
+    body.appendChild(meta);
+
+    article.appendChild(imageWrapper);
+    article.appendChild(body);
+    const anchor = document.createElement('a');
+    anchor.href = `/recette/${encodeURIComponent(recipe.slug || recipe.id)}`;
+    anchor.className = 'absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mv-leaf focus-visible:ring-offset-2';
+    anchor.setAttribute('aria-label', `Voir la recette ${safeText(recipe.title)}`);
+    const anchorText = document.createElement('span');
+    anchorText.className = 'sr-only';
+    anchorText.textContent = `Voir la recette ${safeText(recipe.title)}`;
+    anchor.appendChild(anchorText);
+    article.appendChild(anchor);
+    wrapper.appendChild(article);
+
+    return wrapper;
+  };
+
+  const ensureCardForRecipe = (recipe, index = 0) => {
+    const existing = cardsById.get(recipe.id);
+    if (existing) return existing;
+    if (!grid) return null;
+
+    const wrapper = document.createElement('div');
+    if (typeof window.renderRecipeCard === 'function') {
+      wrapper.className = `scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`;
+      wrapper.style.animationDelay = `${Math.min(index, 18) * 0.05}s`;
+      wrapper.dataset.recipeCard = '';
+      wrapper.dataset.recipeId = recipe.id;
+      wrapper.innerHTML = window.renderRecipeCard(recipe);
+    } else {
+      const fallback = createFallbackCard(recipe, index);
+      if (!fallback) return null;
+      grid.appendChild(fallback);
+      cardsById.set(recipe.id, fallback);
+      return fallback;
+    }
+
     grid.appendChild(wrapper);
     cardsById.set(recipe.id, wrapper);
     return wrapper;
   };
 
-  const updateLoadMoreButton = (totalRecipes, displayedRecipes) => {
-    lastTotalRecipes = totalRecipes;
-    lastDisplayedRecipes = displayedRecipes;
-    if (!loadMoreButton) return;
-    const showPagination = !hasActiveFilters();
-    const hasMore = displayedRecipes < totalRecipes;
-
-    loadMoreButton.classList.toggle('hidden', !hasMore);
-    loadMoreButton.disabled = !hasMore;
-    loadMoreButton.textContent = hasMore
-      ? `Charger plus (${displayedRecipes}/${totalRecipes})`
-      : 'Tout est chargé';
-
-    if (autoLoadSentinel) {
-      const canAutoLoad = showPagination && hasMore && autoLoadedSteps < MAX_AUTO_LOAD_STEPS;
-      autoLoadSentinel.classList.toggle('hidden', !canAutoLoad);
-    }
-  };
-
-  const loadMorePage = (source = 'manual') => {
-    visibleRecipesLimit += DEFAULT_PAGE_SIZE;
-    if (source === 'auto') {
-      autoLoadedSteps += 1;
-    }
-    applyFilters();
-  };
-
   const renderCards = (recipes) => {
     if (!grid) return;
     const shouldPaginate = !hasActiveFilters();
-    const displayedRecipes = shouldPaginate ? recipes.slice(0, visibleRecipesLimit) : recipes;
+    const startIndex = (DEFAULT_PAGE_NUMBER - 1) * DEFAULT_PAGE_SIZE;
+    const displayedRecipes = shouldPaginate ? recipes.slice(startIndex, startIndex + DEFAULT_PAGE_SIZE) : recipes;
     const fragment = document.createDocumentFragment();
     const visibleIds = new Set();
 
@@ -700,8 +765,9 @@ const {
     if (emptyState) {
       emptyState.classList.toggle('hidden', displayedRecipes.length !== 0);
     }
-
-    updateLoadMoreButton(recipes.length, displayedRecipes.length);
+    if (archivePagination) {
+      archivePagination.classList.toggle('hidden', !shouldPaginate);
+    }
   };
 
   const updateResultsCount = (count) => {
@@ -731,12 +797,7 @@ const {
     const filtersPanel = document.getElementById('filters-panel');
     const filtersAdvanced = document.getElementById('filters-advanced');
     const filtersToggle = document.getElementById('filters-toggle');
-    loadMoreButton = document.getElementById('recipes-load-more');
-    autoLoadSentinel = document.getElementById('recipes-auto-load-sentinel');
-    const resetPagination = () => {
-      visibleRecipesLimit = DEFAULT_PAGE_SIZE;
-      autoLoadedSteps = 0;
-    };
+    archivePagination = document.getElementById('recipes-archive-pagination');
     const closeAllMenus = () => {
       document.querySelectorAll('.filter-menu').forEach((panel) => panel.classList.add('hidden'));
       document.querySelectorAll('.filter-trigger').forEach((button) => button.setAttribute('aria-expanded', 'false'));
@@ -765,7 +826,6 @@ const {
     searchInput.addEventListener('input', debounce(() => {
       filterState.search = searchInput.value.trim();
       clearSearchBtn.classList.toggle('hidden', !filterState.search);
-      resetPagination();
       applyFilters();
     }));
 
@@ -773,13 +833,11 @@ const {
       searchInput.value = '';
       filterState.search = '';
       clearSearchBtn.classList.add('hidden');
-      resetPagination();
       applyFilters();
     });
 
     sortSelect.addEventListener('change', () => {
       filterState.sort = sortSelect.value;
-      resetPagination();
       applyFilters();
     });
 
@@ -791,7 +849,6 @@ const {
           .filter((input) => input.checked)
           .map((input) => input.value);
         filterState[key] = checkedValues;
-        resetPagination();
         applyFilters();
       });
     });
@@ -877,7 +934,6 @@ const {
       filterState.diet = [];
       filterState.season = [];
       filterState.sort = 'recent';
-      resetPagination();
 
       searchInput.value = '';
       clearSearchBtn.classList.add('hidden');
@@ -888,35 +944,6 @@ const {
 
       applyFilters();
     });
-
-    if (loadMoreButton) {
-      loadMoreButton.addEventListener('click', () => {
-        loadMorePage('manual');
-      });
-    }
-
-    if (autoLoadSentinel && typeof IntersectionObserver !== 'undefined') {
-      autoLoadObserver = new IntersectionObserver((entries) => {
-        const [entry] = entries;
-        if (!entry?.isIntersecting) return;
-        if (autoLoadInProgress) return;
-        const hasMore = lastDisplayedRecipes < lastTotalRecipes;
-        const canAutoLoad = !hasActiveFilters() && hasMore && autoLoadedSteps < MAX_AUTO_LOAD_STEPS;
-        if (!canAutoLoad) return;
-
-        autoLoadInProgress = true;
-        loadMorePage('auto');
-        window.requestAnimationFrame(() => {
-          autoLoadInProgress = false;
-        });
-      }, {
-        root: null,
-        rootMargin: '240px 0px',
-        threshold: 0
-      });
-
-      autoLoadObserver.observe(autoLoadSentinel);
-    }
   };
 
   const syncUI = () => {
@@ -970,92 +997,8 @@ const {
     if (cardsById.size === 0 && recipeIndex.length > 0 && grid) {
       console.warn('No server-rendered recipe cards found — creating client-side fallback cards from recipes index.');
 
-      const createFallbackCard = (recipe) => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'scroll-fade-in';
-        wrapper.style.animationDelay = '0s';
-        wrapper.setAttribute('data-recipe-card', '');
-        wrapper.setAttribute('data-recipe-id', recipe.id);
-
-        const safeText = (value) => (value ?? '').toString();
-        const safeUrl = (value) => {
-          const raw = (value ?? '').toString().trim();
-          if (!raw) return '';
-          if (raw.startsWith('/') && !raw.startsWith('//')) return raw;
-          if (raw.startsWith('#')) return raw;
-          if (/^https?:\/\//i.test(raw)) return raw;
-          return '';
-        };
-
-        const article = document.createElement('article');
-        article.className = 'mv-card group relative p-6';
-
-        const imageWrapper = document.createElement('div');
-        imageWrapper.className = 'relative z-20 overflow-hidden rounded-lg mb-4 pointer-events-none';
-
-        const imageUrl = safeUrl(recipe.image);
-        if (imageUrl) {
-          const img = document.createElement('img');
-          img.src = imageUrl;
-          img.alt = safeText(recipe.title) || 'Recette';
-          img.className = 'w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300';
-          img.loading = 'lazy';
-          img.decoding = 'async';
-          img.width = 400;
-          img.height = 300;
-          img.setAttribute('sizes', '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw');
-          imageWrapper.appendChild(img);
-        } else {
-          const placeholder = document.createElement('div');
-          placeholder.className = 'w-full h-48 bg-gradient-to-br from-mv-cream to-mv-leaf flex items-center justify-center';
-          placeholder.innerHTML = '<svg class="w-12 h-12 text-mv-forest opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
-          imageWrapper.appendChild(placeholder);
-        }
-
-        const body = document.createElement('div');
-        body.className = 'relative z-20 space-y-3 pointer-events-none';
-
-        const textBlock = document.createElement('div');
-        const title = document.createElement('h3');
-        title.className = 'text-lg font-semibold text-mv-forest';
-        title.textContent = safeText(recipe.title);
-        textBlock.appendChild(title);
-        if (recipe.description) {
-          const desc = document.createElement('p');
-          desc.className = 'text-sm text-mv-forest-80';
-          desc.textContent = safeText(recipe.description);
-          textBlock.appendChild(desc);
-        }
-        body.appendChild(textBlock);
-
-        const meta = document.createElement('div');
-        meta.className = 'flex items-center justify-between text-sm text-mv-forest-70';
-        const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0) + (recipe.restTime || 0);
-        const time = document.createElement('div');
-        time.textContent = totalTime ? `⏱️ ${totalTime} min` : '';
-        const servings = document.createElement('div');
-        servings.textContent = recipe.servings ? `${recipe.servings} pers.` : '';
-        meta.appendChild(time);
-        meta.appendChild(servings);
-        body.appendChild(meta);
-
-        article.appendChild(imageWrapper);
-        article.appendChild(body);
-        const anchor = document.createElement('a');
-        anchor.href = `/recette/${encodeURIComponent(recipe.slug || recipe.id)}`;
-        anchor.className = 'absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mv-leaf focus-visible:ring-offset-2';
-        anchor.setAttribute('aria-label', `Voir la recette ${safeText(recipe.title)}`);
-        const anchorText = document.createElement('span');
-        anchorText.className = 'sr-only';
-        anchorText.textContent = `Voir la recette ${safeText(recipe.title)}`;
-        anchor.appendChild(anchorText);
-        article.appendChild(anchor);
-        wrapper.appendChild(article);
-        return wrapper;
-      };
-
-      recipeIndex.forEach((r) => {
-        const card = createFallbackCard(r);
+      recipeIndex.forEach((r, index) => {
+        const card = createFallbackCard(r, index);
         grid.appendChild(card);
         cardsById.set(r.id, card);
       });

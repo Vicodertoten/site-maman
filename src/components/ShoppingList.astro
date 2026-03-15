@@ -55,9 +55,6 @@
 </div>
 
 <script type="module">
-  import { confirmDialog } from '../lib/confirm.js';
-  import { showToast } from '../lib/notify.js';
-
   class ShoppingListManager {
     constructor() {
       this.items = new Map();
@@ -275,12 +272,12 @@
     }
 
     async clearList() {
-      const ok = await confirmDialog('Êtes-vous sûr de vouloir vider la liste de courses ?');
+      const ok = window.confirm('Êtes-vous sûr de vouloir vider la liste de courses ?');
       if (!ok) return;
       this.items.clear();
       this.saveToStorage();
       this.updateUI();
-      showToast('La liste de courses a été vidée', { type: 'info' });
+      this.showFeedback('La liste de courses a été vidée');
     }
 
     exportList() {

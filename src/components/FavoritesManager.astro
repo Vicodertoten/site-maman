@@ -7,9 +7,6 @@
 </div>
 
 <script type="module">
-  import { confirmDialog } from '../lib/confirm.js';
-  import { showToast } from '../lib/notify.js';
-
   class FavoritesManager {
     constructor() {
       this.favorites = new Set();
@@ -71,7 +68,7 @@
     }
 
     async clearAllFavorites() {
-      const ok = await confirmDialog('Êtes-vous sûr de vouloir supprimer tous les favoris ?');
+      const ok = window.confirm('Êtes-vous sûr de vouloir supprimer tous les favoris ?');
       if (!ok) return;
       this.favorites.clear();
       this.saveToStorage();
@@ -80,7 +77,7 @@
       // Dispatch un événement personnalisé
       window.dispatchEvent(new CustomEvent('favoritesCleared'));
       // Accessible feedback
-      showToast('Tous les favoris ont été supprimés', { type: 'info' });
+      this.showFeedback('Tous les favoris ont été supprimés');
     }
 
     updateButton(button, recipeId) {

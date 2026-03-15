@@ -23,7 +23,7 @@ const {
   title = defaultTitle,
   description = defaultDescription,
   image = defaultImage,
-  url = Astro.url.pathname,
+  url: _url = Astro.url.pathname,
   robots = 'index,follow',
   jsonLd = [],
   enableMicroInteractions = true,
@@ -58,7 +58,7 @@ const normalizedNavigationItems = hasGastronomadeNavItem
 
 const showNavigation = siteSettings?.showNavigation !== false;
 const showFooter = siteSettings?.showFooter !== false;
-const showNewsletter = siteSettings?.showNewsletter !== false;
+const showNewsletter = true;
 
 const footerTitle = siteSettings?.footer?.brandTitle || 'Gastronomade';
 const footerSubtitle = siteSettings?.footer?.brandSubtitle || 'Manger Vrai avec Muriel Cruysmans · Wavre';

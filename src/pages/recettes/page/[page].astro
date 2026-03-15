@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../../../layouts/MainLayout.astro';
 import Section from '../../../components/Section.astro';
+import RecipeFilters from '../../../components/RecipeFilters.astro';
 import EnhancedRecipeCard from '../../../components/EnhancedRecipeCard.astro';
 import ShoppingList from '../../../components/ShoppingList.astro';
 import FavoritesManager from '../../../components/FavoritesManager.astro';
@@ -44,6 +45,20 @@ if (!hasValidPage) {
 const startIndex = (safeCurrentPage - 1) * RECIPES_PAGE_SIZE;
 const endIndex = startIndex + RECIPES_PAGE_SIZE;
 const pageRecipes = hasValidPage ? recipes.slice(startIndex, endIndex) : [];
+
+const url = new URL(Astro.request.url);
+const searchQuery = url.searchParams.get('search') || '';
+const selectedCategory = url.searchParams.get('category') || '';
+const selectedDifficulty = url.searchParams.get('difficulty') || '';
+const selectedTime = url.searchParams.get('time') || '';
+const selectedBudget = url.searchParams.get('budget') || '';
+const selectedSort = url.searchParams.get('sort') || '';
+const tagsParam = url.searchParams.get('tags') || url.searchParams.getAll('tags').join(',');
+const selectedTags = (tagsParam || '').split(',').filter(Boolean);
+const selectedDiet = (url.searchParams.get('diet') || '').split(',').filter(Boolean);
+const selectedSeason = (url.searchParams.get('season') || '').split(',').filter(Boolean);
+
+const allRecipes = recipes;
 
 function normalizeString(value?: string | null): string {
   return (value ?? '')
@@ -105,9 +120,92 @@ function getRecipeImageAlt(recipe: RecipeData): string {
   return `Photo de ${recipe.title}`;
 }
 
+function getRecipeSlug(recipe: RecipeData): string {
+  return recipe.slug?.current || recipe._id;
+}
+
+const allTags = new Set<string>();
+allRecipes.forEach((recipe) => {
+  if (recipe.tags) {
+    recipe.tags.forEach((tag) => allTags.add(tag));
+  }
+});
+const uniqueTags = Array.from(allTags).sort();
+
+const allDiets = new Set<string>();
+allRecipes.forEach((recipe) => {
+  if (recipe.diet) {
+    recipe.diet.forEach((diet) => allDiets.add(diet));
+  }
+});
+
+const allSeasons = new Set<string>();
+allRecipes.forEach((recipe) => {
+  if (recipe.season) {
+    recipe.season.forEach((season) => allSeasons.add(season));
+  }
+});
+
+const allBudgets = new Set<string>();
+allRecipes.forEach((recipe) => {
+  if (recipe.budget) {
+    allBudgets.add(recipe.budget);
+  }
+});
+
+const categoryCounts = new Map<string, number>();
+allRecipes.forEach((recipe) => {
+  if (!recipe.category) return;
+  const normalizedCategory = normalizeCategoryValue(recipe.category);
+  categoryCounts.set(normalizedCategory, (categoryCounts.get(normalizedCategory) || 0) + 1);
+});
+
+const categories = Array.from(categoryCounts.entries())
+  .map(([value, count]) => ({
+    value,
+    label: getCategoryName(value),
+    count
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const dietLabels: { [key: string]: string } = {
+  vegetarien: 'Végétarien',
+  vegan: 'Vegan',
+  pescetarien: 'Pescétarien',
+  'sans-gluten': 'Sans gluten',
+  'sans-lactose': 'Sans lactose',
+  'sans-sucre': 'Sans sucre raffiné',
+  'ig-bas': 'IG bas'
+};
+
+const seasonLabels: { [key: string]: string } = {
+  printemps: 'Printemps',
+  ete: 'Été',
+  automne: 'Automne',
+  hiver: 'Hiver'
+};
+
+const budgetLabels: { [key: string]: string } = {
+  economique: 'Économique',
+  intermediaire: 'Intermédiaire',
+  genereux: 'Généreux'
+};
+
+const availableDiets = Array.from(allDiets)
+  .map((value) => ({ value, label: dietLabels[value] || value }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const availableSeasons = Array.from(allSeasons)
+  .map((value) => ({ value, label: seasonLabels[value] || value }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const budgets = Array.from(allBudgets)
+  .map((value) => ({ value, label: budgetLabels[value] || value }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
 const pageRecipeCards = pageRecipes.map((recipe) => ({
   id: recipe._id,
-  slug: recipe.slug?.current || recipe._id,
+  slug: getRecipeSlug(recipe),
   title: recipe.title,
   description: getRecipeDescription(recipe),
   image: recipe.featuredImageUrl ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : undefined,
@@ -125,6 +223,32 @@ const pageRecipeCards = pageRecipes.map((recipe) => ({
   tags: recipe.tags,
   ingredients: recipe.ingredients ? recipe.ingredients.map((ing) => ing.name) : []
 }));
+
+const recipesIndex = allRecipes.map((recipe) => ({
+  id: recipe._id,
+  slug: getRecipeSlug(recipe),
+  title: recipe.title,
+  description: getRecipeDescription(recipe),
+  image: recipe.featuredImageUrl ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : '',
+  imageAlt: getRecipeImageAlt(recipe),
+  prepTime: recipe.prepTime || 0,
+  cookTime: recipe.cookTime || 0,
+  restTime: recipe.restTime || 0,
+  servings: recipe.servings || null,
+  difficulty: recipe.difficulty || '',
+  category: getCategoryName(normalizeCategoryValue(recipe.category)),
+  categoryValue: normalizeCategoryValue(recipe.category),
+  rating: recipe.rating || 0,
+  isNew: recipe.isNew || false,
+  isPopular: recipe.isPopular || false,
+  publishedAt: recipe.publishedAt,
+  tags: recipe.tags || [],
+  diet: recipe.diet || [],
+  season: recipe.season || [],
+  budget: recipe.budget || '',
+  ingredientText: (recipe.ingredients || []).map((ing) => ing?.name || '').filter(Boolean).join(' ')
+}));
+const recipesIndexJson = JSON.stringify(recipesIndex).replace(/</g, '\\u003c');
 
 const pageTitle = hasValidPage
   ? `Recettes - Page ${safeCurrentPage} | Gastronomade`
@@ -162,19 +286,48 @@ const introTitle = recipesPage?.heroTitle || 'Une cuisine simple, saine et gén�
       <Section class="bg-white" id="recettes-archive">
         <div slot="content" class="space-y-8">
           <header class="space-y-3">
-            <p class="mv-kicker">Archives recettes</p>
+            <p class="mv-kicker">Recettes</p>
             <h1 class="mv-hero-title">{introTitle}</h1>
             <p class="text-sm text-mv-forest-70">
-              Page {safeCurrentPage} sur {totalPages} •
-              <a href="/recettes/" class="underline underline-offset-4 hover:text-mv-leaf ml-1">
-                Accéder à la page filtres
-              </a>
+              Page {safeCurrentPage} sur {totalPages}
             </p>
           </header>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-7" role="list">
-            {pageRecipeCards.map((recipe) => (
-              <div class="scroll-fade-in" role="listitem">
+          <RecipeFilters
+            currentFilters={{
+              search: searchQuery,
+              category: selectedCategory,
+              difficulty: selectedDifficulty,
+              time: selectedTime,
+              budget: selectedBudget,
+              tags: selectedTags,
+              diet: selectedDiet,
+              season: selectedSeason,
+              sort: selectedSort
+            }}
+            availableTags={uniqueTags}
+            availableDiets={availableDiets}
+            availableSeasons={availableSeasons}
+            categories={categories}
+            budgets={budgets}
+            totalRecipes={allRecipes.length}
+            pageSize={RECIPES_PAGE_SIZE}
+            currentPage={safeCurrentPage}
+          />
+
+          <div
+            id="recipes-grid"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-7"
+            role="grid"
+            data-page-size={RECIPES_PAGE_SIZE}
+          >
+            {pageRecipeCards.map((recipe, index) => (
+              <div
+                class={`scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`}
+                style={`animation-delay: ${index * 0.1}s`}
+                data-recipe-card
+                data-recipe-id={recipe.id}
+              >
                 <EnhancedRecipeCard
                   recipe={recipe}
                   showFavoriteButton={true}
@@ -185,8 +338,38 @@ const introTitle = recipesPage?.heroTitle || 'Une cuisine simple, saine et gén�
             ))}
           </div>
 
-          <nav class="space-y-4" aria-label="Pagination des archives recettes">
-            <div class="flex flex-wrap items-center gap-2">
+          <div id="recipes-empty" class="hidden text-center py-12">
+            <div class="max-w-xl mx-auto">
+              <p class="text-lg font-medium text-mv-forest mb-2">
+                {recipesPage?.filtersEmptyTitle || 'Aucune recette ne correspond à ces filtres.'}
+              </p>
+              <p class="text-sm text-mv-forest-70">
+                {recipesPage?.filtersEmptyText || "Essayez d'élargir votre recherche ou de réinitialiser les filtres."}
+              </p>
+            </div>
+          </div>
+
+          <nav id="recipes-archive-pagination" class="space-y-4" aria-label="Pagination des archives recettes">
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              {previousPagePath ? (
+                <a
+                  href={previousPagePath}
+                  rel="prev"
+                  class="inline-flex items-center justify-center min-w-10 h-10 px-3 rounded-lg border border-mv-leaf-30 text-mv-forest hover:border-mv-leaf hover:bg-mv-leaf-10 transition-colors"
+                  aria-label="Page précédente"
+                >
+                  ←
+                </a>
+              ) : (
+                <span
+                  class="inline-flex items-center justify-center min-w-10 h-10 px-3 rounded-lg border border-mv-leaf-20 text-mv-forest opacity-40 cursor-not-allowed"
+                  aria-disabled="true"
+                  aria-label="Page précédente indisponible"
+                >
+                  ←
+                </span>
+              )}
+
               {paginationPages.map((pageNumber) => (
                 pageNumber === safeCurrentPage ? (
                   <span
@@ -205,23 +388,31 @@ const introTitle = recipesPage?.heroTitle || 'Une cuisine simple, saine et gén�
                   </a>
                 )
               ))}
-            </div>
 
-            <div class="flex flex-wrap items-center gap-4 text-sm font-semibold">
-              {previousPagePath && (
-                <a href={previousPagePath} rel="prev" class="text-mv-forest hover:text-mv-leaf transition-colors">
-                  ← Page précédente
+              {nextPagePath ? (
+                <a
+                  href={nextPagePath}
+                  rel="next"
+                  class="inline-flex items-center justify-center min-w-10 h-10 px-3 rounded-lg border border-mv-leaf-30 text-mv-forest hover:border-mv-leaf hover:bg-mv-leaf-10 transition-colors"
+                  aria-label="Page suivante"
+                >
+                  →
                 </a>
-              )}
-              {nextPagePath && (
-                <a href={nextPagePath} rel="next" class="text-mv-forest hover:text-mv-leaf transition-colors">
-                  Page suivante →
-                </a>
+              ) : (
+                <span
+                  class="inline-flex items-center justify-center min-w-10 h-10 px-3 rounded-lg border border-mv-leaf-20 text-mv-forest opacity-40 cursor-not-allowed"
+                  aria-disabled="true"
+                  aria-label="Page suivante indisponible"
+                >
+                  →
+                </span>
               )}
             </div>
           </nav>
         </div>
       </Section>
+
+      <script id="recipes-index" type="application/json" set:html={recipesIndexJson}></script>
     </>
   ) : (
     <Section class="bg-white" containerClass="max-w-xl text-center">
