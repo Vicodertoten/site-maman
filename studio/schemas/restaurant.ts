@@ -121,13 +121,6 @@ export const restaurant = {
       description: 'Minimum de convives requis'
     },
     {
-      name: 'depositAmount',
-      title: 'Montant de l\'acompte',
-      type: 'number',
-      initialValue: 25,
-      description: 'Acompte par personne en euros'
-    },
-    {
       name: 'isVisible',
       title: 'Afficher cette offre',
       type: 'boolean',

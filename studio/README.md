@@ -72,7 +72,6 @@ Le CSV contient les colonnes suivantes :
 - **Description du menu** : Détails du menu unique
 - **Complet ?** : Statut des réservations
 - **Minimum de personnes** : 4 par défaut
-- **Acompte** : 25€ par personne
 
 ### 🤖 Thermomix
 - **Texte du mois** : Contenu mis à jour régulièrement

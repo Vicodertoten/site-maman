@@ -188,12 +188,6 @@ export const contact = {
           title: 'Texte explicatif',
           type: 'text',
           initialValue: 'Pour réserver un cours, un atelier ou un coaching, contactez Muriel par téléphone ou email. Je reviens vers vous rapidement pour fixer une date.'
-        },
-        {
-          name: 'depositInfo',
-          title: 'Informations acompte',
-          type: 'text',
-          initialValue: 'Un acompte peut être demandé selon la formule choisie.'
         }
       ]
     },

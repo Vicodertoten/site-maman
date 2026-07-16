@@ -53,7 +53,6 @@ export interface RestaurantData {
   menuDescription: string
   highlights?: string[]
   minGuests: number
-  depositAmount: number
   isVisible?: boolean
   faqs?: Array<{
     question?: string
@@ -395,7 +394,6 @@ export interface ContactData {
   bookingInfo: {
     title: string
     text: string
-    depositInfo: string
   }
   showContactCards?: boolean
   showPhoneCard?: boolean
@@ -538,7 +536,6 @@ export const queries = {
     menuDescription,
     highlights,
     minGuests,
-    depositAmount,
     isVisible,
     faqs[isVisible == true] | order(order asc){
       question,
